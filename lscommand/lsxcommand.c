@@ -13,7 +13,7 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  September 4, 1999 7:30 PM                  *
+* Last Update:  June 13, 2000 11:00 PM                     *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
@@ -130,6 +130,7 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
   GetRCString("CommandBackground", settings->Background, "", sizeof(settings->Background));
   GetRCString("CommandTime", settings->Clock, "", sizeof(settings->Clock));
   GetRCString("CommandSearchEngineBrowser", settings->BrowserPath, "", sizeof(settings->BrowserPath));
+  GetRCString("CommandMusicPlayer", settings->MusicPlayer, "WINAMP V1.X", sizeof(settings->MusicPlayer));
   //GetRCString("CommandTextAlign", settings->TextAlign, "Left Top", sizeof(settings->TextAlign));
 #else //LSXCOMMANDCLOCK_EXPORTS
 	GetRCString("CommandClockTextFontFace",settings->TextFontFace,"Arial",256);
@@ -784,25 +785,23 @@ void AliasInit()
   item.fType = MFT_STRING;
   item.wID = HMI_USER_ALIAS;
 
-  if(f && !feof(f)) {
-    while(LCReadNextConfig(f, "*CommandAlias", buffer, sizeof(buffer))) {
-      if(cz_LCTokenize(buffer, tokens, 3, extra) >= 3) {					//	tanuki modify
-        strcpy(buffer, name);
+  while(LCReadNextConfig(f, "*CommandAlias", buffer, sizeof(buffer))) {
+    if(cz_LCTokenize(buffer, tokens, 3, extra) >= 3) {					//	tanuki modify
+      strcpy(buffer, name);
+      strcat(buffer, " ");
+      strcat(buffer, path);
+      if(*extra) {
         strcat(buffer, " ");
-        strcat(buffer, path);
-        if(*extra) {
-          strcat(buffer, " ");
-          strcat(buffer, extra);
-        }
-        HistoryAdd(&aliases, buffer, &nAliases);
-        item.dwTypeData = name;
-        item.cch = sizeof(name);
-        InsertMenuItem(hAliasMenu, item.wID - HMI_USER_ALIAS, TRUE, &item);
-        ++item.wID;
+        strcat(buffer, extra);
       }
+      HistoryAdd(&aliases, buffer, &nAliases);
+      item.dwTypeData = name;
+      item.cch = sizeof(name);
+      InsertMenuItem(hAliasMenu, item.wID - HMI_USER_ALIAS, TRUE, &item);
+      ++item.wID;
     }
   }
-
+ 
   if(f)
     LCClose(f);
 }
@@ -1134,7 +1133,7 @@ void HistoryUseNext(HWND hText)
 *                         *  *  *  *                       *
 *    Arguments:                                            *
 *                                                          *
-*    - char *szCommand                                     *
+*    - const char *szCommand                               *
 *      Pointer to the command to execute                   *
 *    - BOOL noaddtohist                                    *
 *      This specifies whether the command should be added  *
@@ -1144,14 +1143,14 @@ void HistoryUseNext(HWND hText)
 * the proper place - ParseBang, ParseSearch, or ShellEx    *
 ***********************************************************/
 
-void ExecCommand(char *szCommand, BOOL noaddtohist)
+void ExecCommand(const char *szCommand, BOOL noaddtohist)
 {
   int index;
 	char *newcmd, *args, *p, command[4096], dir[_MAX_DIR], full_dir[_MAX_DRIVE + _MAX_DIR], explore[] = "explore", open[] = "open"; // Can't trust _MAX_PATH for command
   HINSTANCE val=0;
   SHELLEXECUTEINFO si;
 
-	if(!szCommand || strlen(szCommand)<1)
+	if(!szCommand || strlen(szCommand) < 1)
 		return;
 
   VarExpansion(command, szCommand);
@@ -1319,7 +1318,7 @@ void ExecCommand(char *szCommand, BOOL noaddtohist)
 *                                                          *
 *    - long retval                                         *
 *      ID of the user's selection                          *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      The search phrase for this engine                   *
 *                         *  *  *  *                       *
 * This function is called after the user has entered a     *
@@ -1616,7 +1615,7 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 #endif //LSXCOMMANDCLOCK_EXPORTS
   case WM_LBUTTONDOWN:
 #ifndef LSXCOMMANDCLOCK_EXPORTS
-    if(((*(cs->Clock) && cs->ClockDisappears) || (cs->ScrollWinAmp && cs->WinAmpDisappears && FindWindow("WINAMP V1.X", NULL))) && GetFocus() != hText) {
+    if(((*(cs->Clock) && cs->ClockDisappears) || (cs->ScrollWinAmp && cs->WinAmpDisappears && FindWindow(cs->MusicPlayer, NULL))) && GetFocus() != hText) {
       SetWindowText(hText, "");
       SetForegroundWindow(hWnd);
       SetFocus(hText);
@@ -1704,9 +1703,9 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		{
 		hFont = CreateFont(cs->TextSize,0,0,0,0,0,0,0,0,0,0,0,0,cs->TextFontFace);
 		hText = CreateWindowEx(0,"EDIT","",WS_CHILD|ES_AUTOHSCROLL,cs->LeftBorderSize,cs->TopBorderSize,cs->width-(cs->LeftBorderSize+cs->RightBorderSize),cs->height-(cs->TopBorderSize+cs->BottomBorderSize),hWnd,0,hInst,0);
-    hBGBrush = CreateSolidBrush(cs->BGColor);
-    hHollowBrush = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
-    hBGBitmap = *(cs->Background) ? LoadLSImage(cs->Background, NULL) : NULL;
+		hBGBrush = CreateSolidBrush(cs->BGColor);
+		hHollowBrush = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
+		hBGBitmap = *(cs->Background) ? LoadLSImage(cs->Background, NULL) : NULL;
 		if(!hText) {
 			MessageBox(hWnd,"Error creating window",szApp,MB_OK);
 		}
@@ -1856,21 +1855,23 @@ VOID CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 
 VOID CALLBACK WinAmpTimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
-  char title[_MAX_PATH];
+  char title[_MAX_PATH], curr[_MAX_PATH];
 
 #ifndef LSXCOMMANDCLOCK_EXPORTS
   if(GetFocus() != hText && visible) {
 #else
   if(visible) {
 #endif
-    HWND wahWnd = FindWindow("WINAMP V1.X", NULL);
+    HWND wahWnd = FindWindow(cs->MusicPlayer, NULL);
     if(wahWnd) {
       if(curTimer == CLOCK_TIMER) {
         KillTimer(hWnd, ID_CLOCKTIMER);
         curTimer = WINAMP_TIMER;
       }
       GetWindowText(wahWnd, title, sizeof(title));
-      SetWindowText(hText, title);
+      GetWindowText(hText, curr, sizeof(curr));
+      if(strcmp(title, curr))
+        SetWindowText(hText, title);
 #ifndef LSXCOMMANDCLOCK_EXPORTS
       HistoryRemoveAll(&files, &nFiles);
 #endif
@@ -1894,13 +1895,13 @@ VOID CALLBACK WinAmpTimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Should be the arguments to the function...          *
 *                         *  *  *  *                       *
 * Handles the !Bang Command to focus the command box       *
 ***********************************************************/
 
-void BangFocusCommand(HWND caller,char *args)
+void BangFocusCommand(HWND caller, const char *args)
 {
 	if(!visible) {
 		ShowWindow(hWnd,SW_SHOWNORMAL);
@@ -1933,14 +1934,14 @@ void BangFocusCommand(HWND caller,char *args)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Should be the arguments to the function...          *
 *                         *  *  *  *                       *
 * Handles the !Bang Command to toggle the visibility of    *
 * the command box.                                         *
 ***********************************************************/
 
-void BangToggleCommand(HWND caller, char *args)
+void BangToggleCommand(HWND caller, const char *args)
 {
 	if(visible) {
 		ShowWindow(hWnd, SW_HIDE);
@@ -1984,7 +1985,7 @@ void BangToggleCommand(HWND caller, char *args)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Should be the arguments to the function...          *
 *                         *  *  *  *                       *
 * Handles the !Bang Command to rescan the list of search   *
@@ -1992,7 +1993,7 @@ void BangToggleCommand(HWND caller, char *args)
 ***********************************************************/
 
 #ifndef LSXCOMMANDCLOCK_EXPORTS
-void BangRescanEngineList(HWND caller, char *args)
+void BangRescanEngineList(HWND caller, const char *args)
 {
   HistoryRemoveAll(&searchEngines, &nSearchEngines);
   DestroyMenu(hSearchEngineMenu);
@@ -2013,14 +2014,14 @@ void BangRescanEngineList(HWND caller, char *args)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Should be the arguments to the function...          *
 *                         *  *  *  *                       *
 * Handles the !Bang Command to rescan the list of search   *
 * engines.                                                 *
 ***********************************************************/
 
-void BangClearHistory(HWND caller, char *args)
+void BangClearHistory(HWND caller, const char *args)
 {
   ClearHistory(&current);
 }
@@ -2034,14 +2035,14 @@ void BangClearHistory(HWND caller, char *args)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Should be the arguments to the function...          *
 *                         *  *  *  *                       *
 * Handles the !Bang Command to rescan the list of search   *
 * engines.                                                 *
 ***********************************************************/
 
-void BangShowContextMenu(HWND caller, char *args)
+void BangShowContextMenu(HWND caller, const char *args)
 {
   char buf[_MAX_PATH];
   long retval;
@@ -2054,21 +2055,23 @@ void BangShowContextMenu(HWND caller, char *args)
 
 
 /***********************************************************
-* void BangCommand()                                       *
+* void BangExecCommand()                                   *
 *                         *  *  *  *                       *
 *    Arguments:                                            *
 *                                                          *
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Should be the arguments to the function...          *
 *                         *  *  *  *                       *
 * Executes a command.  This enables any part of Litestep   *
 * to use the power of LSXCommand's command engine.         *
+* Changed from BangCommand(), since that's now a datatype  *
+* inside lsapi.h in newer builds.
 ***********************************************************/
 
-void BangCommand(HWND caller, char *args)
+void BangExecCommand(HWND caller, const char *args)
 {
   ExecCommand(args, !(cs->AddExternalsToHistory));
 }
@@ -2082,13 +2085,13 @@ void BangCommand(HWND caller, char *args)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Should be the arguments to the function...          *
 *                         *  *  *  *                       *
 * Just shows the command box if it isn't visible.          *
 ***********************************************************/
 
-void BangShowCommand(HWND caller, char *args)
+void BangShowCommand(HWND caller, const char *args)
 {
   if(!visible) {
 		ShowWindow(hWnd, SW_SHOWNORMAL);
@@ -2105,13 +2108,13 @@ void BangShowCommand(HWND caller, char *args)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Should be the arguments to the function...          *
 *                         *  *  *  *                       *
 * Just hides the command box if it is visible.             *
 ***********************************************************/
 
-void BangHideCommand(HWND caller, char *args)
+void BangHideCommand(HWND caller, const char *args)
 {
   if(visible) {
 		ShowWindow(hWnd, SW_HIDE);
@@ -2135,14 +2138,14 @@ void BangHideCommand(HWND caller, char *args)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Should be the arguments to the function...          *
 *                         *  *  *  *                       *
 * Opens up an "Open File" dialog box so the user doesn't   *
 * have to type...                                          *
 ***********************************************************/
 
-void BangBrowseFile(HWND caller, char *args)
+void BangBrowseFile(HWND caller, const char *args)
 {
   char file[_MAX_PATH], file_total[_MAX_PATH], filetitle[_MAX_PATH], title[] = "LSXCommand Open File", *filter = NULL, *p = NULL, *p2 = NULL;
   OPENFILENAME ofn;
@@ -2210,13 +2213,13 @@ void BangBrowseFile(HWND caller, char *args)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Should be the arguments to the function...          *
 *                         *  *  *  *                       *
 * This lets the user select a folder to browse.            *
 ***********************************************************/
 
-void BangBrowseFolder(HWND caller, char *args)
+void BangBrowseFolder(HWND caller, const char *args)
 {
   char title[] = "LSXCommand Browse", path[_MAX_PATH];
   BROWSEINFO bi = {hWnd, NULL, path, "LSXCommand Browse", BIF_RETURNONLYFSDIRS, NULL, 0, 0};
@@ -2254,14 +2257,14 @@ void BangBrowseFolder(HWND caller, char *args)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Space delimited pair of numbers telling how far to  *
 *      move left/right, up/down (depending on sign)        *
 *                         *  *  *  *                       *
 * Moves the main LSXCommand according to the input         *
 ***********************************************************/
 
-void BangMove(HWND caller, char *args)
+void BangMove(HWND caller, const char *args)
 {
   int cx, cy, oldx = cs->x, oldy = cs->y;
   char *str, *xstr, *ystr;
@@ -2326,13 +2329,13 @@ void BangMove(HWND caller, char *args)
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Specifies which time to switch to                   *
 *                         *  *  *  *                       *
 * Toggles which timer is currently active.                 *
 ***********************************************************/
 
-void BangToggleTimer(HWND caller, char *args) {
+void BangToggleTimer(HWND caller, const char *args) {
 
   HWND active = GetForegroundWindow();
 
@@ -2361,14 +2364,14 @@ void BangToggleTimer(HWND caller, char *args) {
 *    - HWND caller                                         *
 *      The HWND of the window that called this !Bang       *
 *      Command.                                            *
-*    - char *args                                          *
+*    - const char *args                                    *
 *      Specifies the text to place in LSXCommand.          *
 *                         *  *  *  *                       *
 * Replaces the text inside LSXCommand and brings focus to  *
 * the end of the line.                                     *
 ***********************************************************/
 
-void BangSetText(HWND caller, char *args)
+void BangSetText(HWND caller, const char *args)
 {
   if(args) {
     SetWindowText(hText, args);
@@ -2433,12 +2436,12 @@ int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath)
 	SetWindowLong(hWnd,GWL_USERDATA,magicDWord);
 
 #ifndef LSXCOMMANDCLOCK_EXPORTS
-	AddBangCommand("!TOGGLECOMMAND",BangToggleCommand);
-	AddBangCommand("!FOCUSCOMMAND",BangFocusCommand);
+  AddBangCommand("!TOGGLECOMMAND",BangToggleCommand);
+  AddBangCommand("!FOCUSCOMMAND",BangFocusCommand);
   AddBangCommand("!COMMANDRESCANENGINES", BangRescanEngineList);
   AddBangCommand("!COMMANDCLEARHISTORY", BangClearHistory);
   AddBangCommand("!COMMANDSHOWCONTEXTMENU", BangShowContextMenu);
-  AddBangCommand("!COMMAND", BangCommand);
+  AddBangCommand("!COMMAND", BangExecCommand);
   AddBangCommand("!COMMANDSHOW", BangShowCommand);
   AddBangCommand("!COMMANDHIDE", BangHideCommand);
   AddBangCommand("!COMMANDBROWSEFILE", BangBrowseFile);
@@ -2447,8 +2450,8 @@ int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath)
   AddBangCommand("!COMMANDTOGGLETIMER", BangToggleTimer);
   AddBangCommand("!COMMANDSETTEXT", BangSetText);
 #else //LSXCOMMANDCLOCK_EXPORTS
-	AddBangCommand("!TOGGLECOMMANDCLOCK",BangToggleCommand);
-	AddBangCommand("!FOCUSCOMMANDCLOCK",BangFocusCommand);
+  AddBangCommand("!TOGGLECOMMANDCLOCK",BangToggleCommand);
+  AddBangCommand("!FOCUSCOMMANDCLOCK",BangFocusCommand);
   AddBangCommand("!COMMANDCLOCKSHOW", BangShowCommand);
   AddBangCommand("!COMMANDCLOCKHIDE", BangHideCommand);
   AddBangCommand("!COMMANDCLOCKMOVE", BangMove);
@@ -2513,6 +2516,31 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
 
 int quitModule(HINSTANCE dll)
 {
+#ifndef LSXCOMMANDCLOCK_EXPORTS
+  RemoveBangCommand("!TOGGLECOMMAND");
+  RemoveBangCommand("!FOCUSCOMMAND");
+  RemoveBangCommand("!COMMANDRESCANENGINES");
+  RemoveBangCommand("!COMMANDCLEARHISTORY");
+  RemoveBangCommand("!COMMANDSHOWCONTEXTMENU");
+  RemoveBangCommand("!COMMAND");
+  RemoveBangCommand("!COMMANDSHOW");
+  RemoveBangCommand("!COMMANDHIDE");
+  RemoveBangCommand("!COMMANDBROWSEFILE");
+  RemoveBangCommand("!COMMANDBROWSEFOLDER");
+  RemoveBangCommand("!COMMANDMOVE");
+  RemoveBangCommand("!COMMANDTOGGLETIMER");
+  RemoveBangCommand("!COMMANDSETTEXT");
+  RemoveBangCommand("!COMMANDBOXHOOK");
+#else //LSXCOMMANDCLOCK_EXPORTS
+  RemoveBangCommand("!TOGGLECOMMANDCLOCK");
+  RemoveBangCommand("!FOCUSCOMMANDCLOCK");
+  RemoveBangCommand("!COMMANDCLOCKSHOW");
+  RemoveBangCommand("!COMMANDCLOCKHIDE");
+  RemoveBangCommand("!COMMANDCLOCKMOVE");
+  RemoveBangCommand("!COMMANDCLOCKTOGGLETIMER");
+  RemoveBangCommand("!COMMANDCLOCKBOXHOOK");
+#endif
+
 #ifndef LSXCOMMANDCLOCK_EXPORTS
 	WriteHistory();
   HistoryRemoveAll(&current, &nHistoryEntries);

@@ -1,7 +1,7 @@
 #ifndef EXPORTS_H
 #define EXPORTS_H
 
-#include "wharfdata.h"
+#include "../lscommand/wharfdata.h"
 
 /* Exported Functions */
 __declspec( dllexport ) int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd);

@@ -3,8 +3,8 @@
                     *            by Visigoth            *
                     *    gandhimail@worldnet.att.net    *
                     *          ===============          *
-                    *          Version: 1.8.0           *
-                    *          March 24, 2000           *
+                    *          Version: 1.8.1           *
+                    *          June 21,  2000           *
                     *          ===============          *
                     * http://floach.pimpin.net/visigoth *
                     *************************************
@@ -19,6 +19,10 @@ II.   How to use LSXCommand
 
       II.1 Internet Searches
       II.2 Added RC Commands
+           New to 1.8.1:
+           -------------
+           - CommandMusicPlayer
+
            New to 1.7.6:
            -------------
            - CommandBottom/Top/Left/RightBorderSize
@@ -220,6 +224,14 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.8.1
+   -------------
+     Bug Fixes
+     `````````
+     - Added CommandMusicPlayer
+     - Fixed newer build compatibility
+     - Fixed AlterScript Run-Twice bug (thanks to Chris Rempel for the fix)
 
    Version 1.8.0
    -------------
@@ -1002,6 +1014,15 @@ II. How to use LSXCommand
      NOTE: Please see original LSCommand readme for previous
      RC Commands.
 
+     CommandMusicPlayer
+     ``````````````````
+     Description: This command enables LSXCommand to use the titles
+     of other music players besides WinAmp.  You should set it to the
+     class name of the application you are looking for.
+
+     Example:
+       CommandMusicPlayer "WINAMP V1.X"
+
      CommandBottom/Top/Left/RightBorderSize
      ``````````````````````````````````````
      Description: These four commands specify separate borders for
@@ -1393,6 +1414,7 @@ II. How to use LSXCommand
    -------------------------
      NOTE: See Original LSCommand readme for previous !Bang Commands
 
+
      !CommandSetText
      ```````````````
      Description: This !Bang sets the text in LSXCommand to its
@@ -1403,11 +1425,13 @@ II. How to use LSXCommand
 
      Example: !SetText "?Altavista "
 
+
      !CommandToggleTimer
      ```````````````````
      Description: Toggles the current timer.  If you use this, the
      WinAmp timer no longer takes precedence over the clock.  You have
      to call this !Bang again for the WinAmp scroller to appear.
+
 
      !CommandMove
      ````````````
@@ -1423,6 +1447,7 @@ II. How to use LSXCommand
      current mouse cursor position.  If !CommandMove is called with
      "home" as its parameter, it moves back to the original position
      it received from step.rc
+
 
      !CommandBrowseFile
      ``````````````````

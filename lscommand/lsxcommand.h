@@ -25,7 +25,7 @@ enum Timers {
 
 /* Data Structures */
 struct CommandSettings {
-	char TextFontFace[256], SearchEngineList[_MAX_PATH], ContextMenuOrder[4], Background[_MAX_PATH], Clock[256], TextAlign[15], BrowserPath[_MAX_PATH];
+	char TextFontFace[256], SearchEngineList[_MAX_PATH], ContextMenuOrder[4], Background[_MAX_PATH], Clock[256], TextAlign[15], BrowserPath[_MAX_PATH], MusicPlayer[128];
 	int TextSize;
 	int x, origx;
 	int y, origy;
@@ -89,7 +89,7 @@ struct  History {
 extern struct CommandSettings *cs;
 
 /* Execution */
-extern void ExecCommand(char *command, BOOL alias);
+extern void ExecCommand(const char *szCommand, BOOL alias);
 
 /* History Services - history.c */
 extern void HistoryMoveNext(struct History **hist, int i);
