@@ -5,6 +5,9 @@
 #define HMI_USER_SE WM_USER + 1
 #define HMI_USER_ALIAS HMI_USER_SE + nSearchEngines + 1
 #define HMI_USER_HISTORY HMI_USER_ALIAS + nAliases + 1
+#define HMI_USER_CUT HMI_USER_HISTORY + cs->MaxHistoryMenuEntries + 1
+#define HMI_USER_COPY HMI_USER_CUT + 1
+#define HMI_USER_PASTE HMI_USER_COPY + 1
 
 /* Data Structures */
 struct CommandSettings {
@@ -18,6 +21,7 @@ struct CommandSettings {
   int MaxHistoryEntries;
   int MaxHistoryMenuEntries;
   int Transparent;
+  int ContextMenuStandardItems;
 	BOOL NoCursorChange;
 	BOOL BevelBorder;
 	BOOL NoAlwaysOnTop;
@@ -42,6 +46,7 @@ struct CommandSettings {
   BOOL CommaDelimiter;
   BOOL RPNCalculator;
   BOOL ClockDisappears;
+  BOOL ScrollWinAmp;
 	COLORREF BGColor;
 	COLORREF TextColor;
 	COLORREF BorderColor;
@@ -51,6 +56,12 @@ struct  History {
   char *path;
   struct History *next, *prev;
 };
+
+/* Settings */
+extern struct CommandSettings *cs;
+
+/* Execution */
+extern void ExecCommand(char *command, BOOL alias);
 
 /* History Services - history.c */
 extern void HistoryMoveNext(struct History **hist, int i);
@@ -70,11 +81,16 @@ extern struct History *HistoryRemoveAll(struct History **hist, int *count);
 #define STATE_UNARYOP 2
 #define STATE_OPERATOR 3
 #define UNARY_NEG "(-)"
+#define UNARY_DEC "d"
+#define UNARY_BIN "b"
+#define UNARY_HEX "h"
+#define ERROR_POSTFIX_CONVERSION 1
+#define ERROR_NULL_EXPRESSION    2
+#define ERROR_CONVERSIONS_DONE   3
 
-extern double Evaluate(char *expr, struct CommandSettings *cs, BOOL *error, BOOL alreadyRPN);
+extern double Evaluate(char *expr, int *error, char *replacement, size_t replace_size);
 
 /* Menu Services - menu.c */
-
 extern void MenuDeleteItem(HMENU hMenu, int index);
 extern void MenuAddItem(HMENU hMenu, char *pszValue, long def_id, BOOL insertAtTop);
 

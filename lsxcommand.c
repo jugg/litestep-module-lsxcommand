@@ -5,13 +5,15 @@
 * history, AutoCompletion, Internet Searching, Aliases,    *
 * calculator functionality, backgrounds, transparency, and *
 * clock functionality.  Maybe this is starting to bloat..  *
+* Heck, this thing can even use the WinAmp scrolling title *
+* feature.                                                 *
 *                         *  *  *  *                       *
 * Coding:                                                  *
 *   LSXCommand - Visigoth (Shaheen Gandhi in real life)    *
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  June 15, 1999  12:30 AM                    *
+* Last Update:  June 23, 1999  11:00 AM                    *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
@@ -27,7 +29,7 @@
 
 BOOL visible = FALSE, editfirst = FALSE, staticfirst = FALSE;
 char *szApp = "LSXCommand", *szModuleIniPath = NULL, *defaultEngine = NULL;
-int nHistoryEntries = 0, nSearchEngines = 0, nAliases = 0;
+int nHistoryEntries = 0, nSearchEngines = 0, nAliases = 0, nTimers = 0;
 HINSTANCE hInst = NULL;
 HWND hWnd = NULL, hText = NULL, hBG = NULL;
 HFONT hFont = NULL;
@@ -69,9 +71,9 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
   settings->MaxHistoryEntries = GetRCInt("CommandHistoryEntries", 10) + 1;
   settings->MaxHistoryMenuEntries = GetRCInt("CommandHistoryMenuEntries", settings->MaxHistoryEntries - 1 );
 	settings->BorderSize = GetRCInt("CommandBorderSize",2);
+  settings->ContextMenuStandardItems = GetRCInt("CommandContextMenuStandardItems", 0);
 	settings->BorderColor = GetRCColor("CommandBorderColor",RGB(102,102,102));
 	settings->BevelBorder = GetRCBool("CommandBevelBorder",TRUE);
-	if(settings->BevelBorder) settings->BorderSize = 0; // if bevel then no border
 	settings->NoAlwaysOnTop = GetRCBool("CommandNotAlwaysOnTop",TRUE);
 	settings->notmoveable = GetRCBool("CommandNotMoveable",TRUE);
 	settings->NoClearOnCommand = GetRCBool("CommandNoClearOnCommand",TRUE);
@@ -96,13 +98,32 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
   settings->RPNCalculator = GetRCBool("CommandRPNCalculator", TRUE);
   settings->Transparent = GetRCBool("CommandTransparentEditBox", TRUE);
   settings->ClockDisappears = GetRCBool("CommandClockDisappearsOnFocus", TRUE);
+  settings->ScrollWinAmp = GetRCBool("CommandScrollWinAmpTitle", TRUE);
   GetRCString("CommandSearchEngineList", settings->SearchEngineList, "engines.list", sizeof(settings->SearchEngineList));
   GetRCString("CommandContextMenuOrder", settings->ContextMenuOrder, "012", sizeof(settings->ContextMenuOrder));
   GetRCString("CommandBackground", settings->Background, "", sizeof(settings->Background));
   GetRCString("CommandClock", settings->Clock, "", sizeof(settings->Clock));
-  GetRCString("CommandTextAlign", settings->TextAlign, "Left Top", sizeof(settings->TextAlign));
+  //GetRCString("CommandTextAlign", settings->TextAlign, "Left Top", sizeof(settings->TextAlign));
+  
+  /* Special Cases */
+
+  /* If there's a bevel, then no border */
+  if(settings->BevelBorder) settings->BorderSize = 0;
+  
+  /* No Background */
   if(!(*(settings->Background)))
     settings->Transparent = 0;
+
+  /* Negative screen coords */
+  if(settings->x < 0 || settings->y < 0) {
+    RECT screen;
+    GetClientRect(GetDesktopWindow(), &screen);
+    if(settings->x < 0)
+      settings->x = screen.right + settings->x;
+    if(settings->y < 0)
+      settings->y = screen.bottom + settings->y;
+  }
+
 	return settings;
 }
 
@@ -120,20 +141,35 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
 void ContextMenuInit()
 {
   char buf[15], *p = cs->ContextMenuOrder, atom;
-  int i, indices[3];
+  int i, indices[7];
 
   for(i = 0; i < 3; ++i) {
     atom = *p;
-    indices[i] = atoi(&atom);// + 2;
+    indices[i] = atoi(&atom);
     ++p;
   }
 
-
+  if(cs->ContextMenuStandardItems == 1) {
+    for(i = 0; i < 3; ++i)
+      indices[i] += 4;
+    indices[3] = 0;
+    indices[4] = 1;
+    indices[5] = 2;
+    indices[6] = 3;
+  } else if(cs->ContextMenuStandardItems == 2) {
+    indices[6] = 3;
+    indices[5] = 4;
+    indices[4] = 5;
+    indices[3] = 6;
+  } else {
+    indices[6] = 9;
+    indices[5] = 9;
+    indices[4] = 9;
+    indices[3] = 9;
+  }
 
   if(!hContextMenu) {
     item.cbSize = sizeof(MENUITEMINFO);
-    item.fMask = MIIM_TYPE;
-    item.fType = MFT_STRING;
     item.dwTypeData = buf;
     item.cch = sizeof(buf);
 
@@ -142,22 +178,50 @@ void ContextMenuInit()
     InsertMenuItem(hContextMenu, 0, TRUE, &item);
     item.fType = MFT_SEPARATOR;
     InsertMenuItem(hContextMenu, 1, TRUE, &item);*/
-    
-    item.fMask = MIIM_SUBMENU | MIIM_TYPE;
-    item.hSubMenu = hHistoryMenu;
-    strcpy(buf, "History");
-    InsertMenuItem(hContextMenu, indices[0], TRUE, &item);
-    item.hSubMenu = hAliasMenu;
-    strcpy(buf, "Aliases");
-    InsertMenuItem(hContextMenu, indices[1], TRUE, &item);
-    item.hSubMenu = hSearchEngineMenu;
-    strcpy(buf, "Search Engines");
-    InsertMenuItem(hContextMenu, indices[2], TRUE, &item);
+
+    for(i = 0; i < 9; ++i) {
+      if(indices[0] == i) {
+        item.fMask = MIIM_SUBMENU | MIIM_TYPE;
+        item.hSubMenu = hHistoryMenu;
+        item.fType = MFT_STRING;
+        strcpy(buf, "&History");
+        InsertMenuItem(hContextMenu, i, TRUE, &item);
+      } else if(indices[1] == i) {
+        item.fMask = MIIM_SUBMENU | MIIM_TYPE;
+        item.hSubMenu = hAliasMenu;
+        item.fType = MFT_STRING;
+        strcpy(buf, "&Aliases");
+        InsertMenuItem(hContextMenu, i, TRUE, &item);
+      } else if(indices[2] == i) {
+          item.fMask = MIIM_SUBMENU | MIIM_TYPE;
+        item.hSubMenu = hSearchEngineMenu;
+        item.fType = MFT_STRING;
+        strcpy(buf, "&Search Engines");
+        InsertMenuItem(hContextMenu, i, TRUE, &item);
+      } else if(indices[3] == i) {
+        strcpy(buf, "Cu&t");
+        //InsertMenuItem(hContextMenu, i, TRUE, &item);
+        AppendMenu(hContextMenu, MF_STRING, HMI_USER_CUT, buf);
+      } else if(indices[4] == i) {
+        strcpy(buf, "&Copy");
+        //InsertMenuItem(hContextMenu, i, TRUE, &item);
+        AppendMenu(hContextMenu, MF_STRING, HMI_USER_COPY, buf);
+      } else if(indices[5] == i) {
+        strcpy(buf, "&Paste");
+        //InsertMenuItem(hContextMenu, i, TRUE, &item);
+        AppendMenu(hContextMenu, MF_STRING, HMI_USER_PASTE, buf);
+      } else if(indices[6] == i) {
+        item.fMask = MIIM_TYPE;
+        item.fType = MFT_SEPARATOR;
+        item.hSubMenu = NULL;
+        InsertMenuItem(hContextMenu, i, TRUE, &item);
+      }
+    }
   } else {
     item.cbSize = sizeof(MENUITEMINFO);
     item.fMask = MIIM_SUBMENU;
-    item.hSubMenu = hHistoryMenu;
 
+    item.hSubMenu = hHistoryMenu;
     SetMenuItemInfo(hContextMenu, indices[0], TRUE, &item);
     item.hSubMenu = hAliasMenu;
     SetMenuItemInfo(hContextMenu, indices[1], TRUE, &item);
@@ -654,7 +718,14 @@ BOOL AliasExecute(char *command, char *args)
       buf = (char *)malloc(strlen(aliases->path) + 1);
       strcpy(buf, aliases->path);
       p = strtok(buf, "\t ");
-      p = strtok(NULL, "\t\n ");
+      p = strtok(NULL, "\n\0");
+      p3 = (char *)malloc(strlen(p) + (args ? strlen(args) : 0) + 2);
+      strcpy(p3, p);
+      if(args) {
+        strcat(p3, " ");
+        strcat(p3, args);
+      }
+      /*p = strtok(NULL, "\t\n ");
       p2 = strtok(NULL, "\n");
       if(p2) {
         p3 = (char *)malloc(strlen(p2) + (args ? strlen(args) : 0) + 2);
@@ -669,7 +740,8 @@ BOOL AliasExecute(char *command, char *args)
         strcat(p3, args);
       }
 
-      ShellExecute(hWnd, "open", p, p3, 0, SW_SHOWNORMAL);
+      ShellExecute(hWnd, "open", p, p3, 0, SW_SHOWNORMAL);*/
+      ExecCommand(p3, TRUE);
     }
   }
 
@@ -697,15 +769,28 @@ BOOL AliasExecute(char *command, char *args)
 
 void ParseCalculatorCommand(char *command)
 {
-  BOOL error = FALSE;
-  char num[130];
+  int error = 0;
+  char *p = NULL, val[1024];
 
   ++command;
-  sprintf(num, "=%f ", Evaluate(command, cs, &error, cs->RPNCalculator));
+  if(cs->CommaDelimiter) {
+  p = command;
+  while(*p)
+    if(*p == ',')
+      *p = '.';
+  }
 
-  if(!error) {
-    SetWindowText(hText, num);
-    SendMessage(hText, EM_SETSEL, strlen(num), strlen(num));
+  Evaluate(command, &error, val, sizeof(val));
+
+  if(!error || error == ERROR_CONVERSIONS_DONE) {
+    if(cs->CommaDelimiter) {
+      p = val;
+      while(*p)
+        if(*p == '.')
+          *p = ',';
+    }
+    SetWindowText(hText, val);
+    SendMessage(hText, EM_SETSEL, strlen(val), strlen(val));
   } else {
     SetWindowText(hText, "error");
     SendMessage(hText, EM_SETSEL, 0, -1);
@@ -760,6 +845,8 @@ BOOL AutoComplete(HWND hText, char *szPath)
       }
       HistoryMovePrev(&current, 1);
     }
+
+    //AutoComplete Files
   }
 
   return FALSE;
@@ -817,12 +904,15 @@ void HistoryUseNext(HWND hText)
 *                                                          *
 *    - char *command                                       *
 *      Pointer to the command to execute                   *
+*    - BOOL alias                                          *
+*      I use this to make sure that commands sent by an    *
+*      alias isn't also added to the history.              *
 *                         *  *  *  *                       *
 * This function checks for a valid command and sends it to *
 * the proper place - ParseBang, ParseSearch, or ShellEx    *
 ***********************************************************/
 
-void ExecCommand(char *command)
+void ExecCommand(char *command, BOOL alias)
 {
   int index;
 	char *newcmd, *args, *p;
@@ -831,25 +921,27 @@ void ExecCommand(char *command)
 	if(strlen(command)<1)
 		return;
 
-  index = HistoryFindIndexOf(&current, command);
+  if(!alias) {
+    index = HistoryFindIndexOf(&current, command);
 
-  if(index <= 0) {
-    if(!(nHistoryEntries < cs->MaxHistoryEntries)) {
-      HistoryMoveToHead(&current);
+    if(index <= 0) {
+      if(!(nHistoryEntries < cs->MaxHistoryEntries)) {
+        HistoryMoveToHead(&current);
+        HistoryRemoveEntry(&current, &nHistoryEntries);
+      }
+      HistoryAdd(&current, command, &nHistoryEntries);
+      MenuAddItem(hHistoryMenu, command, HMI_USER_HISTORY, cs->NewestHistoryItemsOnTop);
+    } else {
+      // Bring this command to the front of the history.
+      if(cs->NewestHistoryItemsOnTop)
+        index = GetMenuItemCount(hHistoryMenu) - index;
+      else
+        --index;
+      MenuDeleteItem(hHistoryMenu, index);
       HistoryRemoveEntry(&current, &nHistoryEntries);
+      HistoryAdd(&current, command, &nHistoryEntries);
+      MenuAddItem(hHistoryMenu, command, HMI_USER_HISTORY, cs->NewestHistoryItemsOnTop);
     }
-    HistoryAdd(&current, command, &nHistoryEntries);
-    MenuAddItem(hHistoryMenu, command, HMI_USER_HISTORY, cs->NewestHistoryItemsOnTop);
-  } else {
-    // Bring this command to the front of the history.
-    if(cs->NewestHistoryItemsOnTop)
-      index = GetMenuItemCount(hHistoryMenu) - index;
-    else
-      --index;
-    MenuDeleteItem(hHistoryMenu, index);
-    HistoryRemoveEntry(&current, &nHistoryEntries);
-    HistoryAdd(&current, command, &nHistoryEntries);
-    MenuAddItem(hHistoryMenu, command, HMI_USER_HISTORY, cs->NewestHistoryItemsOnTop);
   }
 
   if(*command == '\"') {
@@ -980,18 +1072,47 @@ void ExecCommand(char *command)
 
 void ParseContextMenuCommand(long retval, char *buf)
 {
-  char *buf2;
+  char *buf2, temp[_MAX_PATH];
+  HGLOBAL hglob;
+  LPTSTR str;
+  DWORD nStart, nEnd;
 
   item.cbSize = sizeof(MENUITEMINFO);
   item.fMask = MIIM_TYPE;
   item.dwTypeData = buf;
   item.cch = _MAX_PATH;
 
-  if(retval >= HMI_USER_HISTORY) {
+  if(retval == HMI_USER_PASTE) {
+    if(!OpenClipboard(hWnd))
+      return;
+    hglob = (void *)GetClipboardData(CF_TEXT);
+    if(hglob) {
+      buf2 = GlobalLock(hglob);
+      if(buf2) {
+        SendMessage(hText, EM_REPLACESEL, TRUE, (LPARAM)buf2);
+        GlobalUnlock(hglob);
+      }
+    }
+    CloseClipboard();
+  } else if(retval == HMI_USER_COPY || retval == HMI_USER_CUT) {
+    if(!OpenClipboard(hWnd))
+      return;
+    GetWindowText(hText, temp, sizeof(temp));
+    SendMessage(hText, EM_GETSEL, (WPARAM)&nStart, (LPARAM)&nEnd);
+    buf2 = temp + nStart*sizeof(char);
+    temp[nEnd] = '\0';
+    str = GlobalAlloc(GMEM_FIXED, (strlen(buf2) + 1)*sizeof(char));
+    memcpy(str, buf2, (strlen(buf2) + 1)*sizeof(char));
+    hglob = GlobalHandle(str);
+    SetClipboardData(CF_TEXT, hglob);
+    CloseClipboard();
+    GlobalFree(hglob);
+    if(retval == HMI_USER_CUT)
+      SendMessage(hText, EM_REPLACESEL, TRUE, (LPARAM)"");
+  } else if(retval >= HMI_USER_HISTORY) {
     GetMenuItemInfo(hHistoryMenu, retval, FALSE, &item);
     if(cs->ContextMenuExecute) {
-      //HistoryMoveToEntry(&current, buf, FALSE);
-      ExecCommand(buf);
+      ExecCommand(buf, FALSE);
     } else {
       SetWindowText(hText, buf);
       SendMessage(hText, EM_SETSEL, 0, -1);
@@ -999,7 +1120,7 @@ void ParseContextMenuCommand(long retval, char *buf)
   } else if(retval >= HMI_USER_ALIAS) {
     GetMenuItemInfo(hAliasMenu, retval, FALSE, &item);
     if(cs->ContextMenuExecute)
-      ExecCommand(buf);
+      ExecCommand(buf, FALSE);
     else {
       SetWindowText(hText, buf);
       SendMessage(hText, EM_SETSEL, 0, -1);
@@ -1155,22 +1276,14 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
           cleared = TRUE;
         }
 			}
-			ExecCommand(buf);
+			ExecCommand(buf, FALSE);
       HistoryMoveToTail(&current);
       if(!cleared)
         HistoryMovePrev(&current, 1);
 			return 0;
     } else if(wParam == VK_TAB)
       return 0;
-    /*else if(wParam == VK_BACK) {
-      if(cs->Transparent) {
-        LRESULT retval = CallWindowProc(wpOld,hText,msg,wParam,lParam);
-        ShowWindow(hWnd, SW_HIDE);
-        ShowWindow(hWnd, SW_SHOW);
-        SetFocus(hText);
-        return retval;
-      }
-    }*/ else {
+    else {
       /*long retval;
       SIZE sz;
       RECT rct;*/
@@ -1210,11 +1323,6 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
       }
     }
 		break;
-  /*case WM_PAINT:
-    {
-
-    }
-    break;*/
 	case WM_DROPFILES:
 		{
 		  char szFileName[MAX_PATH];
@@ -1281,11 +1389,8 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	switch(msg) {
 	case WM_CREATE:
 		{
-		//hBG = CreateWindowEx(WS_EX_TRANSPARENT,"STATIC","",WS_CHILD,cs->BorderSize,cs->BorderSize,cs->width-(cs->BorderSize*2),cs->height-(cs->BorderSize*2),hWnd,0,hInst,0);
-		//wpBG = (WNDPROC)SetWindowLong(hText,GWL_WNDPROC,(long)BGProc);
-		//DragAcceptFiles(hBG, TRUE);
 		hFont = CreateFont(cs->TextSize,0,0,0,0,0,0,0,0,0,0,0,0,cs->TextFontFace);
-		hText = CreateWindowEx(0,"EDIT","",WS_CHILD|ES_AUTOHSCROLL,cs->BorderSize,cs->BorderSize/*(cs->height/2)-(cs->TextSize/2)*/,cs->width-(cs->BorderSize*2),cs->height-(cs->BorderSize*2)/*cs->TextSize*/,hWnd,0,hInst,0);
+		hText = CreateWindowEx(0,"EDIT","",WS_CHILD|ES_AUTOHSCROLL,cs->BorderSize,cs->BorderSize,cs->width-(cs->BorderSize*2),cs->height-(cs->BorderSize*2),hWnd,0,hInst,0);
     hBGBrush = CreateSolidBrush(cs->BGColor);
     hHollowBrush = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
     hBGBitmap = *(cs->Background) ? LoadLSImage(cs->Background, NULL) : NULL;
@@ -1357,11 +1462,6 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
       return 0;
     }
     break;
-	/* case WM_CTLCOLORSTATIC:
-    SetBkMode((HDC)wParam, TRANSPARENT);
-    SetBkColor((HDC)wParam, cs->BGColor);
-    return (int)hHollowBrush; //(int)hBGBrush;
-		return (int)CreateSolidBrush(cs.BGColor);*/
 	case WM_DROPFILES:
 		{
 		char szFileName[MAX_PATH];
@@ -1377,7 +1477,7 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 
 /***********************************************************
-* VOID CALLBACK UpdateClock()                              *
+* VOID CALLBACK TimerProc()                                *
 *                         *  *  *  *                       *
 *    Arguments:                                            *
 *                                                          *
@@ -1394,8 +1494,10 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 * Callback processes the request to update the time & date *
 ***********************************************************/
 
-VOID CALLBACK UpdateClock(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+VOID CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
+  char title[_MAX_PATH];
+
   if(idEvent == ID_CLOCKTIMER && GetFocus() != hText) {
     /* 7 lines of code stolen from LSTime */
     time_t tVal;
@@ -1410,6 +1512,23 @@ VOID CALLBACK UpdateClock(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
     if(cs->Transparent) {
       ShowWindow(hWnd, SW_HIDE);
       ShowWindow(hWnd, SW_SHOWNOACTIVATE);
+    }
+  } else if(idEvent == ID_WINAMPTIMER && GetFocus() != hText) {
+    HWND wahWnd = FindWindow("WINAMP V1.X", NULL);
+    if(wahWnd) {
+      if(nTimers == 2) {
+        KillTimer(hWnd, ID_CLOCKTIMER);
+        --nTimers;
+      }
+      GetWindowText(wahWnd, title, sizeof(title));
+      SetWindowText(hText, title);
+      if(cs->Transparent) {
+        ShowWindow(hWnd, SW_HIDE);
+        ShowWindow(hWnd, SW_SHOWNOACTIVATE);
+      }
+    } else if(*(cs->Clock) && nTimers < 2) {
+      ++nTimers;
+      SetTimer(hWnd, ID_CLOCKTIMER, 1000, TimerProc);
     }
   }
 }
@@ -1465,17 +1584,17 @@ void BangFocusCommand(HWND caller,char *args)
 void BangToggleCommand(HWND caller, char *args)
 {
 	if(visible) {
-		ShowWindow(hWnd,SW_HIDE);
+		ShowWindow(hWnd, SW_HIDE);
 		if(cs->ClearOnHide) SetWindowText(hText,"");
 		visible = FALSE;
 	}
 	else {
-		ShowWindow(hWnd,SW_SHOWNORMAL);
+		ShowWindow(hWnd, SW_SHOWNORMAL);
 		SetForegroundWindow(hText);
 		SetFocus(hText);
     if(*(cs->Clock) && cs->ClockDisappears) SetWindowText(hText, "");
     if(cs->SelectAllOnFocus) SendMessage(hText, EM_SETSEL, 0, -1);
-    if(cs->Transparent && *(cs->Clock) && cs->ClockDisappears) {
+    if((cs->Transparent && *(cs->Clock) && cs->ClockDisappears) || *(cs->Background)) {
       ShowWindow(hWnd, SW_HIDE);
       ShowWindow(hWnd, SW_SHOW);
       SetFocus(hText);
@@ -1563,6 +1682,74 @@ void BangShowContextMenu(HWND caller, char *args)
 
 
 /***********************************************************
+* void BangCommand()                                       *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - HWND caller                                         *
+*      The HWND of the window that called this !Bang       *
+*      Command.                                            *
+*    - char *args                                          *
+*      Should be the arguments to the function...          *
+*                         *  *  *  *                       *
+* Executes a command.  This enables any part of Litestep   *
+* to use the power of LSXCommand's command engine.         *
+***********************************************************/
+
+void BangCommand(HWND caller, char *args)
+{
+  ExecCommand(args, FALSE);
+}
+
+
+/***********************************************************
+* void BangShowCommand()                                   *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - HWND caller                                         *
+*      The HWND of the window that called this !Bang       *
+*      Command.                                            *
+*    - char *args                                          *
+*      Should be the arguments to the function...          *
+*                         *  *  *  *                       *
+* Just shows the command box if it isn't visible.          *
+***********************************************************/
+
+void BangShowCommand(HWND caller, char *args)
+{
+  if(!visible) {
+		ShowWindow(hWnd, SW_SHOWNORMAL);
+		visible = TRUE;
+  }
+}
+
+
+/***********************************************************
+* void BangHideCommand()                                   *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - HWND caller                                         *
+*      The HWND of the window that called this !Bang       *
+*      Command.                                            *
+*    - char *args                                          *
+*      Should be the arguments to the function...          *
+*                         *  *  *  *                       *
+* Just hides the command box if it is visible.             *
+***********************************************************/
+
+void BangHideCommand(HWND caller, char *args)
+{
+  if(visible) {
+		ShowWindow(hWnd, SW_HIDE);
+		if(cs->ClearOnHide) SetWindowText(hText,"");
+		visible = FALSE;
+  }
+}
+
+
+/***********************************************************
 * int initModule()                                         *
 *                         *  *  *  *                       *
 *    Arguments:                                            *
@@ -1609,14 +1796,25 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
   AddBangCommand("!COMMANDRESCANENGINES", BangRescanEngineList);
   AddBangCommand("!COMMANDCLEARHISTORY", BangClearHistory);
   AddBangCommand("!COMMANDSHOWCONTEXTMENU", BangShowContextMenu);
+  AddBangCommand("!COMMAND", BangCommand);
 	
   if(!cs->HiddenOnStart) {
 		ShowWindow(hWnd,SW_SHOWNORMAL);
 		visible = TRUE;
-	}
+  } else {
+    ShowWindow(hWnd, SW_HIDE);
+    visible = FALSE;
+  }
 
-  if(*(cs->Clock))
-    SetTimer(hWnd, ID_CLOCKTIMER, 1000, UpdateClock);
+  if(*(cs->Clock)) {
+    SetTimer(hWnd, ID_CLOCKTIMER, 1000, TimerProc);
+    ++nTimers;
+  }
+
+  if(cs->ScrollWinAmp) {
+    SetTimer(hWnd, ID_WINAMPTIMER, 100, TimerProc);
+    ++nTimers;
+  }
 
 	return 0;
 }

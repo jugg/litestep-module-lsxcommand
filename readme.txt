@@ -3,8 +3,8 @@
                     *           by Visigoth           *
                     *   gandhimail@worldnet.att.net   *
                     *         ==============          *
-                    *          Version: 1.7           *
-                    *          June 14, 1999          *
+                    *         Version: 1.7.1          *
+                    *          June 25, 1999          *
                     *         ==============          *
                     * http://home.att.net/~gandhimail *
                     ***********************************
@@ -19,6 +19,11 @@ II.   How to use LSXCommand
 
       II.1 Internet Searches
       II.2 Added RC Commands
+           New to 1.7.1:
+           -------------
+           - CommandContextMenuStandardItems
+           - CommandScrollWinAmpTitle
+           
            New to 1.7:
            -----------
            - CommandNoAutoComplete
@@ -124,6 +129,9 @@ ii. Kudos
    -------
    The following people gave me ideas after I released version 1.0:
 
+   - Ikka Nisula sent in the request for multiple base support
+   - Alasdair sent in a request for negative screen coordinates
+   - John Kuhn sent in the WinAmp title scrolling idea
    - Reiner Meyer sent in the idea to add Clock functionality
    - Hugo Ahlenius sent in the idea for RPN mode and the comma
      delimiter
@@ -143,6 +151,8 @@ ii. Kudos
    The following people sent in lists of engines (I won't list each
    engine - it would just take too long)
 
+   - bonez sent in 3 new ones for 1.7.1: UBL, OLGA, and CDNow
+     All music related...  Cool stuff
    - Kryten sent in the Merriam-Webster stuff
    - bizquik sent in the File Demon engine
    - mirul sent in the MS Knowledge Base
@@ -153,6 +163,64 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.7.1
+   -------------
+   Just bug fixes and a few features
+   
+     Documentation Changes
+     `````````````````````
+     - Added number conversion information to Calculator
+       Functionality section (section II.6)
+     - Added multiple number bases information to Calculator
+       Functionality section (section II.6)
+     - Changed the original lscommand's readme file.  Many
+       people asked about why CommandHideOnStart doesn't work.
+       This is because there is no such thing.. it is
+       CommandHiddenOnStart.  That solves that mess.
+   
+     Bug Fixes
+     `````````
+     - Fixed Comma Delimiter problem(s)
+     - Caught up with the Kudos section of this readme. :)
+     - Fixed bug with CommandContextMenuOrder
+     - Fixed Clock that never came back after a command
+     - Fixed any problems with CommandHiddenOnStart with
+       CommandBackground
+     
+     New Features
+     ````````````
+     - Calculator supports limited number converion
+     - Calculator supports binary & hexadecimal numbers (see section
+       II.6)
+     - You can now stop any of the History / Alias / Search Engine
+       submenus from coming up by setting them to 9 instead of 0, 1,
+       or 2.
+     - Added following RC Commands (see section II.2 for details)
+     
+       * CommandScrollWinAmpTitle
+       * CommandContextMenuStandardItems
+
+     - Added following !Bang Commands (see section II.3 for details)
+     
+       * !Command
+       * !CommandShow
+       * !CommandHide
+       
+     - Added following search engines (see section II.1 for details)
+     
+       * OLGA  - On-Line Guitar Archive
+       * UBL   - Ultimate Band List
+       * CDNow - Search for CDs
+     
+     Notes
+     `````
+     CommandScrollWinAmpTitle scrolls the current WinAmp title *if*
+     WinAmp's "Scroll Song Title in Windows Taskbar" preference is
+     on.  Also, you *can* have a clock and the WinAmp scroller - but
+     the WinAmp scroller takes precedence.  Therefore, the WinAmp
+     scroller will show when there is a WinAmp to scroll.  If not,
+     LSXCommand will show a clock (if the clock setting is specified)
 
    Version 1.7
    -----------
@@ -561,6 +629,30 @@ II. How to use LSXCommand
      NOTE: Please see original LSCommand readme for previous
      RC Commands.
      
+     CommandContextMenuStandardItems
+     ```````````````````````````````
+     Description: This item does two things.  It first turns on the
+     standard menu items: Cut, Copy & Paste.  Second, it tells where
+     to put the standard items, above or below the LSXCommand
+     specific menus.
+     
+     Example: CommandContextMenuStandardItems 1   ; Above
+              CommandContextMenuStandardItems 2   ; Below
+              CommandContextMenuStandardItems 0   ; Off (Default)
+     
+     CommandScrollWinAmpTitle
+     ````````````````````````
+     Description: If on, this setting takes WinAmp's scrolling title
+     and displays it in LSXCommand.  Note that WinAmp's scroll song
+     title preference must be on for this to happen.  A neat trick
+     with this is to have both a clock and a WinAmp scroller.  The
+     WinAmp scroller will show when WinAmp is running.  If not, the
+     clock will show.  (Note that for the clock to show, you must use
+     the CommandClock RC Command described below).
+     
+     Example: CommandScrollWinAmpTitle
+     
+     
      CommandNoAutoComplete
      `````````````````````
      Description: Turns *off* AutoComplete.  Someone asked for it, so
@@ -844,6 +936,26 @@ II. How to use LSXCommand
    II.3 Added !Bang Commands
    -------------------------
      NOTE: See Original LSCommand readme for previous !Bang Commands
+     
+     !CommandShow
+     ````````````
+     Description: Just shows LSXCommand.  NOTE: It does *not* give
+     LSXCommand focus.  To do this, use !FocusCommand - this command
+     gives focus to LSXCommand, and if it's not visible, it shows it
+     also.
+     
+     !CommandHide
+     ````````````
+     Description: Just hides LSXCommand.  Nothing really special.
+     
+     !Command
+     ````````
+     Description: Now use the power of LSXCommand anywhere within
+     Litestep!  Shortcuts, wharf items, whatever that can run !bang
+     commands outside of its own can now use LSXCommand.
+     
+     Example: !Command notepad
+     
 
      !CommandClearHistory
      ````````````````````
@@ -981,6 +1093,42 @@ II. How to use LSXCommand
    however, make LSXCommand accept postfix notation expressions. See
    the documentation for the CommandRPNCalculator RC Command above in
    section II.2.
+   
+   MULTIPLE NUMBER BASE FUNCTIONALITY
+   
+   As of version 1.7.1, you can specify numbers in different number
+   bases.  However, LSXCommand only supports two others besides the
+   standard decimal: binary (base 2) & hexadecimal (base 16).
+   
+   To specify a number as binary, place a 'b' in front of it.  For
+   instance, entering "=b10" in LSXCommand will return "=2" as an
+   answer.  If you typed "=5 + b10", you would get "=7" as an
+   answer.
+   
+   To specify a number as hexadecimal, do the same as binary, except
+   with an 'h'.
+   
+   NUMBER CONVERSION FUNCTIONALITY
+   
+   As of version 1.7.1, LSXCommand also supports a limited number
+   conversion system.  You can convert within the 3 number bases
+   LSXCommand supports: decimal, binary & hexadecimal.
+   
+   NOTE: The parser for these conversions is different from the
+   regular calculator.  The spaces in the example below are required!
+   
+   To convert *from* decimal *to* hexadecimal (color conversion), you
+   would do the following:
+   
+     =dh 256 256 256    -->   =hff hff hff
+   
+   So, to convert *from* a base *to* another base, place the
+   identifier of the from base first, then the to base, then each
+   number to convert with a space between each one.
+   
+   PLEASE don't do a =dd or =bb or =hh conversion, since I didn't
+   handle them (for obvious reasons) and you'll probably end up
+   messing something up.. I didn't test it too much.
    
    
    II.7 Backgrounds & Transparencies

@@ -44,7 +44,7 @@ CommandTextFontFace "Arial"	font for the text
 CommandNotMoveable		if this is set you will not be able to drag it around by the border
 CommandNotAlwaysOnTop		overides the default of being Always On Top of other windows
 CommandNoClearOnCommand		wont clear the input after you hit enter
-CommandHideOnStart		start hidden
+CommandHiddenOnStart		start hidden
 CommandClearOnHide		clear the text when mod is hidden
 CommandNoCursorChange		does not change mouse cursor when over the text box
 
