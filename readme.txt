@@ -3,7 +3,7 @@
                     *         by Visigoth         *
                     * gandhimail@worldnet.att.net *
                     *       ==============        *
-                    *        Version: 1.0         *
+                    *        Version: 1.1         *
                     *        May 25, 1999         *
                     *******************************
 
@@ -11,6 +11,7 @@ Table of Contents
 =================
 i     Quick & Dirty Install
 ii    Kudos
+iii   Change Log
 I.    About LSXCommand
 II.   How to use LSXCommand
 
@@ -18,6 +19,8 @@ II.   How to use LSXCommand
       II.2 Added RC Commands
            - CommandHistoryEntries
            - CommandSearchEngineList
+           - CommandSelectAllOnFocus
+           - *CommandAlias
       II.3 Added !Bang Commands
            - !CommandRescanEngines
       II.4 The engines.list File
@@ -68,6 +71,33 @@ ii. Kudos
    is based.  Thanks limpid!
 
 
+iii. Change Log
+===============
+
+   Version 1.1
+   -----------
+   A few bug fixes and a little bit more...
+
+     New Features
+     ````````````
+     - Added Select All on Focus by specifying
+       CommandSelectAllOnFocus in the step.rc
+     - Added 'Aliasing' - this allows you to "bind" a single word to
+       a lengthy command.  For instance, you can specify 'step.rc'
+       to be "notepad c:\litestep\step.rc"
+     - Added following search "engines":
+
+       * UPS		(?UPS 1Z99999999) - UPS shipment tracking
+       * FedEx		(?FedEx 90923012) - FedEx shipment tracking
+       * Airborne	(?Airborne 21039) - Airborne Express tracking
+
+     Bug Fixes
+     `````````
+     - Fixed bug where number of entries reported was wrong
+       (this is an internal code fix - just good bookkeeping)
+     - Added the engines.list file to the archive
+
+
 I. About LSXCommand
 ===================
    LSXCommand is a greatly extended version of LSCommand (by limpid).
@@ -78,6 +108,7 @@ I. About LSXCommand
      * History stored in Modules.ini (faster, makes more sense to me)
      * AutoComplete
      * Internet Search
+     * Aliasing - or Binding, if you like
      * A few speed tweaks
 
 
@@ -123,8 +154,9 @@ II. How to use LSXCommand
    - engine names are not case sensitive, I just wrote them the
    proper way in the examples):
 
+     * Default: Yahoo!
      * Yahoo!		(?Yahoo quake) [Note exclusion of !]
-     * AltaVista		(?AltaVista phrase I can't find anywhere)
+     * AltaVista	(?AltaVista phrase I can't find anywhere)
      * Lycos		(?Lycos insane asylum)
      * Excite		(?Excite dilbert)
      * InfoSeek		(?InfoSeek obey your thirst)
@@ -137,13 +169,18 @@ II. How to use LSXCommand
      * LyricsByTitle    (?Lyrics I Wish)
      * Slashdot		(?Slashdot Quest for Cool Cases)
      * Floach		(?Floach lsxcommand)
-     * MSDN			(?MSDN I didn't know that API call existed)
+     * MSDN		(?MSDN I didn't know that API call existed)
      * Amazon		(?Amazon Barbarians Led by Bill Gates)
      * SoftSeek		(?SoftSeek UltraEdit)
      * Hardware		(?Hardware AMD K7)
-     * CMA			(?CMA phrase in that article I can't find)
+     * CMA		(?CMA phrase in that article I can't find)
      * Patent		(?Patent US05731339__)
-     * Default: Yahoo!
+
+     Added as of 1.1:
+
+     * UPS		(?UPS 1Z99999999999)
+     * FedEx		(?FedEx 1092831023)
+     * Airborne		(?Airborne 123934309)
 
    Just a couple of notes:
      - LycosMP3 and ScourMP3 are customized versions of Lycos
@@ -158,6 +195,8 @@ II. How to use LSXCommand
        if you don't remember where you saw an article.
      - Patent looks up the specified patent number on IBM's Patent
        server - www.patents.ibm.com
+     - The last three are all shipment tracking searches - UPS, FedEx
+       or Airborne Express
 
    For more information about adding, removing, or changing engines
    in the list file, see the section below.
@@ -193,6 +232,24 @@ II. How to use LSXCommand
      IMPORTANT: This must be an absolute path.
 
      Example: CommandSearchEngineList C:\Litestep\engines.list
+
+
+     CommandSelectAllOnFocus
+     ```````````````````````
+     Description: Selects everything in the command box on focus
+
+     Default: True
+
+     Example: CommandSelectAllOnFocus	; Selects all on lsxcommand
+
+
+     *CommandAlias
+     `````````````
+     Description: Aliases (or Binds) a phrase to another command.
+
+     Default: -
+
+     Example: *CommandAlias step  notepad c:\litestep\step.rc
 
 
    II.3 Added !Bang Commands

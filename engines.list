@@ -1,0 +1,26 @@
+; Search Engine List File
+; I prefer Yahoo!
+Default	Yahoo
+Yahoo		http://search.yahoo.com/bin/search?p=<args>
+AltaVista	http://www.altavista.com/cgi-bin/query?pg=q&kl=XX&q=<args>
+Lycos		http://www.lycos.com/cgi-bin/pursuit?cat=dir&query=<args>
+Excite		http://search.excite.com/search.gw?search=<args>
+InfoSeek	http://infoseek.go.com/Titles?qt=<args>&col=WW&sv=IS&lk=noframes&svx=home_searchbox
+Google		http://www.google.com/search?q=<args>
+LycosMP3	http://mp3.lycos.com/cgi-bin/search?form=lycosnet&query=<args>
+ScourMP3	http://search.scour.net/cgi-bin/search.cgi?query=<args>&protocol=all&index=mp3&preview_size=small
+HotBot		http://www.hotbot.com/?MT=<args>&SM=MC&DV=0&LG=any&DC=10&DE=2&clickSrc=search&_v=2&OPs=MDRTP
+DejaNews	http://www.deja.com/qs.xp?OP=dnquery.xp&ST=QS&QRY=<args>&DBS=2
+Lyrics		http://www.lyrics.ch/search/checkfulltext.asp?words=<args>&count=20&type=all&title=
+LyricsByTitle	http://www.lyrics.ch/search/checknormal.asp?bands=&label=&song=<args>&match=like
+Slashdot	http://slashdot.org/search.pl?query=<args>
+MSDN		http://search.microsoft.com/us/dev/results.asp?nq=TRUE&SName=&SPath=&SCatalog=&qu=<args>&Boolean=ALL&chkM=on&radM=0&chkM_0=on&chkM_1=on&chkM_2=on&chkM_3=on&chkM_4=on&chkM_5=on&chkM_6=on&chkM_7=on&chkM_8=on&chkM_9=on&chkM_10=on&chkM_11=on&chkM_12=on&chkM_13=on&chkM_14=on&chkM_15=on&chkM_16=on&chkM_17=on&chkS=on&radS=0&chkS_0=on&chkS_1=on&chkS_2=on&chkS_3=on&chkS_4=on&chkS_5=on&chkS_6=on&chkS_7=on&chkS_8=on&chkS_9=on&chkS_10=on&chkS_11=on&chkS_12=on&chkS_13=on&chkA=on&chkK=on
+Amazon		http://www.amazon.com/exec/obidos/external-search/?keyword=<args>
+SoftSeek	http://search02.softseek.com/cgi-bin/search.cgi?keywords=<args>&seekindex=index&maxresults=025&cb=
+Hardware	http://www2.tomshardware.com/site/search.html?word=<args>
+CMA		http://cma.zdnet.com/texis/cma/cma/+Ww1Fqnhw5B/edit.html?feditsrch=<args>
+Patents		http://www.patents.ibm.com/details?pn=<args>
+Floach		http://floach.pimpin.net/search.shtml?query=<args>
+UPS		http://wwwapps.ups.com/etracking/tracking.cgi?submit=Track&InquiryNumber1=<args>&TypeOfInquiryNumber=T
+FedEx		http://www.fedex.com/cgi-bin/track_it?airbills=<args>
+Airborne	http://www.airborne.com/cgi-bin/AirbillTrace?ShipmentNumber=<args>

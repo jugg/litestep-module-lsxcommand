@@ -22,14 +22,14 @@
 
 BOOL visible = FALSE, editfirst = FALSE, staticfirst = FALSE;
 char *szApp = "LSXCommand", *szModuleIniPath, *defaultEngine = NULL;
-int nHistoryEntries = 0;
+int nHistoryEntries = 0, nSearchEngines = 0, nAliases = 0;
 HINSTANCE hInst;
 HWND hWnd, hText, hBG;
 HFONT hFont;
 HBRUSH hBGBrush;
 WNDPROC wpOld, wpBG;
 struct CommandSettings *cs = NULL;
-struct History *current = NULL, *searchEngines = NULL;
+struct History *current = NULL, *searchEngines = NULL, *aliases = NULL;
 
 
 /***********************************************************
@@ -70,6 +70,7 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
 	settings->HiddenOnStart = GetRCBool("CommandHiddenOnStart",TRUE);
 	settings->ClearOnHide = GetRCBool("CommandClearOnHide",TRUE);
 	settings->NoCursorChange = GetRCBool("CommandNoCursorChange",TRUE);
+  settings->SelectAllOnFocus = GetRCBool("CommandSelectAllOnFocus", TRUE);
   GetRCString("CommandSearchEngineList", settings->SearchEngineList, "engines.list", sizeof(settings->SearchEngineList));
 	return settings;
 }
@@ -268,14 +269,17 @@ BOOL HistoryMoveToEntry(struct History **hist, char *pszValue)
 *    - char *data                                          *
 *      Pointer to the path to add to the history or search *
 *      engine list.                                        *
+*    - int *count                                          *
+*      Integer with which to keep track of the number of   *
+*      elements in the list                                *
 *                         *  *  *  *                       *
-* Adds a history or search engine record to the list.  It  *
-* also keeps the null path at the tail of the history so   *
-* that the history behaves correctly.  Returns a pointer   *
-* to the current list element.                             *
+* Adds a history, search engine, or alias record to the    *
+* list.  It also keeps the null path at the tail of the    *
+* history so that the history behaves correctly.  Returns  *
+* a pointer to the current list element.                   *
 ***********************************************************/
 
-struct History *HistoryAdd(struct History **hist, char *pszValue)
+struct History *HistoryAdd(struct History **hist, char *pszValue, int *count)
 {
   char *szData = (char *)malloc(strlen(pszValue) + 1);
   struct History *temp = NULL;
@@ -289,8 +293,7 @@ struct History *HistoryAdd(struct History **hist, char *pszValue)
     } else temp = NULL;
     if(*hist == temp) {
       (*hist)->path = szData;
-      HistoryAdd(hist, "");
-      --nHistoryEntries;  // Otherwise, it would be counted twice...
+      HistoryAdd(hist, "", NULL);
     } else {
       (*hist)->next = (struct History *)malloc(sizeof(struct History));
       if(temp)
@@ -307,7 +310,8 @@ struct History *HistoryAdd(struct History **hist, char *pszValue)
   }
 
   *hist = ((*hist)->next) ? (struct History *)(*hist)->next : (struct History *)(*hist);
-  ++nHistoryEntries;
+  if(count)
+    ++(*count);
 	return *hist;
 }
 
@@ -343,12 +347,15 @@ void HistoryFree(struct History **hist)
 *    - struct History **hist                               *
 *      Pointer to a pointer to an element of the list of   *
 *      history or search engine paths.                     *
+*    - int *count                                          *
+*      Pointer to the integer with which to keep track of  *
+*      the number of elements in this list                 *
 *                         *  *  *  *                       *
 * Removes the current entry from the list and manipulates  *
 * the list appropriately to keep the list in tact.         *
 ***********************************************************/
 
-void HistoryRemoveEntry(struct History **hist)
+void HistoryRemoveEntry(struct History **hist, int *count)
 {
   struct History *temp, *temp2;
 
@@ -373,7 +380,8 @@ void HistoryRemoveEntry(struct History **hist)
         *hist = temp;
       }
     }
-    --nHistoryEntries;
+    if(count)
+      --(*count);
   }
 }
 
@@ -386,15 +394,18 @@ void HistoryRemoveEntry(struct History **hist)
 *    - struct History **hist                               *
 *      Pointer to a pointer to an element of the list of   *
 *      history or search engine paths.                     *
+*    - int *count                                          *
+*      Pointer to the integer with which to keep track of  *
+*      the number of elements in this list                 *
 *                         *  *  *  *                       *
 * Removes all entries from the list - should return NULL   *
 ***********************************************************/
 
-struct History *HistoryRemoveAll(struct History **hist)
+struct History *HistoryRemoveAll(struct History **hist, int *count)
 {
   HistoryMoveToHead(hist);
   while(*hist) {
-    HistoryRemoveEntry(hist);
+    HistoryRemoveEntry(hist, count);
   }
   return *hist;
 }
@@ -422,10 +433,10 @@ void HistoryInit()
     GetPrivateProfileString("LSXCOMMAND", name, "", path, sizeof(path), szModuleIniPath);
 
     if(*path)
-      HistoryAdd(&current, path);
+      HistoryAdd(&current, path, &nHistoryEntries);
   }
 
-  HistoryAdd(&current, "");
+  HistoryAdd(&current, "", &nHistoryEntries);
 }
 
 
@@ -553,7 +564,7 @@ void SearchEngineInit(struct CommandSettings *cs)
     }
 
     if(*(listline))
-      HistoryAdd(&searchEngines, listline);
+      HistoryAdd(&searchEngines, listline, &nSearchEngines);
   }
 }
 
@@ -618,6 +629,94 @@ void ParseSearchCommand(char *command, char *args)
   if(p)
     free(p);
 }
+
+
+/***********************************************************
+* void AliasExecute()                                      *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - char *command                                       *
+*      Search Engine string.                               *
+*    - char *args                                          *
+*      The search phrase for this engine                   *
+*                         *  *  *  *                       *
+* This function is called after the user has entered a     *
+* command.  It searches for an alias match and executes it *
+* Returns TRUE if it finds a match, returns FALSE if it    *
+* doesn't.                                                 *
+***********************************************************/
+
+BOOL AliasExecute(char *command, char *args)
+{
+  char *buf = NULL, *p = NULL, *p2 = NULL, *p3 = NULL;
+
+  if(aliases) {
+    if(HistoryMoveToEntry(&aliases, command)) {
+      buf = (char *)malloc(strlen(aliases->path) + 1);
+      strcpy(buf, aliases->path);
+      p = strtok(buf, "\t ");
+      p = strtok(NULL, "\t\n ");
+      p2 = strtok(NULL, "\n");
+      if(p2) {
+        p3 = (char *)malloc(strlen(p2) + strlen(args) + 2);
+        strcpy(p3, p2);
+        if(*args) {
+          strcat(p3, " ");
+          strcat(p3, args);
+        }
+      }
+
+      ShellExecute(hWnd, "open", p, p3 ? p3 : "", 0, SW_SHOWDEFAULT);
+    }
+  }
+
+  if(buf) {
+    free(buf);
+    if(p3)
+      free(p3);
+    return TRUE;
+  } else
+    return FALSE;
+}
+
+
+/***********************************************************
+* void SearchEngineInit()                                  *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*                         *  *  *  *                       *
+* Initializes the list of Aliases.  If no aliases are      *
+* found, the feature simply doesn't work.                  *
+***********************************************************/
+
+void AliasInit()
+{
+  FILE *f = LCOpen(NULL);
+  char buffer[_MAX_PATH + 20], name[20], path[_MAX_PATH], prefix[15], extra[_MAX_PATH];
+  char* tokens[3];
+
+  tokens[0] = prefix;
+  tokens[1] = name;
+  tokens[2] = path;
+
+  if(f && !feof(f)) {
+    while(LCReadNextConfig(f, "*CommandAlias", buffer, sizeof(buffer))) {
+      if(LCTokenize(buffer, tokens, 3, extra) >= 3) {
+        strcpy(buffer, name);
+        strcat(buffer, " ");
+        strcat(buffer, path);
+        if(*extra) {
+          strcat(buffer, " ");
+          strcat(buffer, extra);
+        }
+        HistoryAdd(&aliases, buffer, &nAliases);
+      }
+    }
+  }
+}
+
 
 
 /***********************************************************
@@ -686,6 +785,7 @@ void BangFocusCommand(HWND caller,char *args)
 	}
 	SetForegroundWindow(hText);
 	SetFocus(hText);
+  if(cs->SelectAllOnFocus) SendMessage(hText, EM_SETSEL, 0, -1);
 }
 
 
@@ -715,6 +815,7 @@ void BangToggleCommand(HWND caller, char *args)
 		ShowWindow(hWnd,SW_SHOWNORMAL);
 		SetForegroundWindow(hText);
 		SetFocus(hText);
+    if(cs->SelectAllOnFocus) SendMessage(hText, EM_SETSEL, 0, -1);
 		visible = TRUE;
 	}
 	return;
@@ -738,7 +839,7 @@ void BangToggleCommand(HWND caller, char *args)
 
 void BangRescanEngineList(HWND caller, char *args)
 {
-  HistoryRemoveAll(&searchEngines);
+  HistoryRemoveAll(&searchEngines, &nSearchEngines);
   SearchEngineInit(cs);
 }
 
@@ -765,28 +866,30 @@ void ExecCommand(char *command)
   if(HistoryFindIndexOf(&current, command) <= 0) {
     if(!(nHistoryEntries < cs->MaxHistoryEntries)) {
       HistoryMoveToHead(&current);
-      HistoryRemoveEntry(&current);
+      HistoryRemoveEntry(&current, &nHistoryEntries);
     }
-    HistoryAdd(&current, command);
+    HistoryAdd(&current, command, &nHistoryEntries);
   } else {
     // Bring this command to the front of the history.
-    HistoryRemoveEntry(&current);
-    HistoryAdd(&current, command);
+    HistoryRemoveEntry(&current, &nHistoryEntries);
+    HistoryAdd(&current, command, &nHistoryEntries);
   }
 
 	strcpy(args,PathGetArgs(command));
 	PathRemoveArgs(command);
 	
-	if(command[0] == '!')
-		ParseBangCommand(hWnd,command,args);
-  else if(command[0] == '?') {
-    if(searchEngines)
-      ParseSearchCommand(command, args);
-    else
-      MessageBox(hWnd, "You have not specified any search engines, or specified\nan invalid search engine list.  You can not use the search feature at this time.", "LSXCommand", MB_OK);
+  if(!AliasExecute(command, args)) {
+	  if(command[0] == '!')
+		  ParseBangCommand(hWnd,command,args);
+    else if(command[0] == '?') {
+      if(searchEngines)
+        ParseSearchCommand(command, args);
+      else
+        MessageBox(hWnd, "You have not specified any search engines, or specified\nan invalid search engine list.  You can not use the search feature at this time.", "LSXCommand", MB_OK);
+    }
+	  else
+		  ShellExecute(hWnd,"open",command,args,0,SW_SHOWDEFAULT);
   }
-	else
-		ShellExecute(hWnd,"open",command,args,0,SW_SHOWDEFAULT);
 	return;
 }
 
@@ -998,6 +1101,7 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
 	hBr = CreateSolidBrush(cs->BorderColor);
   HistoryInit();
   SearchEngineInit(cs);
+  AliasInit();
 	hInst = dll;
 
 	memset(&wc,0,sizeof(wc));
@@ -1037,8 +1141,9 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
 int quitModule(HINSTANCE dll)
 {
 	WriteHistory();
-  HistoryRemoveAll(&current);
-  HistoryRemoveAll(&searchEngines);
+  HistoryRemoveAll(&current, &nHistoryEntries);
+  HistoryRemoveAll(&searchEngines, &nSearchEngines);
+  HistoryRemoveAll(&aliases, &nAliases);
 	DestroyWindow(hWnd);
 	UnregisterClass(szApp,hInst);
 	DeleteObject(hFont);

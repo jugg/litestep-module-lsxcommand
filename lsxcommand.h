@@ -20,6 +20,7 @@ struct CommandSettings {
 	BOOL HideOnCommand;
 	BOOL HiddenOnStart;
 	BOOL ClearOnHide;
+  BOOL SelectAllOnFocus;
 	COLORREF BGColor;
 	COLORREF TextColor;
 	COLORREF BorderColor;
