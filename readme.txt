@@ -3,8 +3,8 @@
                     *           by Visigoth           *
                     *   gandhimail@worldnet.att.net   *
                     *         ==============          *
-                    *         Version: 1.7.1          *
-                    *          June 25, 1999          *
+                    *         Version: 1.7.2          *
+                    *          June 30, 1999          *
                     *         ==============          *
                     * http://home.att.net/~gandhimail *
                     ***********************************
@@ -19,6 +19,15 @@ II.   How to use LSXCommand
 
       II.1 Internet Searches
       II.2 Added RC Commands
+           New to 1.7.2:
+           -------------
+           - CommandOffsetX
+           - CommandOffsetY
+           - CommandSearchEngineBrowser
+           - CommandWinAmpDisappearsOnFocus
+           - CommandHideOnUnfocus
+           - CommandTabFileComplete
+           
            New to 1.7.1:
            -------------
            - CommandContextMenuStandardItems
@@ -77,6 +86,7 @@ II.   How to use LSXCommand
       II.6 Calculator Functionality
       II.7 Backgrounds & Transparencies
       II.8 Clock Settings
+      II.9 Tab File Completion
 
 III.  Known Bugs / Limitations
 
@@ -163,6 +173,68 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.7.2
+   -------------
+   Mostly bug fixes & two feature additions
+   
+     Documentation Changes
+     `````````````````````
+     - Added section II.9 for Tab File Completion feature
+   
+     Bug Fixes
+     `````````
+     - Fixed !CommandHide & !CommandShow problems
+     - Fixed CommandHiddenOnStart problems (again)
+     - Fixed Paste menu item problems
+     
+     New Features
+     ````````````
+     - New positioning system (see Notes below)
+     - Added file name tab completion like Re5ource's popups
+       (see section
+     - Added following RC Commands (see section II.2 for details)
+
+       * CommandSearchEngineBrowser
+       * CommandWinAmpDisappearsOnFocus
+       * CommandHideOnUnfocus
+       * CommandTabFileComplete
+       * CommandOffsetX
+       * CommandOffsetY
+     
+     Notes
+     `````
+     In the new positioning system, CommandOffsetX/Y are used to
+     decide from where LSXCommand should compute its position.  The
+     following table lists the combinations of CommandOffsetX/Y and
+     CommandX/Y and what they do:
+     
+       CommandOffsetX/Y:
+         0  -  Reference from Left/Top (default)
+         1  -  Reference from Center of Horizontal/Vertical
+         2  -  Reference from Right/Bottom
+       
+       CommandX/Y:
+         These values now tell how many pixels away from the point
+         described by CommandOffsetX/Y LSXCommand should be.
+         
+     For instance, using the following values will have LSXCommand
+     be placed 2 pixels to the left of horizontal center, at the very
+     bottom of the screen:
+     
+       CommandOffsetX 1
+       CommandOffsetY 2
+       CommandX      -2
+       CommandY      -14  (Same as negative of CommandHeight)
+     
+     If you leave your settings the way they are, they will work as
+     before.  
+
+     To turn on file name tab completion, be sure to turn *on*
+     CommandTabFileComplete and CommandNoTabMicroComplete.  I know
+     this is a bit clunky, but deal with it please... :)  I didn't
+     test it too extensively, but it seems to be working quite
+     well on my system..  Of course, we know what that means...
 
    Version 1.7.1
    -------------
@@ -628,6 +700,49 @@ II. How to use LSXCommand
    ----------------------
      NOTE: Please see original LSCommand readme for previous
      RC Commands.
+     
+     CommandSearchEngineBrowser
+     ``````````````````````````
+     Description: Path to the browser to be used with search engines.
+     If not specified, LSXCommand uses the default browser on your
+     system.
+     
+     Example: CommandSearchEngineBrowser c:\opera\opera.exe
+     
+     
+     CommandWinAmpDisappearsOnFocus
+     ``````````````````````````````
+     Description: Just like CommandClockDisappearsOnFocus, but for
+     the WinAmp scrolling feature.
+     
+     
+     CommandTabFileComplete
+     ``````````````````````
+     Description: Enables the completion of file names by using the
+     tab key.  NOTE: You will want to also turn on the
+     CommandNoTabMicroComplete RC Command
+     
+     
+     CommandOffsetX/Y
+     ````````````````
+     Description: This value determines which point on the screen
+     LSXCommand should use as a reference for the CommandX/Y values.
+     The default is the upper left corner.
+     
+       0  -  Left / Top
+       1  -  Horizontal / Vertical Center
+       2  -  Right / Bottom
+       
+     Examples: CommandOffsetX 0   CommandOffsetY 2
+     
+     
+     CommandHideOnUnfocus
+     ````````````````````
+     Description: Hides LSXCommand when it loses keyboard focus.
+     This can be used to hide LSXCommand after it runs an app.
+     
+     Example: CommandHideOnUnfocus
+     
      
      CommandContextMenuStandardItems
      ```````````````````````````````
@@ -1224,6 +1339,16 @@ II. How to use LSXCommand
      
    I hope that's enough examples.  If you have any problems, see
    section IV about contacting me.
+   
+   
+   II.9 Tab File Completion
+   ------------------------
+   If you turn on CommandTabFileComplete and
+   CommandNoTabMicroComplete, you can have LSXCommand autocomplete
+   filenames.  For instance, if you type c:\autoe and hit <TAB>, you
+   will most likely get C:\AUTOEXEC.BAT  If not, you can hit <TAB>
+   again to get the next matching filename.  Note that you do have
+   to turn on both RC commands for this to work.
 
 
 III. Known Bugs / Limitations

@@ -11,7 +11,7 @@
 
 /* Data Structures */
 struct CommandSettings {
-	char TextFontFace[256], SearchEngineList[_MAX_PATH], ContextMenuOrder[4], Background[_MAX_PATH], Clock[256], TextAlign[15];
+	char TextFontFace[256], SearchEngineList[_MAX_PATH], ContextMenuOrder[4], Background[_MAX_PATH], Clock[256], TextAlign[15], BrowserPath[_MAX_PATH];
 	int TextSize;
 	int x;
 	int y;
@@ -47,6 +47,9 @@ struct CommandSettings {
   BOOL RPNCalculator;
   BOOL ClockDisappears;
   BOOL ScrollWinAmp;
+  BOOL WinAmpDisappears;
+  BOOL TabFileComplete;
+  BOOL HideOnUnfocus;
 	COLORREF BGColor;
 	COLORREF TextColor;
 	COLORREF BorderColor;

@@ -13,7 +13,7 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  June 23, 1999  11:00 AM                    *
+* Last Update:  July 3, 1999  10:30 PM                     *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
@@ -29,7 +29,7 @@
 
 BOOL visible = FALSE, editfirst = FALSE, staticfirst = FALSE;
 char *szApp = "LSXCommand", *szModuleIniPath = NULL, *defaultEngine = NULL;
-int nHistoryEntries = 0, nSearchEngines = 0, nAliases = 0, nTimers = 0;
+int nHistoryEntries = 0, nSearchEngines = 0, nAliases = 0, nTimers = 0, nFiles = 0;
 HINSTANCE hInst = NULL;
 HWND hWnd = NULL, hText = NULL, hBG = NULL;
 HFONT hFont = NULL;
@@ -39,7 +39,7 @@ HBITMAP hBGBitmap = NULL;
 WNDPROC wpOld, wpBG;
 MENUITEMINFO item;
 struct CommandSettings *cs = NULL;
-struct History *current = NULL, *searchEngines = NULL, *aliases = NULL;
+struct History *current = NULL, *searchEngines = NULL, *aliases = NULL, *files = NULL;
 
 
 /***********************************************************
@@ -56,6 +56,8 @@ struct History *current = NULL, *searchEngines = NULL, *aliases = NULL;
 
 struct CommandSettings *ReadSettings(wharfDataType *wd)
 {
+  int offsetx, offsety;
+  RECT screen;
 	struct CommandSettings *settings = (struct CommandSettings *)malloc(sizeof(struct CommandSettings));
   szModuleIniPath = (char *)malloc(strlen(wd->lsPath) + strlen("\\MODULES.INI") + 1);
   strcpy(szModuleIniPath, wd->lsPath);
@@ -72,6 +74,8 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
   settings->MaxHistoryMenuEntries = GetRCInt("CommandHistoryMenuEntries", settings->MaxHistoryEntries - 1 );
 	settings->BorderSize = GetRCInt("CommandBorderSize",2);
   settings->ContextMenuStandardItems = GetRCInt("CommandContextMenuStandardItems", 0);
+  offsetx = GetRCInt("CommandOffsetX", 0);
+  offsety = GetRCInt("CommandOffsetY", 0);
 	settings->BorderColor = GetRCColor("CommandBorderColor",RGB(102,102,102));
 	settings->BevelBorder = GetRCBool("CommandBevelBorder",TRUE);
 	settings->NoAlwaysOnTop = GetRCBool("CommandNotAlwaysOnTop",TRUE);
@@ -85,6 +89,7 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
   settings->AssumeNetAddress = GetRCBool("CommandAssumeNetAddress", TRUE);
   settings->NoWarnOnError = GetRCBool("CommandNoWarnOnError", TRUE);
   settings->NoTabMicroComplete = GetRCBool("CommandNoTabMicroComplete", TRUE);
+  settings->TabFileComplete = GetRCBool("CommandTabFileComplete", TRUE);
   settings->ClearHistoryOnStartup = GetRCBool("CommandClearHistoryOnStartup", TRUE);
   settings->NewestHistoryItemsOnTop = GetRCBool("CommandNewestHistoryItemsOnTop", TRUE);
   settings->ContextMenuAutoPopup = GetRCBool("CommandContextMenuAutoPopup", TRUE);
@@ -99,10 +104,13 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
   settings->Transparent = GetRCBool("CommandTransparentEditBox", TRUE);
   settings->ClockDisappears = GetRCBool("CommandClockDisappearsOnFocus", TRUE);
   settings->ScrollWinAmp = GetRCBool("CommandScrollWinAmpTitle", TRUE);
+  settings->WinAmpDisappears = GetRCBool("CommandWinAmpDisappearsOnFocus", TRUE);
+  settings->HideOnUnfocus = GetRCBool("CommandHideOnUnfocus", TRUE);
   GetRCString("CommandSearchEngineList", settings->SearchEngineList, "engines.list", sizeof(settings->SearchEngineList));
   GetRCString("CommandContextMenuOrder", settings->ContextMenuOrder, "012", sizeof(settings->ContextMenuOrder));
   GetRCString("CommandBackground", settings->Background, "", sizeof(settings->Background));
   GetRCString("CommandClock", settings->Clock, "", sizeof(settings->Clock));
+  GetRCString("CommandSearchEngineBrowser", settings->BrowserPath, "", sizeof(settings->BrowserPath));
   //GetRCString("CommandTextAlign", settings->TextAlign, "Left Top", sizeof(settings->TextAlign));
   
   /* Special Cases */
@@ -114,15 +122,26 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
   if(!(*(settings->Background)))
     settings->Transparent = 0;
 
-  /* Negative screen coords */
-  if(settings->x < 0 || settings->y < 0) {
-    RECT screen;
-    GetClientRect(GetDesktopWindow(), &screen);
+  GetClientRect(GetDesktopWindow(), &screen);
+
+  /* Offsets */
+  if(offsetx == 0) {
     if(settings->x < 0)
       settings->x = screen.right + settings->x;
+  }
+  else if(offsetx == 1)
+    settings->x = screen.right / 2 - settings->width / 2 + settings->x;
+  else
+    settings->x = screen.right + settings->x;
+
+  if(offsety == 0) {
     if(settings->y < 0)
       settings->y = screen.bottom + settings->y;
   }
+  else if(offsety == 1)
+    settings->y = screen.bottom / 2 - settings->height / 2 + settings->y;
+  else
+    settings->y = screen.bottom + settings->y;
 
 	return settings;
 }
@@ -152,10 +171,10 @@ void ContextMenuInit()
   if(cs->ContextMenuStandardItems == 1) {
     for(i = 0; i < 3; ++i)
       indices[i] += 4;
-    indices[3] = 0;
-    indices[4] = 1;
-    indices[5] = 2;
-    indices[6] = 3;
+    indices[3] = 0;  //Cut
+    indices[4] = 1;  //Copy
+    indices[5] = 2;  //Paste
+    indices[6] = 3;  //Separator
   } else if(cs->ContextMenuStandardItems == 2) {
     indices[6] = 3;
     indices[5] = 4;
@@ -678,7 +697,10 @@ void ParseSearchCommand(char *command, char *args)
     p3 += 6*sizeof(char);
     strcat(p4, p3);
 
-    ShellExecute(hWnd, "open", p4, "", 0, SW_SHOWNORMAL);
+    if(*(cs->BrowserPath))
+      ShellExecute(hWnd, "open", cs->BrowserPath, p4, NULL, SW_SHOWNORMAL);
+    else
+      ShellExecute(hWnd, "open", p4, "", 0, SW_SHOWNORMAL);
   } else {
     if(!cs->NoWarnOnError)
       MessageBox(hWnd, "No search argument specified or search engine list empty", "LSXCommand", MB_OK | MB_ICONERROR | MB_APPLMODAL);
@@ -790,9 +812,11 @@ void ParseCalculatorCommand(char *command)
           *p = ',';
     }
     SetWindowText(hText, val);
+    HistoryRemoveAll(&files, &nFiles);
     SendMessage(hText, EM_SETSEL, strlen(val), strlen(val));
   } else {
     SetWindowText(hText, "error");
+    HistoryRemoveAll(&files, &nFiles);
     SendMessage(hText, EM_SETSEL, 0, -1);
   }
 
@@ -827,9 +851,8 @@ BOOL AutoComplete(HWND hText, char *szPath)
   int len = strlen(szPath);
 
   if(len > 0) {
-    if(len == 1) {
+    if(len == 1)
       HistoryMoveToTail(&current);
-    }
 
     while(current->prev) {
       if(!_strnicmp(current->prev->path, szPath, len)) {
@@ -838,6 +861,7 @@ BOOL AutoComplete(HWND hText, char *szPath)
         strcpy(szText, szPath);
         strcat(szText, p);
         SetWindowText(hText, szText);
+        HistoryRemoveAll(&files, &nFiles);
         SendMessage(hText, EM_SETSEL, len, -1);
         HistoryMovePrev(&current, 1); // This just keeps everything flowing smooth if the user
         free(szText);                 // hits up/down next - see WM_CHAR below
@@ -845,8 +869,6 @@ BOOL AutoComplete(HWND hText, char *szPath)
       }
       HistoryMovePrev(&current, 1);
     }
-
-    //AutoComplete Files
   }
 
   return FALSE;
@@ -871,6 +893,7 @@ void HistoryUsePrev(HWND hText)
 	char *szBuf = "";
   HistoryMovePrev(&current, 1);
 	SetWindowText(hText,current->path);
+  HistoryRemoveAll(&files, &nFiles);
 	return;
 }
 
@@ -893,6 +916,7 @@ void HistoryUseNext(HWND hText)
 	char *szBuf = "";
   HistoryMoveNext(&current, 1);
 	SetWindowText(hText,current->path);
+  HistoryRemoveAll(&files, &nFiles);
 	return;
 }
 
@@ -1136,7 +1160,7 @@ void ParseContextMenuCommand(long retval, char *buf)
     free(buf2);
   }
 
-  if(cs->ContextMenuExecute && retval >= HMI_USER_ALIAS && buf[0] != '=') {
+  if(cs->ContextMenuExecute && retval >= HMI_USER_ALIAS && retval < HMI_USER_CUT && buf[0] != '=') {
     if(!cs->NoClearOnCommand || (cs->HideOnCommand && cs->ClearOnHide))
       SetWindowText(hText, "");
     else
@@ -1154,6 +1178,8 @@ void ParseContextMenuCommand(long retval, char *buf)
 	  SetForegroundWindow(hText);
 	  SetFocus(hText);
   }
+
+  HistoryRemoveAll(&files, &nFiles);
 }
 
 
@@ -1230,7 +1256,48 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 			SendMessage(hText,EM_SETSEL,0,-1);
 			return 0;
     } else if(wParam == VK_TAB) {
+      // If we want file autocompletes, populate the files list and set text to the first one.
+      // Consecutive tabs will select the next file in the list...
       // Move cursor to start of next word and select rest of the line.
+      if(cs->TabFileComplete) {
+        HANDLE handle;
+        LPWIN32_FIND_DATA found /*= (LPWIN32_FIND_DATA)malloc(sizeof(found))*/;
+        BOOL bContinue;
+			  char path_buffer[_MAX_PATH];
+			  char drive[_MAX_DRIVE];
+			  char dir[_MAX_DIR];
+
+        if(nFiles == 0) {
+		      GetWindowText(hText, buf, sizeof(buf));
+		      strcat(buf, "*");
+		      handle = FindFirstFile(buf, found);
+          bContinue = (handle != INVALID_HANDLE_VALUE);
+
+          while(bContinue) {
+            if(*(found->cFileName) && strcmp(found->cFileName, ".") && strcmp(found->cFileName, "..")) {
+              HistoryAdd(&files, found->cFileName, &nFiles);
+            }
+            bContinue = FindNextFile(handle, found);
+          }
+
+          if(nFiles != 0) {
+            HistoryMoveToHead(&files);
+            FindClose(handle);
+
+			      _splitpath(buf, drive, dir, NULL, NULL);
+			      _makepath(path_buffer, drive, dir, files->path, NULL);
+			      SetWindowText(hText, path_buffer);
+            SendMessage(hText, WM_KEYDOWN, VK_END, 0);
+          }
+        } else {
+          GetWindowText(hText, buf, sizeof(buf));
+          HistoryMoveNext(&files, 1);
+			    _splitpath(buf, drive, dir, NULL, NULL);
+			    _makepath(path_buffer, drive, dir, files->path, NULL);
+			    SetWindowText(hText, path_buffer);
+          SendMessage(hText, WM_KEYDOWN, VK_END, 0);
+        }
+      }
       if(!cs->NoTabMicroComplete) {
         DWORD nStart, nEnd;
         SendMessage(hText, EM_GETSEL, (WPARAM)&nStart, (LPARAM)&nEnd);
@@ -1261,6 +1328,8 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
     }
     break;
 	case WM_CHAR:
+    if(wParam != VK_TAB)
+      HistoryRemoveAll(&files, &nFiles);  //If not TAB, we don't want any file autocompletes..
 		if(wParam==VK_RETURN) {
       BOOL cleared = FALSE;
 			GetWindowText(hText,buf,sizeof(buf));
@@ -1330,6 +1399,7 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 		  SetWindowText(hText, szFileName);
 		  SetFocus(hText);
 		  DragFinish((HDROP)wParam);
+      HistoryRemoveAll(&files, &nFiles);
       if(cs->Transparent) {
         ShowWindow(hWnd, SW_HIDE);
         ShowWindow(hWnd, SW_SHOW);
@@ -1339,10 +1409,11 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
     break;
   case WM_LBUTTONDOWN:
-    if(*(cs->Clock) && GetFocus() != hText && cs->ClockDisappears) {
+    if(((*(cs->Clock) && cs->ClockDisappears) || (cs->ScrollWinAmp && cs->WinAmpDisappears && FindWindow("WINAMP V1.X", NULL))) && GetFocus() != hText) {
       SetWindowText(hText, "");
       SetForegroundWindow(hWnd);
       SetFocus(hText);
+      HistoryRemoveAll(&files, &nFiles);
     }
     if(cs->SelectAllOnMouseFocus && GetFocus() != hText) {
       SetForegroundWindow(hWnd);
@@ -1354,6 +1425,16 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
       ShowWindow(hWnd, SW_HIDE);
       ShowWindow(hWnd, SW_SHOW);
       SetFocus(hText);
+    }
+    break;
+  case WM_KILLFOCUS:
+    if(visible && cs->HideOnUnfocus) {
+	    ShowWindow(hWnd, SW_HIDE);
+      if(cs->ClearOnHide) {
+        SetWindowText(hText,"");
+        HistoryRemoveAll(&files, &nFiles);
+      }
+	    visible = FALSE;
     }
     break;
   case WM_CONTEXTMENU:
@@ -1498,7 +1579,7 @@ VOID CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
   char title[_MAX_PATH];
 
-  if(idEvent == ID_CLOCKTIMER && GetFocus() != hText) {
+  if(idEvent == ID_CLOCKTIMER && GetFocus() != hText && visible) {
     /* 7 lines of code stolen from LSTime */
     time_t tVal;
     struct tm *stVal;
@@ -1509,11 +1590,12 @@ VOID CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
     strftime(tstring, sizeof(tstring), cs->Clock, stVal);
 
     SetWindowText(hText, tstring);
+    HistoryRemoveAll(&files, &nFiles);
     if(cs->Transparent) {
       ShowWindow(hWnd, SW_HIDE);
       ShowWindow(hWnd, SW_SHOWNOACTIVATE);
     }
-  } else if(idEvent == ID_WINAMPTIMER && GetFocus() != hText) {
+  } else if(idEvent == ID_WINAMPTIMER && GetFocus() != hText && visible) {
     HWND wahWnd = FindWindow("WINAMP V1.X", NULL);
     if(wahWnd) {
       if(nTimers == 2) {
@@ -1522,6 +1604,7 @@ VOID CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
       }
       GetWindowText(wahWnd, title, sizeof(title));
       SetWindowText(hText, title);
+      HistoryRemoveAll(&files, &nFiles);
       if(cs->Transparent) {
         ShowWindow(hWnd, SW_HIDE);
         ShowWindow(hWnd, SW_SHOWNOACTIVATE);
@@ -1556,9 +1639,12 @@ void BangFocusCommand(HWND caller,char *args)
 	}
 	SetForegroundWindow(hText);
 	SetFocus(hText);
-  if(*(cs->Clock) && cs->ClockDisappears) SetWindowText(hText, "");
+  if((*(cs->Clock) && cs->ClockDisappears) || (cs->ScrollWinAmp && cs->WinAmpDisappears)) {
+    SetWindowText(hText, "");
+    HistoryRemoveAll(&files, &nFiles);
+  }
   if(cs->SelectAllOnFocus) SendMessage(hText, EM_SETSEL, 0, -1);
-  if(cs->Transparent && *(cs->Clock) && cs->ClockDisappears) {
+  if(cs->Transparent && ((*(cs->Clock) && cs->ClockDisappears) || (cs->ScrollWinAmp && cs->WinAmpDisappears))) {
     ShowWindow(hWnd, SW_HIDE);
     ShowWindow(hWnd, SW_SHOW);
     SetFocus(hText);
@@ -1585,16 +1671,22 @@ void BangToggleCommand(HWND caller, char *args)
 {
 	if(visible) {
 		ShowWindow(hWnd, SW_HIDE);
-		if(cs->ClearOnHide) SetWindowText(hText,"");
+    if(cs->ClearOnHide) {
+      SetWindowText(hText,"");
+      HistoryRemoveAll(&files, &nFiles);
+    }
 		visible = FALSE;
 	}
 	else {
 		ShowWindow(hWnd, SW_SHOWNORMAL);
 		SetForegroundWindow(hText);
 		SetFocus(hText);
-    if(*(cs->Clock) && cs->ClockDisappears) SetWindowText(hText, "");
+    if((*(cs->Clock) && cs->ClockDisappears) || (cs->ScrollWinAmp && cs->WinAmpDisappears)) {
+      SetWindowText(hText, "");
+      HistoryRemoveAll(&files, &nFiles);
+    }
     if(cs->SelectAllOnFocus) SendMessage(hText, EM_SETSEL, 0, -1);
-    if((cs->Transparent && *(cs->Clock) && cs->ClockDisappears) || *(cs->Background)) {
+    if((cs->Transparent && (*(cs->Clock) && cs->ClockDisappears) || (cs->ScrollWinAmp && cs->WinAmpDisappears))) {
       ShowWindow(hWnd, SW_HIDE);
       ShowWindow(hWnd, SW_SHOW);
       SetFocus(hText);
@@ -1743,7 +1835,10 @@ void BangHideCommand(HWND caller, char *args)
 {
   if(visible) {
 		ShowWindow(hWnd, SW_HIDE);
-		if(cs->ClearOnHide) SetWindowText(hText,"");
+    if(cs->ClearOnHide) {
+      SetWindowText(hText,"");
+      HistoryRemoveAll(&files, &nFiles);
+    }
 		visible = FALSE;
   }
 }
@@ -1797,6 +1892,8 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
   AddBangCommand("!COMMANDCLEARHISTORY", BangClearHistory);
   AddBangCommand("!COMMANDSHOWCONTEXTMENU", BangShowContextMenu);
   AddBangCommand("!COMMAND", BangCommand);
+  AddBangCommand("!COMMANDSHOW", BangShowCommand);
+  AddBangCommand("!COMMANDHIDE", BangHideCommand);
 	
   if(!cs->HiddenOnStart) {
 		ShowWindow(hWnd,SW_SHOWNORMAL);

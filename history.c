@@ -6,7 +6,7 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  June 2, 1999  2:30 AM                      *
+* Last Update:  June 27, 1999  12:30 AM                    *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
@@ -373,9 +373,11 @@ void HistoryRemoveEntry(struct History **hist, int *count)
 
 struct History *HistoryRemoveAll(struct History **hist, int *count)
 {
-  HistoryMoveToHead(hist);
-  while(*hist) {
-    HistoryRemoveEntry(hist, count);
+  if(*hist) {
+    HistoryMoveToHead(hist);
+    while(*hist) {
+      HistoryRemoveEntry(hist, count);
+    }
   }
   return *hist;
 }
