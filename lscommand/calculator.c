@@ -6,11 +6,13 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  June 15, 1999  12:30 AM                    *
+* Last Update:  July 16, 1999  2:00 AM                     *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 * Ported from Visual Basic code by SoftCircuits, Inc.      *
 ***********************************************************/
+
+#ifndef LSXCOMMANDCLOCK_EXPORTS
 
 #include <windows.h>
 #include <stdio.h>
@@ -581,3 +583,5 @@ double Evaluate(char *expr, int *error, char *replacement, size_t replace_size)
     return 0;
   }
 }
+
+#endif //LSXCOMMANDCLOCK_EXPORTS

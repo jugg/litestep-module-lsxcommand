@@ -6,10 +6,12 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  June 2, 1999  2:30 AM                      *
+* Last Update:  July 16, 1999  2:A0 AM                     *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
+
+#ifndef LSXCOMMANDCLOCK_EXPORTS
 
 #include <windows.h>
 #include <stdio.h>
@@ -45,3 +47,5 @@ void MenuAddItem(HMENU hMenu, char *pszValue, long def_id, BOOL insertAtTop)
     free(buf);
   }
 }
+
+#endif //LSXCOMMANDCLOCK_EXPORTS

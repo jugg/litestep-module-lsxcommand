@@ -1,6 +1,8 @@
 #ifndef LSCOMMAND_H
 #define LSCOMMAND_H
 
+#ifndef LSXCOMMANDCLOCK_EXPORTS
+
 #define HMI_USER_ABOUT WM_USER
 #define HMI_USER_SE WM_USER + 1
 #define HMI_USER_ALIAS HMI_USER_SE + nSearchEngines + 1
@@ -97,4 +99,65 @@ extern double Evaluate(char *expr, int *error, char *replacement, size_t replace
 extern void MenuDeleteItem(HMENU hMenu, int index);
 extern void MenuAddItem(HMENU hMenu, char *pszValue, long def_id, BOOL insertAtTop);
 
-#endif
+#else // LSXCOMMANDCLOCK_EXPORTS
+
+struct CommandSettings {
+	char TextFontFace[256], Background[_MAX_PATH], Clock[256];
+	int TextSize;
+	int x;
+	int y;
+	int width;
+	int height;
+	int BorderSize;
+  /*
+  int MaxHistoryEntries;
+  int MaxHistoryMenuEntries;
+  */
+  int Transparent;
+  /*
+  int ContextMenuStandardItems;
+  */
+	BOOL NoCursorChange;
+	BOOL BevelBorder;
+	BOOL NoAlwaysOnTop;
+	BOOL notmoveable;
+  /*
+	BOOL NoClearOnCommand;
+	BOOL HideOnCommand;
+  */
+	BOOL HiddenOnStart;
+  /*
+	BOOL ClearOnHide;
+  */
+  BOOL SelectAllOnFocus;
+  BOOL SelectAllOnMouseFocus;
+  /*
+  BOOL AssumeNetAddress;
+  BOOL NoWarnOnError;
+  BOOL ClearHistoryOnStartup;
+  BOOL NoTabMicroComplete;
+  BOOL NewestHistoryItemsOnTop;
+  BOOL ContextMenuAutoPopup;
+  BOOL ContextMenuAboveBox;
+  BOOL ContextMenuExecute;
+  BOOL UnixHistory;
+  BOOL ExplorePaths;
+  BOOL AutoComplete;
+  BOOL CommaDelimiter;
+  BOOL RPNCalculator;
+  BOOL ClockDisappears;
+  */
+  BOOL ScrollWinAmp;
+  /*
+  BOOL WinAmpDisappears;
+  BOOL TabFileComplete;
+  */
+  BOOL HideOnUnfocus;
+	COLORREF BGColor;
+	COLORREF TextColor;
+	COLORREF BorderColor;
+};
+
+#endif //LSXCOMMANDCLOCK_EXPORTS
+
+#endif //LSCOMMAND_H

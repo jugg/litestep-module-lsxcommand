@@ -6,10 +6,12 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  June 27, 1999  12:30 AM                    *
+* Last Update:  July 16, 1999  2:00 A M                    *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
+
+#ifndef LSXCOMMANDCLOCK_EXPORTS
 
 #include <windows.h>
 #include <stdio.h>
@@ -381,3 +383,5 @@ struct History *HistoryRemoveAll(struct History **hist, int *count)
   }
   return *hist;
 }
+
+#endif //LSXCOMMANDCLOCK_EXPORTS

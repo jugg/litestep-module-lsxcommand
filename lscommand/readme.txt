@@ -3,8 +3,8 @@
                     *           by Visigoth           *
                     *   gandhimail@worldnet.att.net   *
                     *         ==============          *
-                    *         Version: 1.7.2          *
-                    *          June 30, 1999          *
+                    *         Version: 1.7.3          *
+                    *          July 17, 1999          *
                     *         ==============          *
                     * http://home.att.net/~gandhimail *
                     ***********************************
@@ -72,6 +72,17 @@ II.   How to use LSXCommand
            - *CommandAlias
 
       II.3 Added !Bang Commands
+           New to 1.7.3:
+           -------------
+           - !CommandBrowseFile
+           - !CommandBrowseFolder
+           
+           New to 1.7.1:
+           -------------
+           - !Command
+           - !CommandShow
+           - !CommandHide
+           
            New to 1.5:
            -----------
            - !CommandClearHistory
@@ -87,6 +98,8 @@ II.   How to use LSXCommand
       II.7 Backgrounds & Transparencies
       II.8 Clock Settings
       II.9 Tab File Completion
+      II.10 LSXCommandClock module
+      II.11 AlterScript module
 
 III.  Known Bugs / Limitations
 
@@ -139,6 +152,7 @@ ii. Kudos
    -------
    The following people gave me ideas after I released version 1.0:
 
+   - Kryten sent in the idea about Browse File and Folder
    - Ikka Nisula sent in the request for multiple base support
    - Alasdair sent in a request for negative screen coordinates
    - John Kuhn sent in the WinAmp title scrolling idea
@@ -174,6 +188,23 @@ ii. Kudos
 iii. Change Log
 ===============
 
+   Version 1.7.3
+   -------------
+   A couple of features, bug fixes
+   
+     Bug Fixes
+     `````````
+     - Fixed File AutoComplete junk characters error
+   
+     New Features
+     ````````````
+     - Separate AlterScript module (see section II.11 for details)
+     - Separate clock module (see section II.10 for details)
+     - Added following !Bang Commands:
+     
+       * !CommandBrowseFile
+       * !CommandBrowseFolder
+
    Version 1.7.2
    -------------
    Mostly bug fixes & two feature additions
@@ -192,7 +223,7 @@ iii. Change Log
      ````````````
      - New positioning system (see Notes below)
      - Added file name tab completion like Re5ource's popups
-       (see section
+       (see section II.9)
      - Added following RC Commands (see section II.2 for details)
 
        * CommandSearchEngineBrowser
@@ -1052,6 +1083,24 @@ II. How to use LSXCommand
    -------------------------
      NOTE: See Original LSCommand readme for previous !Bang Commands
      
+     !CommandBrowseFile
+     ``````````````````
+     Description: Brings up an Open Dialog Box to browse for a file
+     for LSXCommand to open.  It's just the same as typing in the
+     file's name.  NOTE: You can send an argument to this !Bang
+     command to specify the filter for the open box.  For instance,
+     to see just Text Files, you might do this:
+     
+       !CommandBrowseFile    All Text Files (*.txt, *.ini)|*.txt;*.ini
+     
+     
+     !CommandBrowseFolder
+     ````````````````````
+     Description: Brings up a folder selection dialog.  You can
+     select a folder to browse to.  There are no arguments for this
+     !Bang command.
+     
+     
      !CommandShow
      ````````````
      Description: Just shows LSXCommand.  NOTE: It does *not* give
@@ -1059,9 +1108,11 @@ II. How to use LSXCommand
      gives focus to LSXCommand, and if it's not visible, it shows it
      also.
      
+     
      !CommandHide
      ````````````
      Description: Just hides LSXCommand.  Nothing really special.
+     
      
      !Command
      ````````
@@ -1349,6 +1400,63 @@ II. How to use LSXCommand
    will most likely get C:\AUTOEXEC.BAT  If not, you can hit <TAB>
    again to get the next matching filename.  Note that you do have
    to turn on both RC commands for this to work.
+   
+   
+   II.10 LSXCommandClock module
+   ----------------------------
+   The LSXCommandClock module is a separate module from LSXCommand
+   that only has the clock and winamp features enabled.  The RC
+   Commands are similar, but have a CommandClock instead of Command
+   prefix.  The following is a list of the RC Commands supported
+   by LSXCommandClock (see section II.2 for details about these
+   Commands)
+   
+     * CommandClockTextFontFace
+     * CommandClockBackground
+     * CommandClockX, CommandClockY
+     * CommandClockWidth, CommandClockHeight
+     * CommandClockBGColor
+     * CommandClockTextSize
+     * CommandClockBorderSize
+     * CommandClockOffsetX, CommandClockOffsetY
+     * CommandClockBevelBorder
+     * CommandClockNotAlwaysOnTop
+     * CommandClockNotMoveable
+     * CommandClockHiddenOnStart
+     * CommandClockNoCursorChange
+     * CommandClockSelectAllOnFocus
+     * CommandClockSelectAllOnMouseFocus
+     * CommandClockTransparentEditBox
+     * CommandClockScrollWinAmpTitle
+     * CommandClockHideOnUnfocus
+     * CommandClockString ****
+   
+   **** NOTE: CommandClockString is the same as the "CommandClock" RC
+   Command for LSXCommand.
+   
+   
+   II.11 AlterScript module
+   ------------------------
+   The AlterScript module is an alternative interpreter to Killarny's
+   script.dll.  I was having problems getting his to work, so I wrote
+   my own... go figure.  However, I'm sure the way he parses strings
+   and the way I do differ - this is no substitute!!  There are many
+   differences, which are described below.
+   
+   For instance, AlterScript does not interpret semi-colons that
+   represent pauses in Killarny's script.dll.  Furthermore, every
+   command MUST be separated by a pipe character '|'.  Everything
+   between pipes is a command.
+   
+   AlterScript MUST be used with LSXCommand because it sends a
+   !Command !Bang command with the specified command.  The actual
+   command sent (stuff between the pipes) should be *exactly* what you
+   would type into LSXCommand's text box.  If you type it without
+   quotes into LSXCommand's text box, do the same between the pipes.
+   Same goes for if you do it with quotes.
+   
+   Note that since I send the !Command !Bang command, you can use
+   aliases and even search engine commands.
 
 
 III. Known Bugs / Limitations
