@@ -20,7 +20,7 @@
 		and bang commands are, but not all explanations. If you want to read more
 		about the calculator, time, transparency, ... check lsxcommand.txt.
 	</description>
-	<author name="Visigoth (blkhawk, ilmcuts, jesus_mjjg, rabidcow)" email="litestep[AT]litestep[DOT]wuzzle[DOT]org" />
+	<author name="Visigoth (blkhawk, ilmcuts, jesus_mjjg, rabidcow, jugg, Seg@)" email="litestep[AT]litestep[DOT]wuzzle[DOT]org" />
 	<!-- ******************************************************************************** -->
 	<!--**************************Positioning***************************-->
 	<command name="CommandX">
@@ -329,7 +329,12 @@
 	    	Hides lsxcommand when a command is issued.
 	    </description>
 	</command>
-	<command name="CommandSelectAllOnFocus">
+	<command name="CommandHideOnEsc">
+	    <bool default="false"/>
+	    <description>
+	    	Hides lsxcommand when Esc key pressed.
+	    </description>
+	</command>	<command name="CommandSelectAllOnFocus">
 	    <bool default="false"/>
 	    <description>
 	    	Selects everything in the command box on focus.
@@ -572,6 +577,14 @@
 	</bang>
 	<!-- *Changelog*-->
 	<changelog>
+		<version id="1.8.6 (jugg, Seg@)">
+			<entry>Added CommandHideOnEsc.</entry>
+			<entry>Fixed invalid buffer size for OnFocus/OnUnfocus actions.</entry>
+			<entry>Fixed trailing spaces bug.</entry>
+			<entry>Commands history is written without expanded eVars now</entry>
+			<entry>Fixed transparent editboxes managing (nobody uses them though ;) )</entry>
+			<entry>Minor updates for used functions: module uses newer LS APIs now</entry>
+		</version>
 		<version id="1.8.5 (jesus_mjjg/ilmcuts)">
 			<entry>Added CommandStretchBackground.</entry>
 			<entry>Added CommandTextBold, CommandTextUnderline and CommandTextItalic.</entry>		

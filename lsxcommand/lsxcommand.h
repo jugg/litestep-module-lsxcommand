@@ -59,6 +59,7 @@ struct CommandSettings {
 	BOOL m_bTextBold;
 	BOOL m_bTextUnderline;
 	BOOL m_bTextItalic; 
+	BOOL m_bHideOnEsc;
 	//go on with what was before
 	char TextFontFace[256], SearchEngineList[_MAX_PATH], ContextMenuOrder[4], Background[_MAX_PATH], Clock[256], TextAlign[15], BrowserPath[_MAX_PATH], MusicPlayer[128];
 	int TextSize;

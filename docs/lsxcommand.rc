@@ -42,6 +42,7 @@ CommandContextMenuOrder 012
 CommandContextMenuAutoPopup false
 CommandNoWarnOnError false
 CommandHideOnCommand false
+CommandHideOnEsc false
 CommandSelectAllOnFocus false
 CommandSelectAllOnMouseFocus false
 CommandHideOnUnfocus false

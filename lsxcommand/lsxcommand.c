@@ -55,10 +55,7 @@
 //20021115
 int msgs[] = {LM_GETREVID, 0};
 const char szAppName[] = "lsxcommand.dll"; // Our window class, etc
-const char rcsRevision[] = "1.8.5"; // Our Version
-
-//20021114
-#define MAX_LINE_LENGTH 4096
+const char rcsRevision[] = "1.8.6"; // Our Version
 
 #ifndef LSXCOMMANDCLOCK_EXPORTS
 
@@ -108,7 +105,7 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
   int offsetx, offsety;
   RECT screen;
   // 20021114
-  char szTemp[256];
+  char szTemp[MAX_LINE_LENGTH];
 
   struct CommandSettings *settings = (struct CommandSettings *)malloc(sizeof(struct CommandSettings));
   
@@ -131,6 +128,7 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
 	settings->m_bTextBold = GetRCBool("CommandTextBold",TRUE);
 	settings->m_bTextUnderline = GetRCBool("CommandTextUnderline",TRUE);
 	settings->m_bTextItalic = GetRCBool("CommandTextItalic",TRUE);
+	settings->m_bHideOnEsc = GetRCBool("CommandHideOnEsc",TRUE);
 
 	settings->origx = settings->x = GetRCInt("CommandX",0);
 	settings->origy = settings->y = GetRCInt("CommandY",0);
@@ -431,10 +429,16 @@ void CreateHistoryPopupMenu()
 *                                                          *
 *                         *  *  *  *                       *
 * Loads past history entries from the modules.ini file.    *
+*                                                          *
+*                                                          *
+*                        Seg@ was here :)                  *
+*                                                          *
+*                                                          *
 ***********************************************************/
 
 void HistoryInit()
 {
+  /*
   BOOL sect_found=FALSE;
   char line[_MAX_PATH], *p;
   FILE *f;
@@ -463,9 +467,23 @@ void HistoryInit()
 
     fclose(f);
   }
+  */
 
-  HistoryAdd(&current, "", &nHistoryEntries);
-  CreateHistoryPopupMenu();
+	char entry[MAX_LINE_LENGTH];
+	char name[17];
+	int i;
+	for(i=0; i < cs->MaxHistoryEntries; i++)
+	{
+		_itoa(i, name, 10);
+		GetPrivateProfileString("LSXCOMMAND", name, "", entry, MAX_LINE_LENGTH, szModuleIniPath);
+		if (*entry)
+			HistoryAdd(&current, entry, &nHistoryEntries);
+		else
+			break;
+	}	
+
+	HistoryAdd(&current, "", &nHistoryEntries);
+	CreateHistoryPopupMenu();
 }
 
 
@@ -711,6 +729,12 @@ void CreateAliasPopupMenu()
 //	tanuki modify version
 //
 
+//
+// Suppose it isn't required here since it can be found in LS core ;)
+//                                               // Seg@
+//
+
+/*
 int cz_LCTokenize (LPCSTR szString, LPSTR *lpszBuffers, DWORD dwNumBuffers, LPSTR szExtraParameters)
 {
 	int		index = 0;
@@ -824,6 +848,7 @@ int cz_LCTokenize (LPCSTR szString, LPSTR *lpszBuffers, DWORD dwNumBuffers, LPST
 
 	return dwBufferCount;
 }
+*/
 
 /***********************************************************
 * void AliasInit()                                         *
@@ -852,7 +877,7 @@ void AliasInit()
   item.wID = HMI_USER_ALIAS;
 
   while(LCReadNextConfig(f, "*CommandAlias", buffer, sizeof(buffer))) {
-    if(cz_LCTokenize(buffer, tokens, 3, extra) >= 3) {					//	tanuki modify
+    if(/*cz_*/LCTokenize(buffer, tokens, 3, extra) >= 3) {					//	tanuki modify
       strcpy(buffer, name);
       strcat(buffer, " ");
       strcat(buffer, path);
@@ -1218,15 +1243,16 @@ void HistoryUseNext(HWND hText)
 void ExecCommand(const char *szCommand, BOOL noaddtohist)
 {
   int index;
-	char *newcmd, *args, *p, command[4096], dir[_MAX_DIR], full_dir[_MAX_DRIVE + _MAX_DIR], explore[] = "explore", open[] = "open"; // Can't trust _MAX_PATH for command
+  char *newcmd, *args, *p, command[MAX_LINE_LENGTH], dir[_MAX_DIR], full_dir[_MAX_DRIVE + _MAX_DIR], explore[] = "explore", open[] = "open"; // Can't trust _MAX_PATH for command
   HINSTANCE val=0;
   SHELLEXECUTEINFO si;
 
-	if(!szCommand || strlen(szCommand) < 1)
-		return;
+  if(!szCommand || strlen(szCommand) < 1)
+    return;
 
-  VarExpansion(command, szCommand);
+  strcpy(command, szCommand);
 
+  // update the history if required
   if(!noaddtohist) {
     index = HistoryFindIndexOf(&current, command);
 
@@ -1249,6 +1275,8 @@ void ExecCommand(const char *szCommand, BOOL noaddtohist)
       MenuAddItem(hHistoryMenu, command, HMI_USER_HISTORY, cs->NewestHistoryItemsOnTop);
     }
   }
+
+  VarExpansionEx(command, szCommand, MAX_LINE_LENGTH);
 
   if(*command == '\"') {
     newcmd = command + sizeof(char);
@@ -1515,175 +1543,173 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 #ifndef LSXCOMMANDCLOCK_EXPORTS
 	case WM_KEYDOWN:
 		if(wParam==VK_DOWN) {
-      if(cs->UnixHistory)
-        HistoryUseNext(hText);
-      else
-			  HistoryUsePrev(hText);
+			if(cs->UnixHistory)
+				HistoryUseNext(hText);
+			else
+				HistoryUsePrev(hText);
 			SendMessage(hText,EM_SETSEL,0,-1);
 			return 0;
-    } else if(wParam==VK_UP) {
-      if(cs->UnixHistory)
-        HistoryUsePrev(hText);
-      else
-			  HistoryUseNext(hText);
+		} else if(wParam==VK_UP) {
+			if(cs->UnixHistory)
+				HistoryUsePrev(hText);
+			else
+				HistoryUseNext(hText);
 			SendMessage(hText,EM_SETSEL,0,-1);
 			return 0;
-    } else if(wParam == VK_ESCAPE) {
-      SetWindowText(hText, "");
-      HistoryMoveToHead(&current);
-    } else if(wParam == VK_TAB) {
-      // If we want file autocompletes, populate the files list and set text to the first one.
-      // Consecutive tabs will select the next file in the list...
-      // Move cursor to start of next word and select rest of the line.
-      if(cs->TabFileComplete) {
-        HANDLE handle;
-        WIN32_FIND_DATA found;
-        BOOL bContinue;
-			  char path_buffer[_MAX_PATH];
-			  char drive[_MAX_DRIVE];
-			  char dir[_MAX_DIR];
+		} else if(wParam == VK_ESCAPE) {
+			SetWindowText(hText, "");
+			HistoryMoveToHead(&current);
+		} else if(wParam == VK_TAB) {
+			// If we want file autocompletes, populate the files list and set text to the first one.
+			// Consecutive tabs will select the next file in the list...
+			// Move cursor to start of next word and select rest of the line.
+			if(cs->TabFileComplete) {
+				HANDLE handle;
+				WIN32_FIND_DATA found;
+				BOOL bContinue;
+				char path_buffer[_MAX_PATH];
+				char drive[_MAX_DRIVE];
+				char dir[_MAX_DIR];
 
-        if(nFiles == 0) {
-		      GetWindowText(hText, buf, sizeof(buf));
-		      strcat(buf, "*");
-		      handle = FindFirstFile(buf, &found);
-          bContinue = (handle != INVALID_HANDLE_VALUE);
+				if(nFiles == 0) {
+					GetWindowText(hText, buf, sizeof(buf));
+					strcat(buf, "*");
+					handle = FindFirstFile(buf, &found);
+					bContinue = (handle != INVALID_HANDLE_VALUE);
 
-          while(bContinue) {
-            if(*(found.cFileName) && strcmp(found.cFileName, ".") && strcmp(found.cFileName, "..")) {
-              HistoryAdd(&files, found.cFileName, &nFiles);
-            }
-            bContinue = FindNextFile(handle, &found);
-          }
+					while(bContinue) {
+						if (*(found.cFileName) && strcmp(found.cFileName, ".") && strcmp(found.cFileName, "..")) {
+							HistoryAdd(&files, found.cFileName, &nFiles);
+						}
+						bContinue = FindNextFile(handle, &found);
+					}
 
-          if(nFiles != 0) {
-            HistoryMoveToHead(&files);
-            FindClose(handle);
+					if(nFiles != 0) {
+						HistoryMoveToHead(&files);
+						FindClose(handle);
 
-			      _splitpath(buf, drive, dir, NULL, NULL);
-			      _makepath(path_buffer, drive, dir, files->path, NULL);
-			      SetWindowText(hText, path_buffer);
-            SendMessage(hText, WM_KEYDOWN, VK_END, 0);
-          }
-        } else {
-          GetWindowText(hText, buf, sizeof(buf));
-          HistoryMoveNext(&files, 1);
-			    _splitpath(buf, drive, dir, NULL, NULL);
-			    _makepath(path_buffer, drive, dir, files->path, NULL);
-			    SetWindowText(hText, path_buffer);
-          SendMessage(hText, WM_KEYDOWN, VK_END, 0);
-        }
-      }
-      if(!cs->NoTabMicroComplete) {
-        DWORD nStart, nEnd;
-        SendMessage(hText, EM_GETSEL, (WPARAM)&nStart, (LPARAM)&nEnd);
-        GetWindowText(hText, buf, sizeof(buf));
-        buf2 = buf + nStart*sizeof(char);
-        while(buf2 && *buf2 != ' ' && *buf2) {
-          ++buf2;
-          ++nStart;
-        }
-        if(*buf2) {
-          ++nStart;
-          SendMessage(hText, EM_SETSEL, (WPARAM)nStart, (LPARAM)strlen(buf));
-        } else
-          SendMessage(hText, EM_SETSEL, (WPARAM)nStart, (LPARAM)nStart);
-      }
-      return 0;
-    } else if((wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_HOME || wParam == VK_END || VK_DELETE) && cs->Transparent) {
-        ShowWindow(hWnd, SW_HIDE);
-        ShowWindow(hWnd, SW_SHOW);
-        SetFocus(hText);
-    }
+						_splitpath(buf, drive, dir, NULL, NULL);
+						_makepath(path_buffer, drive, dir, files->path, NULL);
+						SetWindowText(hText, path_buffer);
+						SendMessage(hText, WM_KEYDOWN, VK_END, 0);
+					}
+				} else {
+					GetWindowText(hText, buf, sizeof(buf));
+					HistoryMoveNext(&files, 1);
+					_splitpath(buf, drive, dir, NULL, NULL);
+					_makepath(path_buffer, drive, dir, files->path, NULL);
+					SetWindowText(hText, path_buffer);
+					SendMessage(hText, WM_KEYDOWN, VK_END, 0);
+				}
+			}
+			if (!cs->NoTabMicroComplete) {
+				DWORD nStart, nEnd;
+				SendMessage(hText, EM_GETSEL, (WPARAM)&nStart, (LPARAM)&nEnd);
+				GetWindowText(hText, buf, sizeof(buf));
+				buf2 = buf + nStart*sizeof(char);
+				while(buf2 && *buf2 != ' ' && *buf2) {
+					++buf2;
+					++nStart;
+				}
+				if(*buf2) {
+					++nStart;
+					SendMessage(hText, EM_SETSEL, (WPARAM)nStart, (LPARAM)strlen(buf));
+				} else
+					SendMessage(hText, EM_SETSEL, (WPARAM)nStart, (LPARAM)nStart);
+			}
+			return 0;
+		} else if((wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_HOME || wParam == VK_END || wParam == VK_DELETE) && cs->Transparent) {
+			ShowWindow(hWnd, SW_HIDE);
+			ShowWindow(hWnd, SW_SHOW);
+			SetFocus(hText);
+		}
 		break;
-  case WM_KEYUP:
-    if((wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_HOME || wParam == VK_END || VK_DELETE) && cs->Transparent) {
-        ShowWindow(hWnd, SW_HIDE);
-        ShowWindow(hWnd, SW_SHOW);
-        SetFocus(hText);
-    }
-    break;
+	case WM_KEYUP:
+		if((wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_HOME || wParam == VK_END || wParam == VK_DELETE) && cs->Transparent) {
+			ShowWindow(hWnd, SW_HIDE);
+			ShowWindow(hWnd, SW_SHOW);
+			SetFocus(hText);
+		}
+		break;
 	case WM_CHAR:
-    if(wParam != VK_TAB)
-      HistoryRemoveAll(&files, &nFiles);  //If not TAB, we don't want any file autocompletes..
-		if(wParam==VK_RETURN) {
-      BOOL cleared = FALSE;
+		if (wParam == VK_ESCAPE && cs->m_bHideOnEsc) {
+			ShowWindow(hWnd, SW_HIDE);
+			return 0;
+		}
+		if(wParam != VK_TAB)
+			HistoryRemoveAll(&files, &nFiles);  //If not TAB, we don't want any file autocompletes..
+		if (wParam == VK_RETURN) {
+			BOOL cleared = FALSE;
 			GetWindowText(hText,buf,sizeof(buf));
-      if(!cs->NoClearOnCommand) {
-        SetWindowText(hText,"");
-        cleared = TRUE;
-      }
+			if(!cs->NoClearOnCommand) {
+				SetWindowText(hText,"");
+				cleared = TRUE;
+			}
 			if(cs->HideOnCommand && buf[0] != '=') {
 				ShowWindow(hWnd,SW_HIDE);
 				visible = FALSE;
-        if(cs->ClearOnHide) {
-          SetWindowText(hText,"");
-          cleared = TRUE;
-        }
+				if(cs->ClearOnHide) {
+					SetWindowText(hText,"");
+					cleared = TRUE;
+				}
 			}
 			ExecCommand(buf, FALSE);
-      HistoryMoveToTail(&current);
-      if(!cleared)
-        HistoryMovePrev(&current, 1);
+			HistoryMoveToTail(&current);
+			if(!cleared)
+				HistoryMovePrev(&current, 1);
 			return 0;
-    } else if(wParam == VK_TAB || wParam == VK_ESCAPE)
-      return 0;
-    else {
-      /*long retval;
-      SIZE sz;
-      RECT rct;*/
-      if(cs->CommaDelimiter && (wParam == 0x2E)) { // Period
-        GetWindowText(hText, buf, sizeof(buf));
-        if(buf[0] == '=')
-          wParam = 0x2C; // Comma
-      }
-      if(cs->AutoComplete) {
-        DWORD nStart, nEnd;
-        SendMessage(hText, EM_GETSEL, (WPARAM)&nStart, (LPARAM)&nEnd);
-        GetWindowText(hText, buf, sizeof(buf));
-        buf2 = (char *)malloc(strlen(buf) + 2);
-        buf3 = buf + nEnd*sizeof(char);
-        strcpy(buf2, "");
-        strncpy(buf2, buf, nStart);
-        buf2[nStart] = (char)wParam;
-        buf2[nStart + 1] = '\0';
-        strcat(buf2, buf3);
-        HistoryMoveNext(&current, 1);
-        nStart = AutoComplete(hText, buf2);
-        /*if((char)wParam == '?' && cs->ContextMenuAutoPopup) {
-          GetTextExtentPoint32(GetDC(hText), "?", 1, &sz);
-          GetWindowRect(hWnd, &rct);
-          rct.left += (cs->BorderSize + sz.cx);
-          retval = TrackPopupMenu(hSearchEngineMenu, TPM_RIGHTALIGN | (cs->ContextMenuAboveBox ? TPM_BOTTOMALIGN : TPM_TOPALIGN) | TPM_NONOTIFY | TPM_RIGHTBUTTON, rct.left, (cs->ContextMenuAboveBox ? rct.top : rct.bottom), 0, hWnd, NULL);
-        }*/ // AUTOPOPUP STUFF - UNDOCUMENTED, CAN'T PULL OFF WITH REGULAR MENUS
-        if(nStart) {
-          free(buf2);
-          return 0;
-        } else HistoryMoveToTail(&current);  // We got to something that is not in the history.
-      }
-      if(cs->Transparent) {
-        ShowWindow(hWnd, SW_HIDE);
-        ShowWindow(hWnd, SW_SHOW);
-        SetFocus(hText);
-      }
-    }
+		} else if(wParam == VK_TAB || wParam == VK_ESCAPE) {
+			return 0;
+		} else {
+			/*long retval;
+			SIZE sz;
+			RECT rct;*/
+			if(cs->CommaDelimiter && (wParam == 0x2E)) { // Period
+				GetWindowText(hText, buf, sizeof(buf));
+				if(buf[0] == '=')
+				wParam = 0x2C; // Comma
+			}
+			if (cs->AutoComplete) {
+				DWORD nStart, nEnd;
+				SendMessage(hText, EM_GETSEL, (WPARAM)&nStart, (LPARAM)&nEnd);
+				GetWindowText(hText, buf, sizeof(buf));
+				buf2 = (char *)malloc(strlen(buf) + 2);
+				buf3 = buf + nEnd*sizeof(char);
+				strcpy(buf2, "");
+				strncpy(buf2, buf, nStart);
+				buf2[nStart] = (char)wParam;
+				buf2[nStart + 1] = '\0';
+				strcat(buf2, buf3);
+				HistoryMoveNext(&current, 1);
+				nStart = AutoComplete(hText, buf2);
+				if(nStart) {
+					free(buf2);
+					return 0;
+				} else HistoryMoveToTail(&current);  // We got to something that is not in the history.
+			}
+			if (cs->Transparent) {
+				ShowWindow(hWnd, SW_HIDE);
+				ShowWindow(hWnd, SW_SHOW);
+				SetFocus(hText);
+			}
+		}
 		break;
 	case WM_DROPFILES:
 		{
-		  char szFileName[MAX_PATH];
-		  DragQueryFile((HDROP)wParam, 0, szFileName, sizeof(szFileName));
-		  SetWindowText(hText, szFileName);
-		  SetFocus(hText);
-		  DragFinish((HDROP)wParam);
-      HistoryRemoveAll(&files, &nFiles);
-      if(cs->Transparent) {
-        ShowWindow(hWnd, SW_HIDE);
-        ShowWindow(hWnd, SW_SHOW);
-        SetFocus(hText);
-      }
-		  return 0;
+			char szFileName[MAX_PATH];
+			DragQueryFile((HDROP)wParam, 0, szFileName, sizeof(szFileName));
+			SetWindowText(hText, szFileName);
+			SetFocus(hText);
+			DragFinish((HDROP)wParam);
+			HistoryRemoveAll(&files, &nFiles);
+			if (cs->Transparent) {
+				ShowWindow(hWnd, SW_HIDE);
+				ShowWindow(hWnd, SW_SHOW);
+				SetFocus(hText);
+			}
+			return 0;
 		}
-    break;
+		break;
 #endif //LSXCOMMANDCLOCK_EXPORTS
   case WM_LBUTTONDOWN:
 #ifndef LSXCOMMANDCLOCK_EXPORTS

@@ -16,7 +16,7 @@ h1, h3.head	{ padding: 0px; margin: 0px; }
 </tr>
 <tr>
 <td>
-<h3 class="head">By: Visigoth (blkhawk, ilmcuts, jesus_mjjg, rabidcow)<span style="font-size:0.75em">
+<h3 class="head">By: Visigoth (blkhawk, ilmcuts, jesus_mjjg, rabidcow, jugg, Seg@)<span style="font-size:0.75em">
       (<a href="mailto:litestep[AT]litestep[DOT]wuzzle[DOT]org">email</a>)
     </span>
 </h3>
@@ -387,6 +387,13 @@ h1, h3.head	{ padding: 0px; margin: 0px; }
 <b>Default: </b>false </td>
 </tr>
 <tr>
+<td style="width: 50%; text-align: center;">CommandHideOnEsc [bool] </td><td style="width: 50%;">
+	    	Hides lsxcommand when Esc key pressed.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
 <td style="width: 50%; text-align: center;">CommandSelectAllOnFocus [bool] </td><td style="width: 50%;">
 	    	Selects everything in the command box on focus.
 	    <br>
@@ -680,6 +687,17 @@ h1, h3.head	{ padding: 0px; margin: 0px; }
 <br>
 <h2>Changelog for lsxcommand.dll</h2>
 <table>
+<tr>
+<td style="width: 100%;">
+        Version 1.8.6 (jugg, Seg@)<ul>
+<li>Added CommandHideOnEsc.</li>
+<li>Fixed invalid buffer size for OnFocus/OnUnfocus actions.</li>
+<li>Fixed trailing spaces bug.</li>
+<li>Commands history is written without expanded eVars now</li>
+<li>Fixed transparent editboxes managing (nobody uses them though ;) )</li>
+<li>Minor updates for used functions: module uses newer LS APIs now</li>
+</td>
+</tr>
 <tr>
 <td style="width: 100%;">
         Version 1.8.5 (jesus_mjjg/ilmcuts)<ul>

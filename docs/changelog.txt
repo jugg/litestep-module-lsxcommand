@@ -1,4 +1,4 @@
-LsxCommand 1.8.5 changelog file:
+LsxCommand 1.8.6 changelog file:
 ================================
 
    All the step.rc syntax changes are reported in the lsxcommand.html file, so don't worry.
@@ -12,11 +12,44 @@ LsxCommand 1.8.5 changelog file:
       ilmcuts:    ilmcuts__AT__gmx__DOT__net
       jesus_mjjg: jesus_mjjg__AT__skynet__DOT__be
       rabidcow:   rabidcow__AT__juno__DOT__com
+      Seg@:       inform-sega__AT__freemail__DOT__ru
 
       Don't forget that litestep developers usually hide on irc.freenode.net , in #litestep or #lsdev.
 
    Changelog:
    ==========
+
+   Version 1.8.6 (29.03.2004; jugg/Seg@)
+   -------------
+     Bug fixes
+     `````````
+         - jugg's buffer size bugfix added
+           (no more crash if CommandOnFocus and CommandOnUnfocus actions contain
+           more than 255 characters)
+         - custom cz_LCTokenize function replaced with a call of LS core's
+           LCTokenize (they are similar!)
+         - HistoryInit() rewritten using GetPrivateProfileString() API call.
+           Custom implementation of procs that are available in the Windows
+           kernel is at least strange thing :)
+           Also it would solve a problem with unknown spaces.
+           (Windows think that spaces is a part of comment and left them in
+           WritePrivateProfileString call (i.e. when modules.ini is written on
+           !Quit), but on the next LS start HistoryInit() reads these spaces as
+           a part of command, usually other, since numbers changed :) )
+         - History is now written before eVar expansion. Is there anybody
+           who think that
+           !alert "X:\Documents and Settings\Seg@\Desktop\"
+           is more informative that
+           !alert "$Desktop$" ?
+         - VarExpansion changed to VarExpansionEx.
+           Don't know about fanatics who can type very long strings with
+           very long eVars, but everything can be...
+         - Fixed typos in managing transparent edit boxes
+           (don't know how it works though :) )
+
+     New Features
+     ````````````
+         - CommandHideOnEsc
 
    Version 1.8.5 (jesus_mjjg/ilmcuts)
    -------------
