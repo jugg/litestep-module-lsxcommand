@@ -129,5 +129,12 @@ int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath)
 
 int quitModule(HINSTANCE dll)
 {
+  /*
+  ListMoveToHead(&list);
+  while(list->next) {
+    RemoveBangCommand(list->name);
+  }
+  */
+  ListRemoveAll(&list, &count);
   return 0;
 }

@@ -58,7 +58,7 @@ LINK32=link.exe
 OutDir=.\Release
 SOURCE="$(InputPath)"
 PostBuild_Desc=Copy
-PostBuild_Cmds=copy $(OutDir)\alterscript.dll c:\litestep\bebox\bemodules\alterscript.dll
+PostBuild_Cmds=copy $(OutDir)\alterscript.dll c:\litestep\luxo\modules\alterscript.dll
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "AlterScript - Win32 Debug"
@@ -90,7 +90,7 @@ LINK32=link.exe
 OutDir=.\Debug
 SOURCE="$(InputPath)"
 PostBuild_Desc=Copy
-PostBuild_Cmds=copy $(OutDir)\alterscript.dll c:\litestep\bebox\bemodules\debug\alterscript.dll
+PostBuild_Cmds=copy $(OutDir)\alterscript.dll c:\litestep\luxo\modules\debug\alterscript.dll
 # End Special Build Tool
 
 !ENDIF 

@@ -58,7 +58,7 @@ LINK32=link.exe
 # Begin Special Build Tool
 OutDir=.\Release
 SOURCE="$(InputPath)"
-PostBuild_Cmds=copy $(OutDir)\lsxcommand.dll c:\litestep\bebox\bemodules\lsxcommand.dll
+PostBuild_Cmds=copy $(OutDir)\lsxcommand.dll c:\litestep\luxo\modules\lsxcommand.dll
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "lscommand - Win32 Debug"
@@ -91,7 +91,7 @@ LINK32=link.exe
 # Begin Special Build Tool
 OutDir=.\Debug
 SOURCE="$(InputPath)"
-PostBuild_Cmds=copy $(OutDir)\lsxcommand.dll c:\litestep\bebox\bemodules\debug\lsxcommand.dll
+PostBuild_Cmds=copy $(OutDir)\lsxcommand.dll c:\litestep\luxo\modules\debug\lsxcommand.dll
 # End Special Build Tool
 
 !ENDIF 
@@ -112,10 +112,6 @@ SOURCE=.\exports.h
 # End Source File
 # Begin Source File
 
-SOURCE="..\ls-b24\lsapi\lsapi.h"
-# End Source File
-# Begin Source File
-
 SOURCE=.\lsxcommand.h
 # End Source File
 # End Group
@@ -124,7 +120,7 @@ SOURCE=.\lsxcommand.h
 # PROP Default_Filter "c"
 # Begin Source File
 
-SOURCE=.\calculator.c
+SOURCE=.\calculator.cpp
 # End Source File
 # Begin Source File
 
@@ -139,7 +135,7 @@ SOURCE=.\lsxcommand.c
 SOURCE=.\menu.c
 # End Source File
 # End Group
-# Begin Group "Rescources"
+# Begin Group "Resources"
 
 # PROP Default_Filter ""
 # Begin Source File

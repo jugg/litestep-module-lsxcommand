@@ -1,13 +1,13 @@
-                    ***********************************
-                    *           LSXCommand            *
-                    *           by Visigoth           *
-                    *   gandhimail@worldnet.att.net   *
-                    *         ==============          *
-                    *         Version: 1.7.5          *
-                    *         August 10, 1999         *
-                    *         ==============          *
-                    * http://home.att.net/~gandhimail *
-                    ***********************************
+                    *************************************
+                    *            LSXCommand             *
+                    *            by Visigoth            *
+                    *    gandhimail@worldnet.att.net    *
+                    *          ===============          *
+                    *          Version: 1.7.9           *
+                    *         November 23, 1999         *
+                    *          ===============          *
+                    * http://floach.pimpin.net/visigoth *
+                    *************************************
 
 Table of Contents
 =================
@@ -19,11 +19,15 @@ II.   How to use LSXCommand
 
       II.1 Internet Searches
       II.2 Added RC Commands
+           New to 1.7.6:
+           -------------
+           - CommandBottom/Top/Left/RightBorderSize
+
            New to 1.7.4:
            -------------
            - Changed CommandClock to CommandTime
            - CommandAddExternalsToHistory
-           
+
            New to 1.7.2:
            -------------
            - CommandOffsetX
@@ -32,12 +36,12 @@ II.   How to use LSXCommand
            - CommandWinAmpDisappearsOnFocus
            - CommandHideOnUnfocus
            - CommandTabFileComplete
-           
+
            New to 1.7.1:
            -------------
            - CommandContextMenuStandardItems
            - CommandScrollWinAmpTitle
-           
+
            New to 1.7:
            -----------
            - CommandNoAutoComplete
@@ -77,21 +81,26 @@ II.   How to use LSXCommand
            - *CommandAlias
 
       II.3 Added !Bang Commands
+           New to 1.7.7:
+           -------------
+           - !CommandToggleTimer
+           - !CommandSetText
+
            New to 1.7.5:
            -------------
            - !CommandMove
-           
+
            New to 1.7.3:
            -------------
            - !CommandBrowseFile
            - !CommandBrowseFolder
-           
+
            New to 1.7.1:
            -------------
            - !Command
            - !CommandShow
            - !CommandHide
-           
+
            New to 1.5:
            -----------
            - !CommandClearHistory
@@ -159,8 +168,20 @@ ii. Kudos
 
    Credits
    -------
+   A big thanks goes to Takayuki Kawamoto, as he is graciously
+   translating this readme into Japanese.  His translation may be
+   found at: http://litestep-jp.fsn.net/translation/lsxc.htm
+
    The following people gave me ideas after I released version 1.0:
 
+   - Jody Franklin sent in the corrected Letterman Top 10 search engine
+   - Jonas Sicking can take all the credit for the calculator functions in
+     LSXCommand, now - he sent in entirely new calculator code which is
+     much better than the stuff I had.
+   - TAMUKI-TAM sent in a patch to LSXCommand.  I also found out he's
+     localized LSXCommand to Japanese (that means you can use Japanese
+     characters with LSXCommand).
+   - technomancer sent in the code for different border sizes
    - Mike Thrall sent in the !bang commands to move LSXCommand
    - gizzmo also sent in the idea for switching between clock/amp mode
    - gizzmo first sent in the idea for a separate clock module
@@ -200,10 +221,101 @@ ii. Kudos
 iii. Change Log
 ===============
 
+   Version 1.7.9
+   -------------
+     Bug Fixes
+     `````````
+     - Fixed DarkStep Compatibility
+     - Linked against a fresh lsapi.dll, so this *should* fix problems
+       people had loading LSXCommand 1.7.8.  Drop me a line if not
+
+   Version 1.7.8
+   -------------
+     Documentation Changes
+     `````````````````````
+     - Calculator documentation entirely revamped to reflect all the new
+       and cool features - CHECK IT OUT!
+     - Added lsxcommand.rc to the package - just a list of all the
+       RC commands and !Bang commands.
+     - Documentation reflects new location of the Japanese translation
+
+     Bug Fixes
+     `````````
+     - AutoComplete bug is fixed!  The fix *might* make AutoComplete work
+       not *exactly* as planned, but at least it won't crash any more.
+
+     New Features
+     ````````````
+     - New Timer management
+     - Entirely new calculator code (Mad props to Jonas Sicking for coding
+       this stuff - credit entirely belongs to him for the calculator now)
+
+   Version 1.7.7
+   -------------
+     Documentation Changes
+     `````````````````````
+     - It turns out Mr. Kawamoto isn't a Professor after all ("merely
+       a student" to put it in his words).  Well, at least he's a
+       Ph. D. candidate :)
+     - Kudos section fixed & updated - check out the new entry.
+     - Updated CommandClock section to include new !Bangs supported
+       by LSXCommandClock
+
+     Bug Fixes
+     `````````
+     - Fixed CommandNoWarnOnError bug when entering a path
+     - !CommandMove now automatically calls !FocusCommand *if*
+       it was called without any arguments (ie you want it to move to
+       the current mouse position)
+     - Aliases now properly parse out stuff like the following:
+       *CommandAlias IE "C:\program files\internet explorer\..."
+       Thanks to TAMUKI-TAM for sending the patch to this bug.
+
+     New Features
+     ````````````
+     - LSXCommand is now offered in Japanese.. TAMUKI-TAM is the guy
+       who localized LSXCommand to use Japanese characters and
+       Mr. Kawamoto, as I said before, has translated the readme to
+       Japanese - thanks again!
+     - Added following !Bang commands (see section II.3 for details):
+
+       * !CommandToggleTimer / !CommandClockToggleTimer
+       * !CommandSetText
+
+   Version 1.7.6
+   -------------
+
+     Documentation Changes
+     `````````````````````
+     - Kudos section has a few new entries - check them out!
+     - CommandBorderSize documentation added
+
+     Bug Fixes
+     `````````
+     - Fixed !CommandMove bug
+     - Fixed Working Directory problems
+
+     New Features
+     ````````````
+     - When !CommandMove/!CommandClockMove is called without
+       parameters, it moves to the current cursor position.  I would
+       recommend using CommandHideOnUnfocus with this.
+       Also, if you !CommandMove has the parameter "home", it moves
+       back to the original position found in step.rc
+     - Added following RC Commands:
+
+       * Command + Bottom | Top | Left | Right + BorderSize
+         (ie. CommandTopBorderSize, CommandLeftBorderSize...)
+
+     Notes
+     `````
+     Be *sure* to read the CommandBorderSize documentation if you
+     are interested in using CommandBottom/Top/Left/RightBorderSize
+
    Version 1.7.5
    -------------
    More bug fixes; new features
-   
+
      Documentation Changes
      `````````````````````
      - Fixed Ilkka Nisula's name.
@@ -211,11 +323,11 @@ iii. Change Log
        "categories"
      - Updated Section II.1 to note that new engines are only added
        to the master search engine list available on my web site.
-     
+
      Bug Fixes
      `````````
      - Fixed !CommandBrowse* crashes
-     
+
      New Features
      ````````````
      - Added Mike Thrall's code for moving LSXCommand via a !Bang
@@ -223,11 +335,11 @@ iii. Change Log
      - Added category feature to Search Engine list (see the end of
        section II.1 for details)
      - Added following !Bang Commands:
-     
+
        * !CommandMove / !CommandClockMove
-     
+
      - Added following Search Engines (see section II.1 for details)
-     
+
        * DVDExpress
        * CodeGuru
        * ZDNet HotFiles
@@ -235,12 +347,12 @@ iii. Change Log
    Version 1.7.4
    -------------
    Bug fixes, bug fixes, bug fixes...
-   
+
      Documentation Changes
      `````````````````````
      - Documentation now reflects change from CommandClock to
        CommandTime
-     
+
      Bug Fixes
      `````````
      - Fixed AlterScript to work like Killarny's script.dll
@@ -250,20 +362,20 @@ iii. Change Log
      - Fixed the weird LSXCommand/CommandClock problem: if you have
        the *original* LSXCommand with a CommandClock entry, then
        you must change this to CommandTime (see Notes for more info)
-     
+
      New Features
      ````````````
      - Added switch WinAmp/Clock mode on mouse click in
        LSXCommandClock (not in LSXCommand).
      - Added following RC Commands:
-     
+
        * CommandAddExternalsToHistory
-     
+
      - Added following search engines:
-     
+
        * AudioFindMP3 (MP3 search engine - audiofind.com)
        * PalaVista    (MP3 metacrawler - palavista.com)
-     
+
      Notes
      `````
      It turns out the problem lies in LSAPI, and not LSXCommand or
@@ -273,40 +385,40 @@ iii. Change Log
      is still the same.  So, if you have the original LSXCommand still
      with a CommandClock entry, change it to CommandTime.  NOTE:
      CommandClockDisappearsOnFocus is still the same.
-     
+
        Example: CommandClock "#c"  -->  CommandTime "#c"
 
    Version 1.7.3
    -------------
    A couple of features, bug fixes
-   
+
      Bug Fixes
      `````````
      - Fixed File AutoComplete junk characters error
-   
+
      New Features
      ````````````
      - Separate AlterScript module (see section II.11 for details)
      - Separate clock module (see section II.10 for details)
      - Added following !Bang Commands:
-     
+
        * !CommandBrowseFile
        * !CommandBrowseFolder
 
    Version 1.7.2
    -------------
    Mostly bug fixes & two feature additions
-   
+
      Documentation Changes
      `````````````````````
      - Added section II.9 for Tab File Completion feature
-   
+
      Bug Fixes
      `````````
      - Fixed !CommandHide & !CommandShow problems
      - Fixed CommandHiddenOnStart problems (again)
      - Fixed Paste menu item problems
-     
+
      New Features
      ````````````
      - New positioning system (see Notes below)
@@ -320,34 +432,34 @@ iii. Change Log
        * CommandTabFileComplete
        * CommandOffsetX
        * CommandOffsetY
-     
+
      Notes
      `````
      In the new positioning system, CommandOffsetX/Y are used to
      decide from where LSXCommand should compute its position.  The
      following table lists the combinations of CommandOffsetX/Y and
      CommandX/Y and what they do:
-     
+
        CommandOffsetX/Y:
          0  -  Reference from Left/Top (default)
          1  -  Reference from Center of Horizontal/Vertical
          2  -  Reference from Right/Bottom
-       
+
        CommandX/Y:
          These values now tell how many pixels away from the point
          described by CommandOffsetX/Y LSXCommand should be.
-         
+
      For instance, using the following values will have LSXCommand
      be placed 2 pixels to the left of horizontal center, at the very
      bottom of the screen:
-     
+
        CommandOffsetX 1
        CommandOffsetY 2
        CommandX      -2
        CommandY      -14  (Same as negative of CommandHeight)
-     
+
      If you leave your settings the way they are, they will work as
-     before.  
+     before.
 
      To turn on file name tab completion, be sure to turn *on*
      CommandTabFileComplete and CommandNoTabMicroComplete.  I know
@@ -358,7 +470,7 @@ iii. Change Log
    Version 1.7.1
    -------------
    Just bug fixes and a few features
-   
+
      Documentation Changes
      `````````````````````
      - Added number conversion information to Calculator
@@ -369,7 +481,7 @@ iii. Change Log
        people asked about why CommandHideOnStart doesn't work.
        This is because there is no such thing.. it is
        CommandHiddenOnStart.  That solves that mess.
-   
+
      Bug Fixes
      `````````
      - Fixed Comma Delimiter problem(s)
@@ -378,7 +490,7 @@ iii. Change Log
      - Fixed Clock that never came back after a command
      - Fixed any problems with CommandHiddenOnStart with
        CommandBackground
-     
+
      New Features
      ````````````
      - Calculator supports limited number converion
@@ -388,22 +500,22 @@ iii. Change Log
        submenus from coming up by setting them to 9 instead of 0, 1,
        or 2.
      - Added following RC Commands (see section II.2 for details)
-     
+
        * CommandScrollWinAmpTitle
        * CommandContextMenuStandardItems
 
      - Added following !Bang Commands (see section II.3 for details)
-     
+
        * !Command
        * !CommandShow
        * !CommandHide
-       
+
      - Added following search engines (see section II.1 for details)
-     
+
        * OLGA  - On-Line Guitar Archive
        * UBL   - Ultimate Band List
        * CDNow - Search for CDs
-     
+
      Notes
      `````
      CommandScrollWinAmpTitle scrolls the current WinAmp title *if*
@@ -416,14 +528,14 @@ iii. Change Log
    Version 1.7
    -----------
    New features...
-   
+
      Documentation Changes
      `````````````````````
      NOTE: This section notifies you about changes to existing
      documentation.  New documentation is not listed here.  Pay
      close attention to Section II, since all major features have
      their own documentation added under this section.
-     
+
      - Added note about RPN functionality to Calculator section II.6
      - Added shameless plug <g> for the full engines.list at my web
        site in section II.4.
@@ -817,40 +929,40 @@ II. How to use LSXCommand
 
    For more information about adding, removing, or changing engines
    in the list file, see the section below.
-   
+
    PLEASE NOTE: LSXCommand's default search engine list is quite
    large; however, there are tons of other good search engines out
    there.  After version 1.5, all engines which are said to be Added
    in the Change Log (above) are actually added to the master
    LSXCommand Search Engines list available at my web site:
-   http://home.att.net/~gandhimail/litestep/lsxcommand-engines.list
-   
+   http://floach.pimpin.net/visigoth/litestep/lsxcommand-engines.list
+
    CATEGORY FUNCTIONALITY
-   
+
    Before I start on the category functionality, I have to say the
    following: your default search engine (identified by the
    "Default ..." line in your search engines list) should be left
    alone on a line by itself. Try and make it the first non-comment
    line in your engines list.
-   
+
    Just one more note: When a search engine is in a category, you
    access it *THE SAME WAY* when typing a search command.
    (ie. even if "Amazon" is in the "Books" category, you still use it
    by typing "?Amazon <book>")
-   
+
    That said, we can get to the meat of the subject.  Categories are
    the same as sub-menus in the popup menu.  The only difference
    between search engines in a category and not in a category is the
    fact that one is in a sub-menu (such as "Books ->" or "MP3 ->") and
    the other is in the root "Search Engines ->" sub-menu.
-   
+
    To create a category in your search engines list, all you have to
    do is type the name of the category and then an open brace ( "{" ).
    This must be on its own line.  Now you can place as many search
    engines as you like in that category, each one on its own line just
    as in the original engines.list.  To close a category, simply place
    a closing brace ( "}" ) on its own line.
-   
+
    You can also have spaces in your category names (NOTE: This doesn't
    mean you can have spaces in your search engine names.  That has
    not been implemented).  To do this, enclose the category name in
@@ -865,15 +977,15 @@ II. How to use LSXCommand
    example, "Music && Movies" will have an ampersand between "Music"
    and "Movies" but no keyboard accelerator.  "Music && &Movies" will
    have both an ampersand and an accelerator.
-   
+
    You are allowed to have sub-categories ad-infinitum (meaning, you
    can make sub-menus on the sub-menus and just keep going as far as
    you like.  You could do something like Computers->Software->
    Download Libraries->.
-   
+
    For human readability, you can also have white space in front of
    both search engine lines and category lines.
-   
+
    For an example, see the included engines.list file in this
    distribution of LSXCommand.
 
@@ -882,6 +994,35 @@ II. How to use LSXCommand
    ----------------------
      NOTE: Please see original LSCommand readme for previous
      RC Commands.
+
+     CommandBottom/Top/Left/RightBorderSize
+     ``````````````````````````````````````
+     Description: These four commands specify separate borders for
+     each side of the edit box.  The default for all of them is 2.
+     You can only use these when CommandBorderSize is *not*
+     soecified.
+
+     Example:
+       CommandTopBorderSize 4
+       CommandBottomBorderSize 4
+       CommandRightBorderSize 0
+
+     This will set a 4 pixel border on top and bottom, a 2 pixel
+     border on the left (default), and no border on the right.
+
+     CommandBorderSize
+     `````````````````
+     Description: Sets the border size around the edit box.  This
+     sets the border on each side to the same number.
+
+     If you want to have different sized borders on each side, use
+     CommandTopBorderSize, CommandBottomBorderSize, CommandLeft...,
+     and CommandRight... (see above)
+
+     If CommandBorderSize is specified, Command<SIDE>BorderSize
+     commands are ignored.
+
+     Default for all these commands is 2.
 
      CommandAddExternalsToHistory
      ````````````````````````````
@@ -893,61 +1034,61 @@ II. How to use LSXCommand
      (not for AlterScript).  It affects any command run with !Command
      and not just AlterScript's.
 
-     
+
      CommandSearchEngineBrowser
      ``````````````````````````
      Description: Path to the browser to be used with search engines.
      If not specified, LSXCommand uses the default browser on your
      system.
-     
+
      Example: CommandSearchEngineBrowser c:\opera\opera.exe
-     
-     
+
+
      CommandWinAmpDisappearsOnFocus
      ``````````````````````````````
      Description: Just like CommandClockDisappearsOnFocus, but for
      the WinAmp scrolling feature.
-     
-     
+
+
      CommandTabFileComplete
      ``````````````````````
      Description: Enables the completion of file names by using the
      tab key.  NOTE: You will want to also turn on the
      CommandNoTabMicroComplete RC Command
-     
-     
+
+
      CommandOffsetX/Y
      ````````````````
      Description: This value determines which point on the screen
      LSXCommand should use as a reference for the CommandX/Y values.
      The default is the upper left corner.
-     
+
        0  -  Left / Top
        1  -  Horizontal / Vertical Center
        2  -  Right / Bottom
-       
+
      Examples: CommandOffsetX 0   CommandOffsetY 2
-     
-     
+
+
      CommandHideOnUnfocus
      ````````````````````
      Description: Hides LSXCommand when it loses keyboard focus.
      This can be used to hide LSXCommand after it runs an app.
-     
+
      Example: CommandHideOnUnfocus
-     
-     
+
+
      CommandContextMenuStandardItems
      ```````````````````````````````
      Description: This item does two things.  It first turns on the
      standard menu items: Cut, Copy & Paste.  Second, it tells where
      to put the standard items, above or below the LSXCommand
      specific menus.
-     
+
      Example: CommandContextMenuStandardItems 1   ; Above
               CommandContextMenuStandardItems 2   ; Below
               CommandContextMenuStandardItems 0   ; Off (Default)
-     
+
      CommandScrollWinAmpTitle
      ````````````````````````
      Description: If on, this setting takes WinAmp's scrolling title
@@ -957,26 +1098,26 @@ II. How to use LSXCommand
      WinAmp scroller will show when WinAmp is running.  If not, the
      clock will show.  (Note that for the clock to show, you must use
      the CommandTime RC Command described below).
-     
+
      Example: CommandScrollWinAmpTitle
-     
-     
+
+
      CommandNoAutoComplete
      `````````````````````
      Description: Turns *off* AutoComplete.  Someone asked for it, so
      I coded it :).
-     
+
      Example: CommandNoAutoComplete
-     
-     
+
+
      CommandCommaDelimiter
      `````````````````````
      Description: Some Eurpoean countries use commas as decimal
      delimiters, so this changes decimals from periods to commas.
-     
+
      Example: CommandCommaDelimiter
-     
-     
+
+
      CommandRPNCalculator
      ````````````````````
      Description: Makes the calculator an RPN calculator.  If you
@@ -984,18 +1125,18 @@ II. How to use LSXCommand
      yourself.  Others call RPN "Postfix" notation.  If you want
      to learn more, obtain a Hewlett-Packard RPN calculator (the
      48/49 series are especially nice, IMO :).
-     
+
      NOTE: This does not make the history a stack!  It merely
      means that you can write your expressions as postfix and it
      will be calculated correctly.  For instance, typing:
-     
+
        5 <ENTER> 2 <ENTER> + <ENTER>
-     
+
      will NOT work.  You must type "=5 2 +" to get the answer
-     
+
      Example: CommandRPNCalculator
-     
-     
+
+
      CommandBackground
      `````````````````
      Description: Path to your background image.  If this is not an
@@ -1003,13 +1144,13 @@ II. How to use LSXCommand
      this option is not specified, the background & border colors
      are used (see the original lscommand readme for info on these
      colors).
-     
+
      NOTE: See section II.7 for more about backgrounds and their
      relationship to transparency.
-     
+
      Example: CommandBackground "lsxcommand_background.bmp"
-     
-     
+
+
      CommandTransparentEditBox
      `````````````````````````
      Description: Makes the area in which you type transparent to the
@@ -1017,36 +1158,36 @@ II. How to use LSXCommand
      image shows through.  If there is no background, the background
      color is used (see the original lscommand readme for info on
      these colors).
-     
+
      NOTE: See section II.7 for more about backgrounds and
      transparency.
-     
+
      Example: CommandTransparentEditBox
-     
-     
+
+
      CommandTime
      ```````````
      Description: Format string that tells LSXCommand how you want
      your time & date to look.
-     
+
      NOTE: See section II.8 on different format strings and what
      effect they have.  It's quite long, but worth it.
-     
+
      Example: CommandTime "%#c"
-     
+
      NOTE: The above results in something like "Monday, June 14, 1999
      18:00:30" depending on the real date and time.
-     
-     
+
+
      CommandClockDisappearsOnFocus
      `````````````````````````````
      Description: If you want the clock to automatically disappear
      when you click in LSXCommand, set this on.  Otherwise, the
      clock will "pause" at the current time/date.  This makes it
      easier for you to copy/paste the time & date into any app.
-     
+
      Example: CommandClockDisappearsOnFocus
-     
+
 
      CommandSelectAllOnMouseFocus
      ````````````````````````````
@@ -1244,7 +1385,23 @@ II. How to use LSXCommand
    II.3 Added !Bang Commands
    -------------------------
      NOTE: See Original LSCommand readme for previous !Bang Commands
-     
+
+     !CommandSetText
+     ```````````````
+     Description: This !Bang sets the text in LSXCommand to its
+     arguments.  This makes for some really neat stuff (for instance,
+     a shortcut that pops up LSXCommand with a question mark and a
+     space already in it ready for an argument to search with).  Note
+     that this !Bang command does not show LSXCommand if it is hidden.
+
+     Example: !SetText "?Altavista "
+
+     !CommandToggleTimer
+     ```````````````````
+     Description: Toggles the current timer.  If you use this, the
+     WinAmp timer no longer takes precedence over the clock.  You have
+     to call this !Bang again for the WinAmp scroller to appear.
+
      !CommandMove
      ````````````
      Description: Moves the LSXCommand window by the amount specified
@@ -1252,9 +1409,14 @@ II. How to use LSXCommand
      a space, specifying the number of pixels to move left/right or
      up/down.  If there is only one number, it is assumed to be
      horizontal movement.
-     
+
        !CommandMove 0 100  ; moves it 100 pixels down
-     
+
+     When !CommandMove is called without parameters, it moves to the
+     current mouse cursor position.  If !CommandMove is called with
+     "home" as its parameter, it moves back to the original position
+     it received from step.rc
+
      !CommandBrowseFile
      ``````````````````
      Description: Brings up an Open Dialog Box to browse for a file
@@ -1262,38 +1424,38 @@ II. How to use LSXCommand
      file's name.  NOTE: You can send an argument to this !Bang
      command to specify the filter for the open box.  For instance,
      to see just Text Files, you might do this:
-     
+
        !CommandBrowseFile    All Text Files (*.txt, *.ini)|*.txt;*.ini
-     
-     
+
+
      !CommandBrowseFolder
      ````````````````````
      Description: Brings up a folder selection dialog.  You can
      select a folder to browse to.  There are no arguments for this
      !Bang command.
-     
-     
+
+
      !CommandShow
      ````````````
      Description: Just shows LSXCommand.  NOTE: It does *not* give
      LSXCommand focus.  To do this, use !FocusCommand - this command
      gives focus to LSXCommand, and if it's not visible, it shows it
      also.
-     
-     
+
+
      !CommandHide
      ````````````
      Description: Just hides LSXCommand.  Nothing really special.
-     
-     
+
+
      !Command
      ````````
      Description: Now use the power of LSXCommand anywhere within
      Litestep!  Shortcuts, wharf items, whatever that can run !bang
      commands outside of its own can now use LSXCommand.
-     
+
      Example: !Command notepad
-     
+
 
      !CommandClearHistory
      ````````````````````
@@ -1349,12 +1511,12 @@ II. How to use LSXCommand
    their full extent - for instance, the "Simple Search" function on
    the Lyrics server - www.lyrics.ch - has more than one search
    field.
-   
+
    You can find the full engines.list (the one shipped with
    LSXCommand is by no means complete and neither is this one, but it
    is larger) here:
-   
-     http://home.att.net/~gandhimail/litestep/lsxcommand-engines.list
+
+     http://floach.pimpin.net/visigoth/litestep/lsxcommand-engines.list
 
    TO MAKE YOUR OWN SEARCH ENTRIES:
 
@@ -1398,11 +1560,13 @@ II. How to use LSXCommand
 
    II.6 Calculator Functionality
    -----------------------------
-   Currently, the calculator functionality in LSXCommand is a bit
-   skimpy, though it does support order of operations and
-   parentheses.  To invoke a calculation, the procedure is much like
-   a search or !bang command.  Just type an = sign at the prompt and
-   enter the expression to calculate.
+   As of version 1.7.8, the calculator functionality has been entirely
+   revamped, thanks to the work of Jonas Sicking.  Just like in older
+   versions, calculator commands start with an = sign at the prompt, then
+   the expression to evaluate.
+
+   What's new?  Everything - from the supported operators to the base
+   conversion, it's all been redone.
 
    LSXCommand handles float precision, so decimals are allowed.  The
    result will be placed right back into LSXCommand's command box
@@ -1412,89 +1576,136 @@ II. How to use LSXCommand
 
    LSXCommand understands the following operators:
 
-     + - * \ / ^ ( )
+     + - * \ / ( ) ^ % ! E
 
      Addition, Subtraction, Multiplication, Division, Division,
-     Power, Open Parenthesis, Close Parenthesis.
+     Open Parenthesis, Close Parenthesis, Power, Modulus (remainder),
+     Factorial, Exponential
 
-     Yes, there are two division operators - some people like \ and
-     others like /.
-     
+     Yes, there are two division operators.  HOWEVER, the \ means
+     integer division, and the / means regular division.
+
+     E is the 10 to the power operator.  For instance, 1E6 is 1 million.
+     Note: don't try 1*E6 - that won't work.  Just do 1E6 or (1E6).  You
+     can even do 1E(5+4), but don't try to multiply the two.
+
+   FULL RECURSION
+
+   With the new calculator, recursion is fully supported.  Meaning, as
+   long as the expression follows the order of operations, it should be
+   able to be calculated.  For instance, you could easily do the following
+   calculation: =1E(log2(64)), which would return =1000000 (1 million).
+
+   MATH LIBRARY FUNCTIONS
+
+   With the revamping of the calculator functionality comes some really
+   useful stuff: a library of mathematics functions!  The following is a
+   list of the supported math functions:
+
+      TRIG FUNCTIONS        ANALYTIC FUNCTIONS      CONSTANTS
+      ``````````````        ``````````````````      `````````
+      sin                   exp                     pi
+      cos                   ln                      e
+      tan                   log
+      cot                   log2
+      asin                  log10
+      acos                  sqrt
+      atan                  floor
+      acot                  ceil
+      sinh                  abs
+      cosh                  fpart
+      tanh                  ipart
+                            sign
+                            rand
+                            rnd
+
+   The trig functions should be self explanatory.  The log functions are
+   a bit tricky: ln and log are both base e, while log2 and log 10 are
+   base 2 and 10 respectively.  If you haven't heard of the other
+   functions (like fpart and ipart), consult your graphing calculator's
+   manual - the one you never bothered to read because you already thought
+   you knew how to use a calculator :P
+
+   To use these functions, you would type something like '=sin(0)'.  Note
+   that since pi and e are constants, you don't put () after them.  For
+   instance, =pi would result in =3.141..
+
    RPN CALCULATOR FUNCTIONALITY
-   
+
    As of version 1.7, you can use LSXCommand as a "Postfix"
    calculator.  If you are not familiar with this expression, leave
    it be and don't worry about it!  If you really want to learn more,
    obtain a Hewlett-Packard RPN calculator and learn to use it.
-   
+
    RPN mode does *not* turn your history into a stack.  It does,
    however, make LSXCommand accept postfix notation expressions. See
    the documentation for the CommandRPNCalculator RC Command above in
    section II.2.
-   
+
+   This functionality extends to the 1.7.8 revamping of the calculator
+   code.  It should work fine, but I haven't played with it enough to say
+   anything more than that.
+
    MULTIPLE NUMBER BASE FUNCTIONALITY
-   
+
    As of version 1.7.1, you can specify numbers in different number
-   bases.  However, LSXCommand only supports two others besides the
-   standard decimal: binary (base 2) & hexadecimal (base 16).
-   
+   bases.  With the 1.7.8 rewrite of the calculator, LSXCommand supports
+   4 bases: decimal (10), binary (2), hexadecimal (16) and octal (8).
+
    To specify a number as binary, place a 'b' in front of it.  For
    instance, entering "=b10" in LSXCommand will return "=2" as an
    answer.  If you typed "=5 + b10", you would get "=7" as an
    answer.
-   
-   To specify a number as hexadecimal, do the same as binary, except
-   with an 'h'.
-   
+
+   Append the following prefixes for its respective base:
+
+   b - binary
+   h - hexadecimal
+   o - octal
+   d - decimal (this is, of course, the default)
+
    NUMBER CONVERSION FUNCTIONALITY
-   
-   As of version 1.7.1, LSXCommand also supports a limited number
-   conversion system.  You can convert within the 3 number bases
-   LSXCommand supports: decimal, binary & hexadecimal.
-   
-   NOTE: The parser for these conversions is different from the
-   regular calculator.  The spaces in the example below are required!
-   
+
+   With the version 1.7.8 rewrite comes much more flexible number
+   conversion.  You can convert between any of the bases supported by
+   LSXCommand (listed above).
+
    To convert *from* decimal *to* hexadecimal (color conversion), you
    would do the following:
-   
-     =dh 256 256 256    -->   =hff hff hff
-   
+
+     =dh 255 255 255    -->   =hff hff hff
+
    So, to convert *from* a base *to* another base, place the
    identifier of the from base first, then the to base, then each
    number to convert with a space between each one.
-   
-   PLEASE don't do a =dd or =bb or =hh conversion, since I didn't
-   handle them (for obvious reasons) and you'll probably end up
-   messing something up.. I didn't test it too much.
-   
-   
+
+
    II.7 Backgrounds & Transparencies
    ---------------------------------
    I'm sure many people have been wanting these features, so I made
    my best attempt at added them to LSXCommand.
-   
+
    Backgrounds are just that - backgrounds.  However, they only fill
    the background window, much like the background can be set in
    mIRC, but it doesn't show through the channel windows.  If you
    want a background to show through to the place you are typing,
    set the CommandTransparentEditBox RC Command.
-   
+
    If there is no background set, CommandTransparentEditBox is
    automatically turned off since the only effect will be to slow
    down performance and other nasty things.
-   
+
    If there is a background, but CommandTransparentEditBox is *not*
    set, the background acts like a border around the text box.
-   
+
    DISCLAIMER: If you turn CommandTransparentEditBox *on*, you WILL
    see flashing as you are doing normal things with LSXCommand - such
    as typing.  Seriously, though, I have no doubts that you will get
    some type of flashing effect in LSXCommand no matter what you do.
    Until I write my own text output routines, you will just have to
    deal.
-   
-   
+
+
    II.8 Clock Settings
    -------------------
    The clock functionality in LSXCommand is quite robust, though hard
@@ -1502,12 +1713,12 @@ II. How to use LSXCommand
    expect them to.  If you want a quick format command that gives you
    both the date and time, use "%#c".  If you want more
    customization, you will just have to read below.  Sorry...
-   
+
    Okay, so you want more control, eh?  The following comes straight
    from the Microsoft Developer Network Library.  It is a table of
    format commands you must use to create your time & date string.
    Examples are listed below the table.
-   
+
    %a                 Abbreviated weekday name
    %A                 Full weekday name
    %b                 Abbreviated month name
@@ -1533,12 +1744,12 @@ II. How to use LSXCommand
    %z                 Time-zone name / abbreviation
    %Z                 Same as %z
    %%                 Percent sign
-   
+
    The # sign (pound, hash, whatever you like..) can be used as a
    prefix for most format commands.  For instance, %#<character>. The
    following lists the change in meaning for those commands that are
    affected:
-   
+
    %#c                Long date & time representation for current
                       location.
    %#x                Long date representation only for current
@@ -1547,11 +1758,11 @@ II. How to use LSXCommand
    %#j, %#m, %#M,
    %#S, %#U, %#w,
    %#W, %#y, %#Y
-   
+
    So, what the heck does all that crap mean?  Basically, you think
    of how you want your date & time to look, and then substitute the
    proper codes where they are needed, for instance:
-   
+
      Think Of..             Code Used
      ``````````             `````````
      05:30:00 PM            %I:%M:%S %p
@@ -1559,11 +1770,11 @@ II. How to use LSXCommand
      Mon. 6/14/1999         %a %#m/%#d/%Y  -  Removes leading zeros
      June 14, 1999          %B %d, %Y
      Monday, June 14, 1999  %#x
-     
+
    I hope that's enough examples.  If you have any problems, see
    section IV about contacting me.
-   
-   
+
+
    II.9 Tab File Completion
    ------------------------
    If you turn on CommandTabFileComplete and
@@ -1572,8 +1783,8 @@ II. How to use LSXCommand
    will most likely get C:\AUTOEXEC.BAT  If not, you can hit <TAB>
    again to get the next matching filename.  Note that you do have
    to turn on both RC commands for this to work.
-   
-   
+
+
    II.10 LSXCommandClock module
    ----------------------------
    The LSXCommandClock module is a separate module from LSXCommand
@@ -1582,7 +1793,7 @@ II. How to use LSXCommand
    prefix.  The following is a list of the RC Commands supported
    by LSXCommandClock (see section II.2 for details about these
    Commands)
-   
+
      * CommandClockTextFontFace
      * CommandClockTextColor
      * CommandClockBorderColor
@@ -1609,11 +1820,12 @@ II. How to use LSXCommand
      * !CommandClockShow
      * !CommandClockHide
      * !CommandClockMove
-   
+     * !CommandClockToggleTimer
+
    **** NOTE: CommandClockString is the same as the "CommandTime"
    RC Command for LSXCommand (see section II.8 for details)
-   
-   
+
+
    II.11 AlterScript module
    ------------------------
    The AlterScript module is an alternative interpreter to Killarny's
@@ -1621,19 +1833,19 @@ II. How to use LSXCommand
    my own... go figure.  However, I'm sure the way he parses strings
    and the way I do differ - this is no substitute!!  There are many
    differences, which are described below.
-   
+
    For instance, AlterScript does not interpret semi-colons that
    represent pauses in Killarny's script.dll.  Furthermore, every
    command MUST be separated by a pipe character '|'.  Everything
    between pipes is a command.
-   
+
    AlterScript MUST be used with LSXCommand because it sends a
    !Command !Bang command with the specified command.  The actual
    command sent (stuff between the pipes) should be *exactly* what you
    would type into LSXCommand's text box.  If you type it without
    quotes into LSXCommand's text box, do the same between the pipes.
    Same goes for if you do it with quotes.
-   
+
    Note that since I send the !Command !Bang command, you can use
    aliases and even search engine commands.
 

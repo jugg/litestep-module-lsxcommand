@@ -13,7 +13,7 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  August 11, 1999  1:00 AM                   *
+* Last Update:  September 4, 1999 7:30 PM                  *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
@@ -28,8 +28,6 @@
 #include "lsxcommand.h"
 #include "lsapi.h"
 
-BOOL visible = FALSE;
-
 #ifndef LSXCOMMANDCLOCK_EXPORTS
 
 BOOL editfirst = FALSE, staticfirst = FALSE;
@@ -39,22 +37,24 @@ HMENU hSearchEngineMenu = NULL, hAliasMenu = NULL, hHistoryMenu = NULL, hContext
 MENUITEMINFO item;
 struct History *current = NULL, *searchEngines = NULL, *aliases = NULL, *files = NULL;
 
+extern double Evaluate(char *expr, int *error, char *replacement, size_t replace_size, struct CommandSettings *cs);
+
 #else
 
-BOOL curTimer;
 char *szApp = "LSXCommandClock";
 
 #endif //LSXCOMMANDCLOCK_EXPORTS
 
+BOOL visible = FALSE;
 char *szModuleIniPath = NULL;
-int nTimers = 0;
+enum Timers curTimer = NO_TIMER;
 HINSTANCE hInst = NULL;
 HWND hWnd = NULL, hText = NULL, hBG = NULL;
 HFONT hFont = NULL;
 HBRUSH hBGBrush = NULL, hHollowBrush = NULL;
 HBITMAP hBGBitmap = NULL;
 WNDPROC wpOld, wpBG;
-struct CommandSettings *cs = NULL;
+struct CommandSettings *cs;
 
 
 /***********************************************************
@@ -69,13 +69,13 @@ struct CommandSettings *cs = NULL;
 * local structure. Returns a pointer to a new structure.   *
 ***********************************************************/
 
-struct CommandSettings *ReadSettings(wharfDataType *wd)
+struct CommandSettings *ReadSettings(LPCSTR lsPath)
 {
   int offsetx, offsety;
   RECT screen;
 	struct CommandSettings *settings = (struct CommandSettings *)malloc(sizeof(struct CommandSettings));
-  szModuleIniPath = (char *)malloc(strlen(wd->lsPath) + strlen("\\MODULES.INI") + 1);
-  strcpy(szModuleIniPath, wd->lsPath);
+  szModuleIniPath = (char *)malloc(strlen(lsPath) + strlen("\\MODULES.INI") + 1);
+  strcpy(szModuleIniPath, lsPath);
   strcat(szModuleIniPath, "\\MODULES.INI");
 
 #ifndef LSXCOMMANDCLOCK_EXPORTS
@@ -83,13 +83,13 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
 	settings->BGColor = GetRCColor("CommandBGColor",RGB(255,255,255));
 	settings->TextColor = GetRCColor("CommandTextColor",RGB(0,0,0));
 	settings->TextSize = GetRCInt("CommandTextSize",14);
-	settings->x = GetRCInt("CommandX",0);
-	settings->y = GetRCInt("CommandY",0);
+	settings->origx = settings->x = GetRCInt("CommandX",0);
+	settings->origy = settings->y = GetRCInt("CommandY",0);
 	settings->width = GetRCInt("CommandWidth",160);
 	settings->height = GetRCInt("CommandHeight",20);
   settings->MaxHistoryEntries = GetRCInt("CommandHistoryEntries", 10) + 1;
   settings->MaxHistoryMenuEntries = GetRCInt("CommandHistoryMenuEntries", settings->MaxHistoryEntries - 1 );
-	settings->BorderSize = GetRCInt("CommandBorderSize",2);
+	settings->BorderSize = GetRCInt("CommandBorderSize", -1);
   settings->ContextMenuStandardItems = GetRCInt("CommandContextMenuStandardItems", 0);
   offsetx = GetRCInt("CommandOffsetX", 0);
   offsety = GetRCInt("CommandOffsetY", 0);
@@ -139,7 +139,7 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
 	settings->y = GetRCInt("CommandClockY",0);
 	settings->width = GetRCInt("CommandClockWidth",160);
 	settings->height = GetRCInt("CommandClockHeight",20);
-	settings->BorderSize = GetRCInt("CommandClockBorderSize",2);
+	settings->BorderSize = GetRCInt("CommandClockBorderSize", -1);
   offsetx = GetRCInt("CommandClockOffsetX", 0);
   offsety = GetRCInt("CommandClockOffsetY", 0);
 	settings->BorderColor = GetRCColor("CommandClockBorderColor",RGB(102,102,102));
@@ -161,7 +161,27 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
 
   /* If there's a bevel, then no border */
   if(settings->BevelBorder) settings->BorderSize = 0;
-  
+
+  /* If the universal border is invalid, use separate borders */
+	if(settings->BorderSize == -1) {
+#ifndef LSXCOMMANDCLOCK_EXPORTS
+		settings->BottomBorderSize = GetRCInt("CommandBottomBorderSize",2);
+		settings->TopBorderSize = GetRCInt("CommandTopBorderSize",2);
+		settings->LeftBorderSize = GetRCInt("CommandLeftBorderSize",2);
+		settings->RightBorderSize = GetRCInt("CommandRightBorderSize",2);
+#else // LSXCOMMANDCLOCK_EXPORTS
+		settings->BottomBorderSize = GetRCInt("CommandClockBottomBorderSize",2);
+		settings->TopBorderSize = GetRCInt("CommandClockTopBorderSize",2);
+		settings->LeftBorderSize = GetRCInt("CommandClockLeftBorderSize",2);
+		settings->RightBorderSize = GetRCInt("CommandClockRightBorderSize",2);
+#endif // LSXCOMMANDCLOCK_EXPORTS
+	} else {
+		settings->BottomBorderSize = settings->BorderSize;
+		settings->TopBorderSize = settings->BorderSize;
+		settings->LeftBorderSize = settings->BorderSize;
+		settings->RightBorderSize = settings->BorderSize;
+	}
+
   /* No Background */
   if(!(*(settings->Background)))
     settings->Transparent = 0;
@@ -616,6 +636,126 @@ void CreateAliasPopupMenu()
   }
 }
 
+// Parses szString, splitting it up into tokens.  Pays attention to single and
+// double quotes.
+//
+//	original src - D:\VC\LiteStep\ls-b24\lsapi\lsapi.c
+//	tanuki modify version
+//
+#define MAX_LINE_LENGTH 4096
+int cz_LCTokenize (LPCSTR szString, LPSTR *lpszBuffers, DWORD dwNumBuffers, LPSTR szExtraParameters)
+{
+	int		index = 0;
+	char	quoteChar = 0;
+
+	char	buffer[MAX_LINE_LENGTH];
+	char	output[MAX_LINE_LENGTH];
+	char	*pOutput = NULL;
+	DWORD	dwBufferCount = 0;
+
+	strcpy (buffer, szString);
+
+	pOutput = output;
+
+	while (buffer[index] && dwBufferCount < dwNumBuffers)
+	{
+		BOOL skipWhitespace = FALSE;
+
+		switch (buffer[index])
+		{
+		case '"':
+		case '\'':
+			{
+//	tanuki modify start
+				*pOutput++ = buffer[index];
+				*pOutput = '\0';
+				if (!quoteChar)
+				{
+					quoteChar = buffer[index];
+				}
+				else
+				{
+					if (quoteChar == buffer[index])
+					{
+						quoteChar = 0;
+						strcpy (*lpszBuffers, output);
+						lpszBuffers++;
+						dwBufferCount++;
+
+						if (dwBufferCount < dwNumBuffers)
+						{
+							(*lpszBuffers)[0] = '\0';
+						}
+						pOutput = output;
+						*pOutput = '\0';
+						skipWhitespace = TRUE;
+					}
+				}
+				break;
+//	tanuki modify end
+			}
+		case ' ':
+		case '\t':
+			{
+				if (!quoteChar)
+				{
+					if (strlen (output))
+					{
+						strcpy (*lpszBuffers, output);
+						lpszBuffers++;
+						dwBufferCount++;
+						if (dwBufferCount < dwNumBuffers)
+						{
+							(*lpszBuffers)[0] = '\0';
+						}
+						pOutput = output;
+						*pOutput = '\0';
+						skipWhitespace = TRUE;
+					}
+				}
+				else
+				{
+					*pOutput++ = buffer[index];
+					*pOutput = '\0';
+				}
+				break;
+			}
+		default:
+			{
+				*pOutput++ = buffer[index];
+				*pOutput = '\0';
+				break;
+			}
+		}
+
+		index++;
+
+		if (skipWhitespace)
+		{
+			while (isspace (buffer[index]))
+			{
+				index++;
+			}
+		}
+	}
+
+	if (strlen (output))
+	{
+		if (dwBufferCount < dwNumBuffers)
+		{
+			dwBufferCount++;
+
+			strcat (*lpszBuffers, output);
+		}
+	}
+
+	if (szExtraParameters && dwBufferCount == dwNumBuffers)
+	{
+		strcpy (szExtraParameters, buffer + index);
+	}
+
+	return dwBufferCount;
+}
 
 /***********************************************************
 * void AliasInit()                                         *
@@ -645,7 +785,7 @@ void AliasInit()
 
   if(f && !feof(f)) {
     while(LCReadNextConfig(f, "*CommandAlias", buffer, sizeof(buffer))) {
-      if(LCTokenize(buffer, tokens, 3, extra) >= 3) {
+      if(cz_LCTokenize(buffer, tokens, 3, extra) >= 3) {					//	tanuki modify
         strcpy(buffer, name);
         strcat(buffer, " ");
         strcat(buffer, path);
@@ -867,7 +1007,7 @@ void ParseCalculatorCommand(char *command)
     }
   }
 
-  Evaluate(command, &error, val, sizeof(val));
+  Evaluate(command, &error, val, sizeof(val), cs);
 
   if(!error || error == ERROR_CONVERSIONS_DONE) {
     if(cs->CommaDelimiter) {
@@ -921,7 +1061,7 @@ BOOL AutoComplete(HWND hText, char *szPath)
     if(len == 1)
       HistoryMoveToTail(&current);
 
-    while(current->prev) {
+    while(current->prev && strlen(current->prev->path)) {
       if(!_strnicmp(current->prev->path, szPath, len)) {
         szText = malloc(strlen(current->prev->path) + 1);
         p = current->prev->path + len*sizeof(char);
@@ -993,7 +1133,7 @@ void HistoryUseNext(HWND hText)
 *                         *  *  *  *                       *
 *    Arguments:                                            *
 *                                                          *
-*    - char *command                                       *
+*    - char *szCommand                                     *
 *      Pointer to the command to execute                   *
 *    - BOOL noaddtohist                                    *
 *      This specifies whether the command should be added  *
@@ -1003,14 +1143,17 @@ void HistoryUseNext(HWND hText)
 * the proper place - ParseBang, ParseSearch, or ShellEx    *
 ***********************************************************/
 
-void ExecCommand(char *command, BOOL noaddtohist)
+void ExecCommand(char *szCommand, BOOL noaddtohist)
 {
   int index;
-	char *newcmd, *args, *p;
+	char *newcmd, *args, *p, command[4096], dir[_MAX_DIR], full_dir[_MAX_DRIVE + _MAX_DIR], explore[] = "explore", open[] = "open"; // Can't trust _MAX_PATH for command
   HINSTANCE val=0;
+  SHELLEXECUTEINFO si;
 
-	if(strlen(command)<1)
+	if(!szCommand || strlen(szCommand)<1)
 		return;
+
+  VarExpansion(command, szCommand);
 
   if(!noaddtohist) {
     index = HistoryFindIndexOf(&current, command);
@@ -1099,10 +1242,24 @@ void ExecCommand(char *command, BOOL noaddtohist)
         MessageBox(hWnd, "You have not specified any search engines, or specified\nan invalid search engine list.  You can not use the search feature at this time.", "LSXCommand", MB_OK | MB_ICONERROR | MB_APPLMODAL);
       }
     } else {
-      if(cs->ExplorePaths && PathIsDirectory(newcmd))
+      memset(&si, 0, sizeof(si));
+      si.cbSize = sizeof(SHELLEXECUTEINFO);
+      si.hwnd = hWnd;
+      si.lpFile = newcmd;
+      si.lpParameters = args;
+      si.nShow = SW_SHOWNORMAL;
+      si.fMask = SEE_MASK_DOENVSUBST;
+      if(cs->ExplorePaths && PathIsDirectory(newcmd)) {
         val = ShellExecute(hWnd, "explore", newcmd, args, NULL, SW_SHOWNORMAL);
-      else
-        val = ShellExecute(hWnd, "open", newcmd, args, NULL, SW_SHOWNORMAL);
+      } else {
+        _splitpath(newcmd, full_dir, dir, NULL, NULL);
+        si.lpVerb = NULL;
+        si.lpDirectory = full_dir;
+        strcat(full_dir, dir);
+        (HINSTANCE)ShellExecuteEx(&si);
+        val = (HINSTANCE)GetLastError();
+        //val = ShellExecute(hWnd, "open", newcmd, args, NULL, SW_SHOWNORMAL);
+      }
 
       if(((long)val == ERROR_PATH_NOT_FOUND || (long)val == ERROR_FILE_NOT_FOUND) && !PathIsDirectory(newcmd)) {
         if(!strstr(command, "\\")) {
@@ -1112,7 +1269,11 @@ void ExecCommand(char *command, BOOL noaddtohist)
             newcmd = (char *)malloc(strlen(command) + 8);
             strcpy(newcmd, "http://");
             strcat(newcmd, command);
-            ShellExecute(hWnd, "open", newcmd, "", "", SW_SHOWNORMAL);
+            si.lpParameters = NULL;
+            si.lpDirectory = NULL;
+            si.lpFile = newcmd;
+            ShellExecuteEx(&si);
+            //ShellExecute(hmWnd, "open", newcmd, "", "", SW_SHOWNORMAL);
             free(newcmd);
           } else {
             if(!cs->NoWarnOnError) {
@@ -1123,11 +1284,16 @@ void ExecCommand(char *command, BOOL noaddtohist)
         } else {
           if(args) {
             newcmd[strlen(newcmd)] = ' ';
-            if(cs->ExplorePaths && PathIsDirectory(newcmd))
+            if(cs->ExplorePaths && PathIsDirectory(newcmd)) {
               val = ShellExecute(hWnd, "explore", newcmd, NULL, NULL, SW_SHOWNORMAL);
-            else
-              val = ShellExecute(hWnd, "open", newcmd, NULL, NULL, SW_SHOWNORMAL);
- 
+            } else {
+              si.lpVerb = open;
+              si.lpDirectory = NULL;
+              ShellExecuteEx(&si);
+              val = (HINSTANCE)GetLastError();
+              //val = ShellExecute(hWnd, "open", newcmd, NULL, NULL, SW_SHOWNORMAL);
+            }
+
             if(((long)val == ERROR_PATH_NOT_FOUND || (long)val == ERROR_FILE_NOT_FOUND) && !PathIsDirectory(newcmd) && !cs->NoWarnOnError) {
               MessageBeep(MB_ICONHAND);
               MessageBox(NULL, "The file or path could not be found.", "LSXCommand", MB_OK | MB_ICONERROR | MB_APPLMODAL);
@@ -1469,17 +1635,13 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 #else //LSXCOMMANDCLOCK_EXPORTS
     {
       HWND active = GetForegroundWindow();
-      if(curTimer) {
+      if(curTimer == WINAMP_TIMER) {
         KillTimer(hWnd, ID_WINAMPTIMER);
         TimerProc(hWnd, 0, ID_CLOCKTIMER, 0);
         SetTimer(hWnd, ID_CLOCKTIMER, 1000, TimerProc);
-        curTimer = FALSE;
-      } else {
-        if(cs->ScrollWinAmp) {
-          SetTimer(hWnd, ID_WINAMPTIMER, 100, TimerProc);
-          ++nTimers;
-        }
-      }
+        curTimer = CLOCK_TIMER;
+      } else if(cs->ScrollWinAmp)
+        SetTimer(hWnd, ID_WINAMPTIMER, 100, WinAmpTimerProc);
 
       if(cs->Transparent) {
         ShowWindow(hWnd, SW_HIDE);
@@ -1510,6 +1672,8 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
       return 0;
     }
 #endif //LSXCOMMANDCLOCK_EXPORTS
+  case WM_CLOSE:
+    return 0;
 	}
 	return CallWindowProc(wpOld,hText,msg,wParam,lParam);
 }
@@ -1538,7 +1702,7 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_CREATE:
 		{
 		hFont = CreateFont(cs->TextSize,0,0,0,0,0,0,0,0,0,0,0,0,cs->TextFontFace);
-		hText = CreateWindowEx(0,"EDIT","",WS_CHILD|ES_AUTOHSCROLL,cs->BorderSize,cs->BorderSize,cs->width-(cs->BorderSize*2),cs->height-(cs->BorderSize*2),hWnd,0,hInst,0);
+		hText = CreateWindowEx(0,"EDIT","",WS_CHILD|ES_AUTOHSCROLL,cs->LeftBorderSize,cs->TopBorderSize,cs->width-(cs->LeftBorderSize+cs->RightBorderSize),cs->height-(cs->TopBorderSize+cs->BottomBorderSize),hWnd,0,hInst,0);
     hBGBrush = CreateSolidBrush(cs->BGColor);
     hHollowBrush = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
     hBGBitmap = *(cs->Background) ? LoadLSImage(cs->Background, NULL) : NULL;
@@ -1646,81 +1810,78 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 VOID CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
+#ifndef LSXCOMMANDCLOCK_EXPORTS
+  if(GetFocus() != hText && visible) {
+#else
+  if(visible) {
+#endif
+    time_t tVal;
+    struct tm *stVal;
+    char tstring[512];
+
+    time(&tVal);
+    stVal = localtime(&tVal);
+    strftime(tstring, sizeof(tstring), cs->Clock, stVal);
+
+    SetWindowText(hText, tstring);
+#ifndef LSXCOMMANDCLOCK_EXPORTS
+    HistoryRemoveAll(&files, &nFiles);
+#endif
+    if(cs->Transparent) {
+      ShowWindow(hWnd, SW_HIDE);
+      ShowWindow(hWnd, SW_SHOWNOACTIVATE);
+    }
+  }
+}
+
+
+/***********************************************************
+* VOID CALLBACK WinAmpTimerProc()                          *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - HWND hWnd                                           *
+*      The HWND of the window that owns this timer.        *
+*    - UINT uMsg                                           *
+*      The WM_TIMER message.                               *
+*    - UINT idEvent                                        *
+*      ID of the Timer event.                              *
+*    - DWORD dwTime                                        *
+*      Current system time.                                *
+*                         *  *  *  *                       *
+* If the user chooses to display the current WinAmp title, *
+* this function updates the lsxcommand display.            *
+***********************************************************/
+
+VOID CALLBACK WinAmpTimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+{
   char title[_MAX_PATH];
 
 #ifndef LSXCOMMANDCLOCK_EXPORTS
-  if(idEvent == ID_CLOCKTIMER && GetFocus() != hText && visible) {
-    /* 7 lines of code stolen from LSTime */
-    time_t tVal;
-    struct tm *stVal;
-    char tstring[512];
-
-    time(&tVal);
-    stVal = localtime(&tVal);
-    strftime(tstring, sizeof(tstring), cs->Clock, stVal);
-
-    SetWindowText(hText, tstring);
-    HistoryRemoveAll(&files, &nFiles);
-    if(cs->Transparent) {
-      ShowWindow(hWnd, SW_HIDE);
-      ShowWindow(hWnd, SW_SHOWNOACTIVATE);
-    }
-  } else if(idEvent == ID_WINAMPTIMER && GetFocus() != hText && visible) {
+  if(GetFocus() != hText && visible) {
+#else
+  if(visible) {
+#endif
     HWND wahWnd = FindWindow("WINAMP V1.X", NULL);
     if(wahWnd) {
-      if(nTimers == 2) {
+      if(curTimer == CLOCK_TIMER) {
         KillTimer(hWnd, ID_CLOCKTIMER);
-        --nTimers;
+        curTimer = WINAMP_TIMER;
       }
       GetWindowText(wahWnd, title, sizeof(title));
       SetWindowText(hText, title);
+#ifndef LSXCOMMANDCLOCK_EXPORTS
       HistoryRemoveAll(&files, &nFiles);
+#endif
       if(cs->Transparent) {
         ShowWindow(hWnd, SW_HIDE);
         ShowWindow(hWnd, SW_SHOWNOACTIVATE);
       }
-    } else if(*(cs->Clock) && nTimers < 2) {
-      ++nTimers;
+    } else if(*(cs->Clock) && curTimer != CLOCK_TIMER) {
       SetTimer(hWnd, ID_CLOCKTIMER, 1000, TimerProc);
+      curTimer = CLOCK_TIMER;
     }
   }
-#else //LSXCOMMANDCLOCK_EXPORTS
-  if(idEvent == ID_CLOCKTIMER && visible) {
-    /* 7 lines of code stolen from LSTime */
-    time_t tVal;
-    struct tm *stVal;
-    char tstring[512];
-
-    time(&tVal);
-    stVal = localtime(&tVal);
-    strftime(tstring, sizeof(tstring), cs->Clock, stVal);
-
-    SetWindowText(hText, tstring);
-    if(cs->Transparent) {
-      ShowWindow(hWnd, SW_HIDE);
-      ShowWindow(hWnd, SW_SHOWNOACTIVATE);
-    }
-  } else if(idEvent == ID_WINAMPTIMER && visible) {
-    HWND wahWnd = FindWindow("WINAMP V1.X", NULL);
-    if(wahWnd) {
-      if(nTimers == 2) {
-        KillTimer(hWnd, ID_CLOCKTIMER);
-        --nTimers;
-        curTimer = TRUE;
-      }
-      GetWindowText(wahWnd, title, sizeof(title));
-      SetWindowText(hText, title);
-      if(cs->Transparent) {
-        ShowWindow(hWnd, SW_HIDE);
-        ShowWindow(hWnd, SW_SHOWNOACTIVATE);
-      }
-    } else if(*(cs->Clock) && nTimers < 2) {
-      ++nTimers;
-      SetTimer(hWnd, ID_CLOCKTIMER, 1000, TimerProc);
-      curTimer = FALSE;
-    }
-  }
-#endif //LSXCOMMANDCLOCK_EXPORTS
 }
 
 
@@ -2101,46 +2262,130 @@ void BangBrowseFolder(HWND caller, char *args)
 
 void BangMove(HWND caller, char *args)
 {
-  int cx, cy;
+  int cx, cy, oldx = cs->x, oldy = cs->y;
   char *str, *xstr, *ystr;
 
   if(args && *args) {
-    str = (char *)malloc(strlen(args) + 1);
-    strcpy(str, args);
+    if(!_stricmp(args, "home")) {
+      cs->x = cs->origx;
+      cs->y = cs->origy;
+    } else {
+      str = (char *)malloc(strlen(args) + 1);
+      strcpy(str, args);
 
-    xstr = strtok(args, " \t");
-    ystr = strtok(args, "");
+      xstr = strtok(args, " \t");
+      ystr = strtok(NULL, "");
 
-    cy = GetSystemMetrics(SM_CYSCREEN);
+      if(xstr) {
+        cs->x += atoi(xstr);
+        cx = GetSystemMetrics(SM_CXSCREEN);
 
-    if(xstr) {
-      cs->x += atoi(xstr);
-      cx = GetSystemMetrics(SM_CXSCREEN);
+        if(cs->x < 0)
+          cs->x = 0;
+        else if(cs->x > (cx - cs->width))
+          cs->x = cx - cs->width;
+      }
 
-      if(cs->x < 0)
-        cs->x = 0;
-      else if(cs->x > (cx - cs->width))
-        cs->x = cx - cs->width;
+      if(ystr) {
+        cs->y += atoi(ystr);
+        cy = GetSystemMetrics(SM_CYSCREEN);
+
+        if(cs->y < 0)
+          cs->y = 0;
+        else if(cs->y > (cy - cs->height))
+          cs->y = cy - cs->height;
+      }
+
+      free(str);
     }
+  } else {
+    POINT cursorPos;
 
-    if(ystr) {
-      cs->y += atoi(ystr);
-      cy = GetSystemMetrics(SM_CYSCREEN);
+    GetCursorPos(&cursorPos);
 
-      if(cs->y < 0)
-        cs->y = 0;
-      else if(cs->y > (cy - cs->height))
-        cs->y = cy - cs->height;
-    }
-
-    SetWindowPos(hWnd, cs->NoAlwaysOnTop ? HWND_NOTOPMOST : HWND_TOPMOST, cs->x, cs->y, 0, 0, SWP_NOSIZE);
-    free(str);
+    cs->x = cursorPos.x;
+    cs->y = cursorPos.y;
   }
+
+  if(oldx != cs->x || oldy != cs->y) {
+    SetWindowPos(hWnd, cs->NoAlwaysOnTop ? HWND_NOTOPMOST : HWND_TOPMOST, cs->x, cs->y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
+    visible = TRUE;
+  }
+
+  if(!args || !(*args))
+    BangFocusCommand(caller, NULL);
 }
 
 
 /***********************************************************
-* int initModule()                                         *
+* void BangToggleTimer()                                   *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - HWND caller                                         *
+*      The HWND of the window that called this !Bang       *
+*      Command.                                            *
+*    - char *args                                          *
+*      Specifies which time to switch to                   *
+*                         *  *  *  *                       *
+* Toggles which timer is currently active.                 *
+***********************************************************/
+
+void BangToggleTimer(HWND caller, char *args) {
+
+  HWND active = GetForegroundWindow();
+
+  if(curTimer == WINAMP_TIMER) {
+    KillTimer(hWnd, ID_WINAMPTIMER);
+    TimerProc(hWnd, 0, ID_CLOCKTIMER, 0);
+    SetTimer(hWnd, ID_CLOCKTIMER, 1000, TimerProc);
+    curTimer = CLOCK_TIMER;
+  } else if(cs->ScrollWinAmp) {
+      SetTimer(hWnd, ID_WINAMPTIMER, 100, WinAmpTimerProc);
+  }
+
+  if(cs->Transparent) {
+    ShowWindow(hWnd, SW_HIDE);
+    ShowWindow(hWnd, SW_SHOW);
+  }
+  SetForegroundWindow(active);
+}
+
+#ifndef LSXCOMMANDCLOCK_EXPORTS
+/***********************************************************
+* void BangSetText()                                       *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - HWND caller                                         *
+*      The HWND of the window that called this !Bang       *
+*      Command.                                            *
+*    - char *args                                          *
+*      Specifies the text to place in LSXCommand.          *
+*                         *  *  *  *                       *
+* Replaces the text inside LSXCommand and brings focus to  *
+* the end of the line.                                     *
+***********************************************************/
+
+void BangSetText(HWND caller, char *args)
+{
+  if(args) {
+    SetWindowText(hText, args);
+    SetFocus(hText);
+    SendMessage(hText, EM_SETSEL, strlen(args), strlen(args));
+
+    if(cs->Transparent) {
+      ShowWindow(hWnd, SW_HIDE);
+      ShowWindow(hWnd, SW_SHOW);
+      SetFocus(hText);
+    }
+  }
+}
+#endif LSXCOMMANDCLOCK_EXPORTS
+
+
+/***********************************************************
+* int initModuleEx()                                       *
 *                         *  *  *  *                       *
 *    Arguments:                                            *
 *                                                          *
@@ -2148,19 +2393,19 @@ void BangMove(HWND caller, char *args)
 *      The HWND of the parent window to this module        *
 *    - HINSTANCE dll                                       *
 *      The HINSTANCE of this DLL.                          *
-*    - WharfDataType *wd                                   *
-*      A pointer to the structure containing data about LS *
+*    - LPCSTR szPath                                       *
+*      A pointer to the Litestep path                      *
 *                         *  *  *  *                       *
 * Handles all initialization of LSXCommand.  Returns 0     *
 ***********************************************************/
 
-int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
+int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath)
 {
 	WNDCLASS wc;
 	HBRUSH hBr;
 
 	hInst = dll;
-  cs = ReadSettings(wd);
+  cs = ReadSettings(szPath);
 	hBr = CreateSolidBrush(cs->BorderColor);
 #ifndef LSXCOMMANDCLOCK_EXPORTS
   SearchEngineInit(cs);
@@ -2196,12 +2441,15 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
   AddBangCommand("!COMMANDBROWSEFILE", BangBrowseFile);
   AddBangCommand("!COMMANDBROWSEFOLDER", BangBrowseFolder);
   AddBangCommand("!COMMANDMOVE", BangMove);
+  AddBangCommand("!COMMANDTOGGLETIMER", BangToggleTimer);
+  AddBangCommand("!COMMANDSETTEXT", BangSetText);
 #else //LSXCOMMANDCLOCK_EXPORTS
 	AddBangCommand("!TOGGLECOMMANDCLOCK",BangToggleCommand);
 	AddBangCommand("!FOCUSCOMMANDCLOCK",BangFocusCommand);
   AddBangCommand("!COMMANDCLOCKSHOW", BangShowCommand);
   AddBangCommand("!COMMANDCLOCKHIDE", BangHideCommand);
   AddBangCommand("!COMMANDCLOCKMOVE", BangMove);
+  AddBangCommand("!COMMANDCLOCKTOGGLETIMER", BangToggleTimer);
 #endif
 	
   if(!cs->HiddenOnStart) {
@@ -2214,18 +2462,38 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
 
   if(*(cs->Clock)) {
     SetTimer(hWnd, ID_CLOCKTIMER, 1000, TimerProc);
-    ++nTimers;
+    curTimer = CLOCK_TIMER;
   }
 
   if(cs->ScrollWinAmp) {
-    SetTimer(hWnd, ID_WINAMPTIMER, 100, TimerProc);
-    ++nTimers;
+    SetTimer(hWnd, ID_WINAMPTIMER, 100, WinAmpTimerProc);
   }
 
   //Initialize input to nothing
   SetWindowText(hText, "");
 
 	return 0;
+}
+
+
+/***********************************************************
+* int initModule()                                         *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - HWND parent                                         *
+*      The HWND of the parent window to this module        *
+*    - HINSTANCE dll                                       *
+*      The HINSTANCE of this DLL.                          *
+*    - WharfDataType *wd                                   *
+*      A pointer to the structure containing data about LS *
+*                         *  *  *  *                       *
+* Handles all initialization of LSXCommand.  Returns 0     *
+***********************************************************/
+
+int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
+{
+  return initModuleEx(parent, dll, wd->lsPath);
 }
 
 

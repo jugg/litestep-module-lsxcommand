@@ -59,7 +59,7 @@ LINK32=link.exe
 OutDir=.\Release
 SOURCE="$(InputPath)"
 PostBuild_Desc=Copy
-PostBuild_Cmds=copy $(OutDir)\lsxcommandclock.dll c:\litestep\bebox\bemodules\lsxcommandclock.dll
+PostBuild_Cmds=copy $(OutDir)\lsxcommandclock.dll c:\litestep\luxo\modules\lsxcommandclock.dll
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "LSXCommandClock - Win32 Debug"
@@ -92,7 +92,7 @@ LINK32=link.exe
 OutDir=.\Debug
 SOURCE="$(InputPath)"
 PostBuild_Desc=Copy
-PostBuild_Cmds=copy $(OutDir)\lsxcommandclock.dll c:\litestep\bebox\bemodules\debug\lsxcommandclock.dll
+PostBuild_Cmds=copy $(OutDir)\lsxcommandclock.dll c:\litestep\luxo\modules\debug\lsxcommandclock.dll
 # End Special Build Tool
 
 !ENDIF 
@@ -106,7 +106,7 @@ PostBuild_Cmds=copy $(OutDir)\lsxcommandclock.dll c:\litestep\bebox\bemodules\de
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\calculator.c
+SOURCE=.\calculator.cpp
 # End Source File
 # Begin Source File
 

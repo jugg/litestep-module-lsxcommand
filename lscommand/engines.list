@@ -57,6 +57,8 @@ Default Yahoo
 		Hardware            http://www2.tomshardware.com/site/search.html?word=<args>
 		Shareware           http://search.shareware.com/code/engine/Find?cfrom=quick&frame=none&orfile=True&category=MS-Windows%28all%29&hits=25&search=<args>&logop=and&and=
 		HotFiles   http://hotfiles.zdnet.com/cgi-bin/texis/swlib/hotfiles/search.html?Usrt=rel&Usrchtype=simple&Utext=<args>
+		Astalavista         http://astalavista.box.sk/cgi-bin/robot/robot?srch=<args>&project=robot&gfx=robot
+		LinuxEngine         http://linux.box.sk/box.php3?prj=linux&gfx=linux&srch=<args>
 	}
 	Archie {
 		Archieplex          http://www.nexor.com/public/archie/archieplex/cgi-bin/archieplexform?query=<args>&type=Case+Insensitive+Substring+Match&order=host&server=archie.doc.ic.ac.uk&domain=&hits=99&nice=Nice
@@ -70,6 +72,7 @@ Default Yahoo
 	Amazon              http://www.amazon.com/exec/obidos/external-search/?keyword=<args>
 	BarnesAndNoble      http://shop.barnesandnoble.com/booksearch/results.asp?title=<args>&match=exact&options=and&userid=22NK15R7D9
 	FOLDOC              http://wombat.doc.ic.ac.uk/foldoc/foldoc.cgi?query=<args>
+	H2G2                http://www.h2g2.com/search.cgi?search=<args>
 	Patents             http://www.patents.ibm.com/details?pn=<args>
 	Quote               http://fast.quote.com/fq/quotecom/quote?symbols=<args>
 	Dictionary          http://www.m-w.com/cgi-bin/dictionary?book=Dictionary&va=<args>
@@ -87,6 +90,6 @@ Miscellaneous {
 	Finger              http://kryten.eng.monash.edu.au/cgi-bin/gspam?c=FINGER+user%40hostname&a=<args>
 	NSLookup            http://www.uia.ac.be/cgi-bin/nslookup-query?hostname=<args>
 	MerckMan            http://www.merck.com/!!tevVX3Hs_tevVX3Hs_/htbin/search_mmanual/?term=<args>
-	LettermanTop10      http://marketing.cbs.com/cgi/excite/bin/lateshow.cgi?sp=sp&search=<args>
+	LettermanTop10      http://marketing.cbs.com/network/tvshows/mini/lateshow/topten/archive/search/TopTen_Search.cgi?sp=sp&search=<args>
 	Anonymizer          http://anon.free.anonymizer.com/<args>
 }
