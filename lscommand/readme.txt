@@ -3,8 +3,8 @@
                     *           by Visigoth           *
                     *   gandhimail@worldnet.att.net   *
                     *         ==============          *
-                    *         Version: 1.7.3          *
-                    *          July 17, 1999          *
+                    *         Version: 1.7.4          *
+                    *          July 24, 1999          *
                     *         ==============          *
                     * http://home.att.net/~gandhimail *
                     ***********************************
@@ -19,6 +19,11 @@ II.   How to use LSXCommand
 
       II.1 Internet Searches
       II.2 Added RC Commands
+           New to 1.7.4:
+           -------------
+           - Changed CommandClock to CommandTime
+           - CommandAddExternalsToHistory
+           
            New to 1.7.2:
            -------------
            - CommandOffsetX
@@ -152,6 +157,8 @@ ii. Kudos
    -------
    The following people gave me ideas after I released version 1.0:
 
+   - gizzmo also sent in the idea for switching between clock/amp mode
+   - gizzmo first sent in the idea for a separate clock module
    - Kryten sent in the idea about Browse File and Folder
    - Ikka Nisula sent in the request for multiple base support
    - Alasdair sent in a request for negative screen coordinates
@@ -187,6 +194,50 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.7.4
+   -------------
+   Bug fixes, bug fixes, bug fixes...
+   
+     Documentation Changes
+     `````````````````````
+     - Documentation now reflects change from CommandClock to
+       CommandTime
+     
+     Bug Fixes
+     `````````
+     - Fixed AlterScript to work like Killarny's script.dll
+       Meaning, understanding the LoadScript RC Commands
+     - Fixed !CommandBrowseFile & !CommandBrowseFolder crashing bugs
+     - Fixed CommandCommaDelimiter problems (stupid infinite loops)
+     - Fixed the weird LSXCommand/CommandClock problem: if you have
+       the *original* LSXCommand with a CommandClock entry, then
+       you must change this to CommandTime (see Notes for more info)
+     
+     New Features
+     ````````````
+     - Added switch WinAmp/Clock mode on mouse click in
+       LSXCommandClock (not in LSXCommand).
+     - Added following RC Commands:
+     
+       * CommandAddExternalsToHistory
+     
+     - Added following search engines:
+     
+       * AudioFindMP3 (MP3 search engine - audiofind.com)
+       * PalaVista    (MP3 metacrawler - palavista.com)
+     
+     Notes
+     `````
+     It turns out the problem lies in LSAPI, and not LSXCommand or
+     LSXCommandClock.  In any case, the original CommandClock RC
+     Command (before there ever was a LSXCommandClock) now is named
+     CommandTime.  The LSXCommandClock RC Command "CommandClockString"
+     is still the same.  So, if you have the original LSXCommand still
+     with a CommandClock entry, change it to CommandTime.  NOTE:
+     CommandClockDisappearsOnFocus is still the same.
+     
+       Example: CommandClock "#c"  -->  CommandTime "#c"
 
    Version 1.7.3
    -------------
@@ -607,6 +658,10 @@ I. About LSXCommand
      * Context Menu (Right-Click) Access
      * Backgrounds & Transparency
      * A Clock with Date functionality as well
+     * A separate clock module
+     * A 'replacement' for Killarny's script.dll for use with
+       LSXCommand
+     * Heck, it can even use WinAmp's scrolling title feature...
      * A few speed tweaks
 
 
@@ -732,6 +787,17 @@ II. How to use LSXCommand
      NOTE: Please see original LSCommand readme for previous
      RC Commands.
      
+     CommandAddExternalsToHistory
+     ````````````````````````````
+     Description: If this is on, LSXCommand will add any commands
+     launched with the !Command !Bang command to the history.  Since
+     I've been using AlterScript with this a lot, it became
+     annoying to have all of AlterScript's commands end up in
+     LSXCommand's history.  NOTE: This is an LSXCommand RC Command
+     (not for AlterScript).  It affects any command run with !Command
+     and not just AlterScript's.
+
+     
      CommandSearchEngineBrowser
      ``````````````````````````
      Description: Path to the browser to be used with search engines.
@@ -794,7 +860,7 @@ II. How to use LSXCommand
      with this is to have both a clock and a WinAmp scroller.  The
      WinAmp scroller will show when WinAmp is running.  If not, the
      clock will show.  (Note that for the clock to show, you must use
-     the CommandClock RC Command described below).
+     the CommandTime RC Command described below).
      
      Example: CommandScrollWinAmpTitle
      
@@ -862,15 +928,15 @@ II. How to use LSXCommand
      Example: CommandTransparentEditBox
      
      
-     CommandClock
-     ````````````
+     CommandTime
+     ```````````
      Description: Format string that tells LSXCommand how you want
      your time & date to look.
      
      NOTE: See section II.8 on different format strings and what
      effect they have.  It's quite long, but worth it.
      
-     Example: CommandClock "%#c"
+     Example: CommandTime "%#c"
      
      NOTE: The above results in something like "Monday, June 14, 1999
      18:00:30" depending on the real date and time.
@@ -1412,13 +1478,15 @@ II. How to use LSXCommand
    Commands)
    
      * CommandClockTextFontFace
+     * CommandClockTextColor
+     * CommandClockBorderColor
      * CommandClockBackground
-     * CommandClockX, CommandClockY
-     * CommandClockWidth, CommandClockHeight
+     * CommandClockX, LSXCommandClockY
+     * CommandClockWidth, LSXCommandClockHeight
      * CommandClockBGColor
      * CommandClockTextSize
      * CommandClockBorderSize
-     * CommandClockOffsetX, CommandClockOffsetY
+     * CommandClockOffsetX, LSXCommandClockOffsetY
      * CommandClockBevelBorder
      * CommandClockNotAlwaysOnTop
      * CommandClockNotMoveable
@@ -1431,8 +1499,8 @@ II. How to use LSXCommand
      * CommandClockHideOnUnfocus
      * CommandClockString ****
    
-   **** NOTE: CommandClockString is the same as the "CommandClock" RC
-   Command for LSXCommand.
+   **** NOTE: CommandClockString is the same as the "CommandTime"
+   RC Command for LSXCommand (see section II.8 for details)
    
    
    II.11 AlterScript module

@@ -52,6 +52,7 @@ struct CommandSettings {
   BOOL WinAmpDisappears;
   BOOL TabFileComplete;
   BOOL HideOnUnfocus;
+  BOOL AddExternalsToHistory;
 	COLORREF BGColor;
 	COLORREF TextColor;
 	COLORREF BorderColor;
@@ -157,6 +158,9 @@ struct CommandSettings {
 	COLORREF TextColor;
 	COLORREF BorderColor;
 };
+
+/* Timer Procedure must be declared for LSXCommandClock */
+VOID CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime);
 
 #endif //LSXCOMMANDCLOCK_EXPORTS
 

@@ -13,7 +13,7 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  July 16, 1999  2:00 AM                     *
+* Last Update:  July 22, 1999  12:30 AM                    *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
@@ -41,6 +41,7 @@ struct History *current = NULL, *searchEngines = NULL, *aliases = NULL, *files =
 
 #else
 
+BOOL curTimer;
 char *szApp = "LSXCommandClock";
 
 #endif //LSXCOMMANDCLOCK_EXPORTS
@@ -122,10 +123,11 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
   settings->ScrollWinAmp = GetRCBool("CommandScrollWinAmpTitle", TRUE);
   settings->WinAmpDisappears = GetRCBool("CommandWinAmpDisappearsOnFocus", TRUE);
   settings->HideOnUnfocus = GetRCBool("CommandHideOnUnfocus", TRUE);
+  settings->AddExternalsToHistory = GetRCBool("CommandAddExternalsToHistory", TRUE);
   GetRCString("CommandSearchEngineList", settings->SearchEngineList, "engines.list", sizeof(settings->SearchEngineList));
   GetRCString("CommandContextMenuOrder", settings->ContextMenuOrder, "012", sizeof(settings->ContextMenuOrder));
   GetRCString("CommandBackground", settings->Background, "", sizeof(settings->Background));
-  GetRCString("CommandClock", settings->Clock, "", sizeof(settings->Clock));
+  GetRCString("CommandTime", settings->Clock, "", sizeof(settings->Clock));
   GetRCString("CommandSearchEngineBrowser", settings->BrowserPath, "", sizeof(settings->BrowserPath));
   //GetRCString("CommandTextAlign", settings->TextAlign, "Left Top", sizeof(settings->TextAlign));
 #else //LSXCOMMANDCLOCK_EXPORTS
@@ -839,10 +841,12 @@ void ParseCalculatorCommand(char *command)
 
   ++command;
   if(cs->CommaDelimiter) {
-  p = command;
-  while(*p)
-    if(*p == ',')
-      *p = '.';
+    p = command;
+    while(*p) {
+      if(*p == ',')
+        *p = '.';
+      ++p;
+    }
   }
 
   Evaluate(command, &error, val, sizeof(val));
@@ -850,9 +854,11 @@ void ParseCalculatorCommand(char *command)
   if(!error || error == ERROR_CONVERSIONS_DONE) {
     if(cs->CommaDelimiter) {
       p = val;
-      while(*p)
+      while(*p) {
         if(*p == '.')
           *p = ',';
+        ++p;
+      }
     }
     SetWindowText(hText, val);
     HistoryRemoveAll(&files, &nFiles);
@@ -971,15 +977,15 @@ void HistoryUseNext(HWND hText)
 *                                                          *
 *    - char *command                                       *
 *      Pointer to the command to execute                   *
-*    - BOOL alias                                          *
-*      I use this to make sure that commands sent by an    *
-*      alias isn't also added to the history.              *
+*    - BOOL noaddtohist                                    *
+*      This specifies whether the command should be added  *
+*      to the history.                                     *
 *                         *  *  *  *                       *
 * This function checks for a valid command and sends it to *
 * the proper place - ParseBang, ParseSearch, or ShellEx    *
 ***********************************************************/
 
-void ExecCommand(char *command, BOOL alias)
+void ExecCommand(char *command, BOOL noaddtohist)
 {
   int index;
 	char *newcmd, *args, *p;
@@ -988,7 +994,7 @@ void ExecCommand(char *command, BOOL alias)
 	if(strlen(command)<1)
 		return;
 
-  if(!alias) {
+  if(!noaddtohist) {
     index = HistoryFindIndexOf(&current, command);
 
     if(index <= 0) {
@@ -1226,43 +1232,6 @@ void ParseContextMenuCommand(long retval, char *buf)
 }
 #endif //LSXCOMMANDCLOCK_EXPORTS
 
-/***********************************************************
-* BOOL CALLBACK BGProc()                                   *
-*                         *  *  *  *                       *
-*    Arguments:                                            *
-*                                                          *
-*    - HWND hText                                          *
-*      A handle to a window which this function handles    *
-*    - UINT msg                                            *
-*      The message sent to the textbox                     *
-*    - WPARAM wParam                                       *
-*      The WPARAM of this message                          *
-*    - LPARAM lParam                                       *
-*      The LPARAM of this message                          *
-*                         *  *  *  *                       *
-* Handles the window procedure for the background window   * 
-***********************************************************/
-
-/*
-BOOL CALLBACK BGProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
-{
-	switch(msg) {
-	case WM_NCHITTEST:
-		return HTNOWHERE;
-	case WM_DROPFILES:
-		{
-		char szFileName[MAX_PATH];
-		DragQueryFile((HDROP)wParam, 0, szFileName, sizeof(szFileName));
-		SetWindowText(hText, szFileName);
-		SetFocus(hText);
-		DragFinish((HDROP)wParam);
-		return 0;
-		}
-	}
-	return CallWindowProc(wpOld,hText,msg,wParam,lParam);
-}
-*/
-
 
 /***********************************************************
 * BOOL CALLBACK EditProc()                                 *
@@ -1303,6 +1272,9 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 			  HistoryUseNext(hText);
 			SendMessage(hText,EM_SETSEL,0,-1);
 			return 0;
+    } else if(wParam == VK_ESCAPE) {
+      SetWindowText(hText, "");
+      HistoryMoveToHead(&current);
     } else if(wParam == VK_TAB) {
       // If we want file autocompletes, populate the files list and set text to the first one.
       // Consecutive tabs will select the next file in the list...
@@ -1398,7 +1370,7 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
       if(!cleared)
         HistoryMovePrev(&current, 1);
 			return 0;
-    } else if(wParam == VK_TAB)
+    } else if(wParam == VK_TAB || wParam == VK_ESCAPE)
       return 0;
     else {
       /*long retval;
@@ -1456,7 +1428,9 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 		  return 0;
 		}
     break;
+#endif //LSXCOMMANDCLOCK_EXPORTS
   case WM_LBUTTONDOWN:
+#ifndef LSXCOMMANDCLOCK_EXPORTS
     if(((*(cs->Clock) && cs->ClockDisappears) || (cs->ScrollWinAmp && cs->WinAmpDisappears && FindWindow("WINAMP V1.X", NULL))) && GetFocus() != hText) {
       SetWindowText(hText, "");
       SetForegroundWindow(hWnd);
@@ -1474,8 +1448,30 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
       ShowWindow(hWnd, SW_SHOW);
       SetFocus(hText);
     }
-    break;
+#else //LSXCOMMANDCLOCK_EXPORTS
+    {
+      HWND active = GetForegroundWindow();
+      if(curTimer) {
+        KillTimer(hWnd, ID_WINAMPTIMER);
+        TimerProc(hWnd, 0, ID_CLOCKTIMER, 0);
+        SetTimer(hWnd, ID_CLOCKTIMER, 1000, TimerProc);
+        curTimer = FALSE;
+      } else {
+        if(cs->ScrollWinAmp) {
+          SetTimer(hWnd, ID_WINAMPTIMER, 100, TimerProc);
+          ++nTimers;
+        }
+      }
+
+      if(cs->Transparent) {
+        ShowWindow(hWnd, SW_HIDE);
+        ShowWindow(hWnd, SW_SHOW);
+      }
+      SetForegroundWindow(active);
+      return 0;
+    }
 #endif //LSXCOMMANDCLOCK_EXPORTS
+    break;
   case WM_KILLFOCUS:
     if(visible && cs->HideOnUnfocus) {
 	    ShowWindow(hWnd, SW_HIDE);
@@ -1692,6 +1688,7 @@ VOID CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
       if(nTimers == 2) {
         KillTimer(hWnd, ID_CLOCKTIMER);
         --nTimers;
+        curTimer = TRUE;
       }
       GetWindowText(wahWnd, title, sizeof(title));
       SetWindowText(hText, title);
@@ -1702,6 +1699,7 @@ VOID CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
     } else if(*(cs->Clock) && nTimers < 2) {
       ++nTimers;
       SetTimer(hWnd, ID_CLOCKTIMER, 1000, TimerProc);
+      curTimer = FALSE;
     }
   }
 #endif //LSXCOMMANDCLOCK_EXPORTS
@@ -1892,7 +1890,7 @@ void BangShowContextMenu(HWND caller, char *args)
 
 void BangCommand(HWND caller, char *args)
 {
-  ExecCommand(args, FALSE);
+  ExecCommand(args, !(cs->AddExternalsToHistory));
 }
 #endif //LSXCOMMANDCLOCK_EXPORTS
 
@@ -1996,14 +1994,17 @@ void BangBrowseFile(HWND caller, char *args)
   if(GetOpenFileName(&ofn)) {
     p = ofn.lpstrFile;
     strcpy(file_total, p);
-    p2 = file_total + strlen(file_total);
+    if(file_total[strlen(file_total) - 1] == '\\') {
+      p2 = file_total + strlen(file_total);
 
-    p += strlen(p) + 1;
-    while(*p) {
-      strcpy(p2, p);
-      ExecCommand(file_total, FALSE);
       p += strlen(p) + 1;
-    }
+      while(*p) {
+        strcpy(p2, p);
+        ExecCommand(file_total, FALSE);
+        p += strlen(p) + 1;
+      }
+    } else
+      ExecCommand(file_total, FALSE);
   }
 
   if(filter)
@@ -2027,14 +2028,9 @@ void BangBrowseFile(HWND caller, char *args)
 
 void BangBrowseFolder(HWND caller, char *args)
 {
-  BROWSEINFO bi;
-  LPITEMIDLIST pidl;
   char title[] = "LSXCommand Browse", path[_MAX_PATH];
-
-  bi.hwndOwner = hWnd;
-  bi.pidlRoot = NULL;
-  bi.lpszTitle = title;
-  bi.ulFlags = BIF_VALIDATE;
+  BROWSEINFO bi = {hWnd, NULL, path, "LSXCommand Browse", BIF_RETURNONLYFSDIRS, NULL, 0, 0};
+  LPITEMIDLIST pidl;
 
   pidl = SHBrowseForFolder(&bi);
 
@@ -2088,6 +2084,7 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
 	
   //DragAcceptFiles(hWnd, TRUE);
 	SetWindowLong(hWnd,GWL_USERDATA,magicDWord);
+
 #ifndef LSXCOMMANDCLOCK_EXPORTS
 	AddBangCommand("!TOGGLECOMMAND",BangToggleCommand);
 	AddBangCommand("!FOCUSCOMMAND",BangFocusCommand);
@@ -2123,6 +2120,9 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
     SetTimer(hWnd, ID_WINAMPTIMER, 100, TimerProc);
     ++nTimers;
   }
+
+  //Initialize input to nothing
+  SetWindowText(hText, "");
 
 	return 0;
 }

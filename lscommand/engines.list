@@ -59,3 +59,5 @@ IMDB                http://us.imdb.com/Tsearch?title=<args>
 UBL                 http://search.ubl.com/cgi/search.cgi?search=<args>
 OLGA                http://rhythm.harmony-central.com/cgi-bin/olga-query?key=<args>
 CDNow               http://www.cdnow.com//cgi-bin/mserver/SID=1116013684/pagename=/RP/CDN/FIND/popsearch.html?string=<args>
+AudioFindMP3        http://www.audiofind.com:70/?audiofindsearch=<args>&audiofindtype=mp3
+PalaVista           http://mp3.palaquest.com/cgi-bin/nph-metamp3.pl?template=default.html&minrel=60&maxhit=50&query=<args>

@@ -236,9 +236,9 @@ struct List *ListAdd(struct List **hist, char *pszValue1, char *pszValue2, int *
   char *szData2 = pszValue2 ? (char *)malloc(strlen(pszValue2) + 1) : NULL;
   struct List *temp = NULL;
 
-  if(pszValue1 && pszValue2) {
-    strcpy(szData1, pszValue1);
-    strcpy(szData2, pszValue2);
+  if(pszValue1 || pszValue2) {
+    if(szData1) strcpy(szData1, pszValue1);
+    if(szData2) strcpy(szData2, pszValue2);
     if(*hist) {
       ListMoveToTail(hist);
       (*hist)->next = (struct List *)malloc(sizeof(struct List));
