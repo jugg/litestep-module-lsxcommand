@@ -1,63 +1,92 @@
 ; Search Engine List File
 ; I prefer Yahoo!
 Default Yahoo
-Yahoo         http://search.yahoo.com/bin/search?p=<args>
-AltaVista     http://www.altavista.com/cgi-bin/query?pg=q&kl=XX&q=<args>
-Lycos         http://www.lycos.com/cgi-bin/pursuit?cat=dir&query=<args>
-Excite        http://search.excite.com/search.gw?search=<args>
-InfoSeek      http://infoseek.go.com/Titles?qt=<args>&col=WW&sv=IS&lk=noframes&svx=home_searchbox
-Google        http://www.google.com/search?q=<args>
-LycosMP3      http://mp3.lycos.com/cgi-bin/search?form=lycosnet&query=<args>
-ScourMP3      http://search.scour.net/cgi-bin/search.cgi?query=<args>&protocol=all&index=mp3&preview_size=small
-HotBot        http://www.hotbot.com/?MT=<args>&SM=MC&DV=0&LG=any&DC=10&DE=2&clickSrc=search&_v=2&OPs=MDRTP
-DejaNews            http://www.deja.com/qs.xp?OP=dnquery.xp&ST=QS&QRY=<args>&DBS=2
-Lyrics              http://www.lyrics.ch/search/checkfulltext.asp?words=<args>&count=20&type=all&title=
-LyricsByTitle       http://www.lyrics.ch/search/checknormal.asp?bands=&label=&song=<args>&match=like
-Slashdot            http://slashdot.org/search.pl?query=<args>
-MSDN                http://search.microsoft.com/us/dev/results.asp?nq=TRUE&SName=&SPath=&SCatalog=&qu=<args>&Boolean=ALL&chkM=on&radM=0&chkM_0=on&chkM_1=on&chkM_2=on&chkM_3=on&chkM_4=on&chkM_5=on&chkM_6=on&chkM_7=on&chkM_8=on&chkM_9=on&chkM_10=on&chkM_11=on&chkM_12=on&chkM_13=on&chkM_14=on&chkM_15=on&chkM_16=on&chkM_17=on&chkS=on&radS=0&chkS_0=on&chkS_1=on&chkS_2=on&chkS_3=on&chkS_4=on&chkS_5=on&chkS_6=on&chkS_7=on&chkS_8=on&chkS_9=on&chkS_10=on&chkS_11=on&chkS_12=on&chkS_13=on&chkA=on&chkK=on
-Amazon              http://www.amazon.com/exec/obidos/external-search/?keyword=<args>
-SoftSeek            http://search02.softseek.com/cgi-bin/search.cgi?keywords=<args>&seekindex=index&maxresults=025&cb=
-Hardware            http://www2.tomshardware.com/site/search.html?word=<args>
-CMA                 http://cma.zdnet.com/texis/cma/cma/+Ww1Fqnhw5B/edit.html?feditsrch=<args>
-Patents             http://www.patents.ibm.com/details?pn=<args>
-Floach              http://floach.pimpin.net/search.shtml?query=<args>
-UPS                 http://wwwapps.ups.com/etracking/tracking.cgi?submit=Track&InquiryNumber1=<args>&TypeOfInquiryNumber=T
-FedEx               http://www.fedex.com/cgi-bin/track_it?airbills=<args>
-Airborne            http://www.airborne.com/cgi-bin/AirbillTrace?ShipmentNumber=<args>
-Dictionary          http://www.m-w.com/cgi-bin/dictionary?book=Dictionary&va=<args>
-Thesaurus           http://www.m-w.com/cgi-bin/thesaurus?book=Thesaurus&va=<args>
-OTH                 http://oth.ipmedia.net:8080/cgi-bin/search?q=<args>&cl=1
-FOLDOC              http://wombat.doc.ic.ac.uk/foldoc/foldoc.cgi?query=<args>
-Quote               http://fast.quote.com/fq/quotecom/quote?symbols=<args>
-FileDemon           http://171.64.175.32/armen/servlets/TestServlet8?filename=<args>
-MSKB                http://search.microsoft.com/us/results.asp?nq=TRUE&SName=&SPath=&SCatalog=&qu=<args>&Boolean=ALL&Finish=Search+Now%21&intCat=7
-BigBook             http://yp8.superpages.com/listings.phtml?SRC=bb&STYPE=S&PG=L&C=&N=<args>&T=&S=*&R=N&search=Find+It&rtd=yp8.superpages.com
-BarnesAndNoble      http://shop.barnesandnoble.com/booksearch/results.asp?title=<args>&match=exact&options=and&userid=22NK15R7D9
-MediafindMP3        http://194.95.209.6/cgi-bin/search.cgi?file=<args>&filetype=mp3
-Reel                http://www.reel.com/cgi-bin/nph-reel.exe?OBJECT=searchresults&STRING=<args>&TYPE=TITLE&STORE=ALL&MODE=BEGINS&GENRE=0&PERIOD=0&RATING=0&AVAIL=BOTH&PRICERANGE=0&PRODUCTTYPE=0
-Archieplex          http://www.nexor.com/public/archie/archieplex/cgi-bin/archieplexform?query=<args>&type=Case+Insensitive+Substring+Match&order=host&server=archie.doc.ic.ac.uk&domain=&hits=99&nice=Nice
-Filez               http://search.filez.com/search.cgi?type=1&key=<args>&submit1=Find&search=1&rows=50
-Shareware           http://search.shareware.com/code/engine/Find?cfrom=quick&frame=none&orfile=True&category=MS-Windows%28all%29&hits=25&search=<args>&logop=and&and=
-NorthernLight       http://www.nlsearch.com/nlquery.fcg?qr=<args>
-OpenText            http://search.opentext.com/omw/simplesearch?SearchFor=<args>&mode=and
-Infospace           http://in-115.infospace.com/search?QT=1&QV=info&QX=&QK=15&QL=&QG=&QMULT=1&QN=<args>&QC=&QS=&QU=r
-GoTo                http://www.goto.com/d/search/;$sessionid$4W153TYAA55YLQFIEENQPUQ?Keywords=<args>
-Pathfinder          http://cgi.pathfinder.com/cgi-bin/altavista/pshell?venue=pathfinder&q=<args>&pg=q&date=all&x=3&y=13
-Metacrawler         http://www.metacrawler.com/crawler?general=<args>
-Top5                http://www.pointcom.com/cgi-bin/pursuit?cat=point&query=<args>
-A2Z                 http://a2z.lycos.com/cgi-bin/pursuit?query=<args>
-AskJeeves           http://www.askjeeves.com/AskJeeves.asp?ask=<args>
-MerckMan            http://www.merck.com/!!tevVX3Hs_tevVX3Hs_/htbin/search_mmanual/?term=<args>
-APWire              http://wire.ap.org/APnews/main_search.html?SEARCHSTRING=<args>
-WhoWhere            http://query1.whowhere.com/jwz/name.wsrch?name=<args>&org=
-LibraryOfCongress   http://lcweb.loc.gov/Harvest/cgi-bin/BrokerQuery.pl.cgi?query=<args>&host=lcweb.loc.gov%3A8501&brokerqueryconfig=BrokerLC.cf&maxresultflag=50&caseflag=on&descflag=on&verbose=on
-Finger              http://kryten.eng.monash.edu.au/cgi-bin/gspam?c=FINGER+user%40hostname&a=<args>
-NSLookup            http://www.uia.ac.be/cgi-bin/nslookup-query?hostname=<args>
-LettermanTop10      http://marketing.cbs.com/cgi/excite/bin/lateshow.cgi?sp=sp&search=<args>
-Anonymizer          http://anon.free.anonymizer.com/<args>
-IMDB                http://us.imdb.com/Tsearch?title=<args>
-UBL                 http://search.ubl.com/cgi/search.cgi?search=<args>
-OLGA                http://rhythm.harmony-central.com/cgi-bin/olga-query?key=<args>
-CDNow               http://www.cdnow.com//cgi-bin/mserver/SID=1116013684/pagename=/RP/CDN/FIND/popsearch.html?string=<args>
-AudioFindMP3        http://www.audiofind.com:70/?audiofindsearch=<args>&audiofindtype=mp3
-PalaVista           http://mp3.palaquest.com/cgi-bin/nph-metamp3.pl?template=default.html&minrel=60&maxhit=50&query=<args>
+
+"&Search Engines" {
+	Yahoo         http://search.yahoo.com/bin/search?p=<args>
+	AltaVista     http://www.altavista.com/cgi-bin/query?pg=q&kl=XX&q=<args>
+	Lycos         http://www.lycos.com/cgi-bin/pursuit?cat=dir&query=<args>
+	Excite        http://search.excite.com/search.gw?search=<args>
+	InfoSeek      http://infoseek.go.com/Titles?qt=<args>&col=WW&sv=IS&lk=noframes&svx=home_searchbox
+	Google        http://www.google.com/search?q=<args>
+	HotBot        http://www.hotbot.com/?MT=<args>&SM=MC&DV=0&LG=any&DC=10&DE=2&clickSrc=search&_v=2&OPs=MDRTP
+	DejaNews            http://www.deja.com/qs.xp?OP=dnquery.xp&ST=QS&QRY=<args>&DBS=2
+	AskJeeves           http://www.askjeeves.com/AskJeeves.asp?ask=<args>
+	NorthernLight       http://www.nlsearch.com/nlquery.fcg?qr=<args>
+	OpenText            http://search.opentext.com/omw/simplesearch?SearchFor=<args>&mode=and
+	Infospace           http://in-115.infospace.com/search?QT=1&QV=info&QX=&QK=15&QL=&QG=&QMULT=1&QN=<args>&QC=&QS=&QU=r
+	GoTo                http://www.goto.com/d/search/;$sessionid$4W153TYAA55YLQFIEENQPUQ?Keywords=<args>
+	Pathfinder          http://cgi.pathfinder.com/cgi-bin/altavista/pshell?venue=pathfinder&q=<args>&pg=q&date=all&x=3&y=13
+	Metacrawler         http://www.metacrawler.com/crawler?general=<args>
+	Top5                http://www.pointcom.com/cgi-bin/pursuit?cat=point&query=<args>
+	A2Z                 http://a2z.lycos.com/cgi-bin/pursuit?query=<args>
+	WhoWhere            http://query1.whowhere.com/jwz/name.wsrch?name=<args>&org=
+	BigBook             http://yp8.superpages.com/listings.phtml?SRC=bb&STYPE=S&PG=L&C=&N=<args>&T=&S=*&R=N&search=Find+It&rtd=yp8.superpages.com
+}
+
+"Music && Movies" {
+  MP3 {
+		OTH                 http://oth.ipmedia.net:8080/cgi-bin/search?q=<args>&cl=1
+		PalaVista           http://mp3.palaquest.com/cgi-bin/nph-metamp3.pl?template=default.html&minrel=60&maxhit=50&query=<args>
+		LycosMP3      http://mp3.lycos.com/cgi-bin/search?form=lycosnet&query=<args>
+		ScourMP3      http://search.scour.net/cgi-bin/search.cgi?query=<args>&protocol=all&index=mp3&preview_size=small
+		MediafindMP3        http://194.95.209.6/cgi-bin/search.cgi?file=<args>&filetype=mp3
+		AudioFindMP3        http://www.audiofind.com:70/?audiofindsearch=<args>&audiofindtype=mp3
+	}
+	
+	DVDExpress    http://www.dvdexpress.com/consumer/include/search_redir.asp?optSearchBy=title&pagename=splash_main&category=q1&query=<args>
+	CDNow               http://www.cdnow.com//cgi-bin/mserver/SID=1116013684/pagename=/RP/CDN/FIND/popsearch.html?string=<args>
+	IMDB                http://us.imdb.com/Tsearch?title=<args>
+	Lyrics              http://www.lyrics.ch/search/checkfulltext.asp?words=<args>&count=20&type=all&title=
+	LyricsByTitle       http://www.lyrics.ch/search/checknormal.asp?bands=&label=&song=<args>&match=like
+}
+
+&News {
+	Slashdot            http://slashdot.org/search.pl?query=<args>
+	APWire              http://wire.ap.org/APnews/main_search.html?SEARCHSTRING=<args>
+}
+
+&Computers {
+  Programming {
+		MSDN                http://search.microsoft.com/us/dev/results.asp?nq=TRUE&SName=&SPath=&SCatalog=&qu=<args>&Boolean=ALL&chkM=on&radM=0&chkM_0=on&chkM_1=on&chkM_2=on&chkM_3=on&chkM_4=on&chkM_5=on&chkM_6=on&chkM_7=on&chkM_8=on&chkM_9=on&chkM_10=on&chkM_11=on&chkM_12=on&chkM_13=on&chkM_14=on&chkM_15=on&chkM_16=on&chkM_17=on&chkS=on&radS=0&chkS_0=on&chkS_1=on&chkS_2=on&chkS_3=on&chkS_4=on&chkS_5=on&chkS_6=on&chkS_7=on&chkS_8=on&chkS_9=on&chkS_10=on&chkS_11=on&chkS_12=on&chkS_13=on&chkA=on&chkK=on
+		MSKB                http://search.microsoft.com/us/results.asp?nq=TRUE&SName=&SPath=&SCatalog=&qu=<args>&Boolean=ALL&Finish=Search+Now%21&intCat=7
+		CodeGuru            http://www.codeguru.com/cgi/AT-Pagessearch.cgi?search=<args>
+	}
+	"Software && Hardware"  {
+		SoftSeek            http://search02.softseek.com/cgi-bin/search.cgi?keywords=<args>&seekindex=index&maxresults=025&cb=
+		Hardware            http://www2.tomshardware.com/site/search.html?word=<args>
+		Shareware           http://search.shareware.com/code/engine/Find?cfrom=quick&frame=none&orfile=True&category=MS-Windows%28all%29&hits=25&search=<args>&logop=and&and=
+		HotFiles   http://hotfiles.zdnet.com/cgi-bin/texis/swlib/hotfiles/search.html?Usrt=rel&Usrchtype=simple&Utext=<args>
+	}
+	Archie {
+		Archieplex          http://www.nexor.com/public/archie/archieplex/cgi-bin/archieplexform?query=<args>&type=Case+Insensitive+Substring+Match&order=host&server=archie.doc.ic.ac.uk&domain=&hits=99&nice=Nice
+		Filez               http://search.filez.com/search.cgi?type=1&key=<args>&submit1=Find&search=1&rows=50
+		FileDemon           http://171.64.175.32/armen/servlets/TestServlet8?filename=<args>
+	}
+	CMA                 http://cma.zdnet.com/texis/cma/cma/+Ww1Fqnhw5B/edit.html?feditsrch=<args>
+}
+
+"Books && &Reference" {
+	Amazon              http://www.amazon.com/exec/obidos/external-search/?keyword=<args>
+	BarnesAndNoble      http://shop.barnesandnoble.com/booksearch/results.asp?title=<args>&match=exact&options=and&userid=22NK15R7D9
+	FOLDOC              http://wombat.doc.ic.ac.uk/foldoc/foldoc.cgi?query=<args>
+	Patents             http://www.patents.ibm.com/details?pn=<args>
+	Quote               http://fast.quote.com/fq/quotecom/quote?symbols=<args>
+	Dictionary          http://www.m-w.com/cgi-bin/dictionary?book=Dictionary&va=<args>
+	Thesaurus           http://www.m-w.com/cgi-bin/thesaurus?book=Thesaurus&va=<args>
+	LibraryOfCongress   http://lcweb.loc.gov/Harvest/cgi-bin/BrokerQuery.pl.cgi?query=<args>&host=lcweb.loc.gov%3A8501&brokerqueryconfig=BrokerLC.cf&maxresultflag=50&caseflag=on&descflag=on&verbose=on
+}
+
+"Package Tracking" {
+	UPS                 http://wwwapps.ups.com/etracking/tracking.cgi?submit=Track&InquiryNumber1=<args>&TypeOfInquiryNumber=T
+	FedEx               http://www.fedex.com/cgi-bin/track_it?airbills=<args>
+	Airborne            http://www.airborne.com/cgi-bin/AirbillTrace?ShipmentNumber=<args>
+}
+
+Miscellaneous {
+	Finger              http://kryten.eng.monash.edu.au/cgi-bin/gspam?c=FINGER+user%40hostname&a=<args>
+	NSLookup            http://www.uia.ac.be/cgi-bin/nslookup-query?hostname=<args>
+	MerckMan            http://www.merck.com/!!tevVX3Hs_tevVX3Hs_/htbin/search_mmanual/?term=<args>
+	LettermanTop10      http://marketing.cbs.com/cgi/excite/bin/lateshow.cgi?sp=sp&search=<args>
+	Anonymizer          http://anon.free.anonymizer.com/<args>
+}

@@ -13,7 +13,7 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  July 22, 1999  12:30 AM                    *
+* Last Update:  August 11, 1999  1:00 AM                   *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
@@ -166,7 +166,10 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
   if(!(*(settings->Background)))
     settings->Transparent = 0;
 
-  GetClientRect(GetDesktopWindow(), &screen);
+  screen.left = 0;
+  screen.right = GetSystemMetrics(SM_CXSCREEN);
+  screen.top = 0;
+  screen.bottom = GetSystemMetrics(SM_CYSCREEN);
 
   /* Offsets */
   if(offsetx == 0) {
@@ -257,7 +260,7 @@ void ContextMenuInit()
         strcpy(buf, "&Aliases");
         InsertMenuItem(hContextMenu, i, TRUE, &item);
       } else if(indices[2] == i) {
-          item.fMask = MIIM_SUBMENU | MIIM_TYPE;
+        item.fMask = MIIM_SUBMENU | MIIM_TYPE;
         item.hSubMenu = hSearchEngineMenu;
         item.fType = MFT_STRING;
         strcpy(buf, "&Search Engines");
@@ -445,52 +448,6 @@ void WriteHistory()
 
 
 /***********************************************************
-* void CreateSearchEnginePopupMenu()                       *
-*                         *  *  *  *                       *
-*    Arguments:                                            *
-*                                                          *
-*                         *  *  *  *                       *
-* Creates the search engine popup menu based on the        *
-* current list of search engines.                          *
-***********************************************************/
-
-void CreateSearchEnginePopupMenu()
-{
-  int i = 0;
-  char *p;
-
-  hSearchEngineMenu = CreatePopupMenu();
-  item.cbSize = sizeof(MENUITEMINFO);
-  item.fMask = MIIM_TYPE | MIIM_ID;
-  item.fType = MFT_STRING;
-  item.wID = HMI_USER_SE;
-
-  HistoryMoveToHead(&searchEngines);
-
-  if(searchEngines) {
-    while(searchEngines->next) {
-      p = (char *)malloc(strlen(searchEngines->path) + 1);
-      strcpy(p, searchEngines->path);
-      item.dwTypeData = strtok(p, "\t ");
-      item.cch = sizeof(p);
-      InsertMenuItem(hSearchEngineMenu, i, TRUE, &item);
-      ++item.wID;
-      ++i;
-      HistoryMoveNext(&searchEngines, 1);
-      free(p);
-    }
-
-    p = (char *)malloc(strlen(searchEngines->path) + 1);
-    strcpy(p, searchEngines->path);
-    item.dwTypeData = strtok(p, "\t ");
-    item.cch = sizeof(p);
-    InsertMenuItem(hSearchEngineMenu, i, TRUE, &item);
-    free(p);
-  }
-}
-
-
-/***********************************************************
 * void SearchEngineInit()                                  *
 *                         *  *  *  *                       *
 *    Arguments:                                            *
@@ -507,8 +464,15 @@ void CreateSearchEnginePopupMenu()
 
 void SearchEngineInit(struct CommandSettings *cs)
 {
-  char listline[512], *p;
+  char listline[1024], *p, *p2;
   FILE *fpEngineList;
+  /*int nummenus = 0;*/
+  HMENU tempmenu = NULL;
+  struct  MenuHist {
+    HMENU *hm;
+    int curitem;
+    struct MenuHist *prev;
+  } *mhist = NULL, *tmphist = NULL;
 
   fpEngineList = fopen(cs->SearchEngineList, "r");
   if(!fpEngineList)
@@ -516,20 +480,34 @@ void SearchEngineInit(struct CommandSettings *cs)
 
   hSearchEngineMenu = CreatePopupMenu();
   item.cbSize = sizeof(MENUITEMINFO);
-  item.fMask = MIIM_TYPE | MIIM_ID;
   item.fType = MFT_STRING;
   item.wID = HMI_USER_SE;
+
+  mhist = (struct MenuHist *)malloc(sizeof(struct MenuHist));
+  mhist->hm = &hSearchEngineMenu;
+  mhist->curitem = 0;
+  mhist->prev = NULL;
+
+  strcpy(listline, "");
 
   for(;;) {
     if(!fgets(listline, 511, fpEngineList))
       break;
 
-    p = strstr(listline, ";");
+    p = strchr(listline, '\n');
+    if(p)
+      *p = '\0';
+
+    p = strchr(listline, ';');
     if(p == listline)
       continue;
 
     if(p)
       *p = '\0';
+
+    p = listline;
+    while(isspace(*p))
+      ++p;
 
     // strtok for Default.  Save the other token to defaultEngine
     if(!(_strnicmp("default", listline, strlen("default")*sizeof(char)))) {
@@ -540,16 +518,56 @@ void SearchEngineInit(struct CommandSettings *cs)
       continue;
     }
 
-    if(*listline) {
-      HistoryAdd(&searchEngines, listline, &nSearchEngines);
-      p = strtok(listline, "\t ");
-      item.dwTypeData = p;
-      item.cch = sizeof(p);
-      InsertMenuItem(hSearchEngineMenu, item.wID - HMI_USER_SE, TRUE, &item);
-      ++item.wID;
+    if(*p) {
+      p2 = strchr(p, '{');
+      if(p2) {
+        p2 = p;
+        if(*p2 == '\"')
+          p2 = strtok(p, "\"");
+        else
+          p2 = strtok(p, " \t");
+        if(p2 && *p2) {
+          tmphist = (struct MenuHist *)malloc(sizeof(struct MenuHist));
+          tmphist->hm = (HMENU *)malloc(sizeof(HMENU));
+          *(tmphist->hm) = CreatePopupMenu();
+          tmphist->curitem = 0;
+          tmphist->prev = mhist;
+          item.dwTypeData = p2;
+          item.cch = sizeof(p2);
+          item.fMask = MIIM_SUBMENU | MIIM_TYPE;
+          item.hSubMenu = *(tmphist->hm);
+          InsertMenuItem(*(mhist->hm), mhist->curitem, TRUE, &item);
+          mhist = tmphist;
+        }
+      } else {
+        p2 = strchr(p, '}');
+        if(p2) {
+          tmphist = mhist;
+          mhist = mhist->prev;
+          free(tmphist->hm);
+          free(tmphist);
+          ++(mhist->curitem);
+        } else {
+          p2 = p;
+          if(*p2) {
+            HistoryAdd(&searchEngines, p2, &nSearchEngines);
+            p2 = strtok(p, "\t ");
+            if(p2 && *p2) {
+              item.fMask = MIIM_TYPE | MIIM_ID;
+              item.hSubMenu = NULL;
+              item.dwTypeData = p2;
+              item.cch = sizeof(p2);
+              InsertMenuItem(/*hSearchEngineMenu*/*(mhist->hm), /*item.wID - HMI_USER_SE*/mhist->curitem, TRUE, &item);
+              ++item.wID;
+              ++(mhist->curitem);
+            }
+          }
+        }
+      }
     }
   }
 
+  free(mhist);
   fclose(fpEngineList);
 }
 
@@ -766,9 +784,9 @@ void ParseSearchCommand(char *command, char *args)
 *    Arguments:                                            *
 *                                                          *
 *    - char *command                                       *
-*      Search Engine string.                               *
+*      Alias name                                          *
 *    - char *args                                          *
-*      The search phrase for this engine                   *
+*      Any extra arguments to this alias' command          *
 *                         *  *  *  *                       *
 * This function is called after the user has entered a     *
 * command.  It searches for an alias match and executes it *
@@ -1185,7 +1203,7 @@ void ParseContextMenuCommand(long retval, char *buf)
   } else if(retval >= HMI_USER_HISTORY) {
     GetMenuItemInfo(hHistoryMenu, retval, FALSE, &item);
     if(cs->ContextMenuExecute) {
-      ExecCommand(buf, FALSE);
+			ExecCommand(buf, FALSE);
     } else {
       SetWindowText(hText, buf);
       SendMessage(hText, EM_SETSEL, 0, -1);
@@ -1964,7 +1982,7 @@ void BangHideCommand(HWND caller, char *args)
 
 void BangBrowseFile(HWND caller, char *args)
 {
-  char file[_MAX_PATH], file_total[_MAX_PATH], title[] = "LSXCommand Open File", *filter = NULL, *p, *p2;
+  char file[_MAX_PATH], file_total[_MAX_PATH], filetitle[_MAX_PATH], title[] = "LSXCommand Open File", *filter = NULL, *p = NULL, *p2 = NULL;
   OPENFILENAME ofn;
 
   if(args && *args) {
@@ -1978,18 +1996,28 @@ void BangBrowseFile(HWND caller, char *args)
       p2 += strlen(p2) + 1;
       p = strchr(p2, '|');
     }
+  } else {
+    filter = (char *)malloc(strlen("All Files (*.*)\0*.*") + 1);
+    strcpy(filter, "All Files (*.*)\0*.*");
   }
 
-  strcpy(file, "");
-  ofn.lStructSize = sizeof(ofn);
+  strcpy(file, "*.*\0");
+  ofn.lStructSize = sizeof(OPENFILENAME);
   ofn.hwndOwner = hWnd;
   ofn.lpstrFilter = filter;
-  ofn.lpstrCustomFilter = NULL;
-  ofn.nFilterIndex = 1;
+  ofn.lpstrCustomFilter = (LPSTR) NULL;
+  ofn.nMaxCustFilter = 0L;
+  ofn.nFilterIndex = 0;
   ofn.lpstrFile = file;
-  ofn.nMaxFile = _MAX_PATH - 1;
+  ofn.nMaxFile = sizeof(file);
+  ofn.lpstrFileTitle = filetitle;
+  ofn.nMaxFileTitle = sizeof(filetitle);
+  ofn.lpstrInitialDir = NULL;
+  ofn.nFileOffset = 0;
+  ofn.nFileExtension = 0;
+  ofn.lpstrDefExt = "";
   ofn.lpstrTitle = title;
-  ofn.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_EXPLORER;
+  ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_HIDEREADONLY | OFN_EXPLORER; /*OFN_EXPLORER; */
 
   if(GetOpenFileName(&ofn)) {
     p = ofn.lpstrFile;
@@ -2000,11 +2028,11 @@ void BangBrowseFile(HWND caller, char *args)
       p += strlen(p) + 1;
       while(*p) {
         strcpy(p2, p);
-        ExecCommand(file_total, FALSE);
+        ExecCommand(file_total, TRUE);
         p += strlen(p) + 1;
       }
     } else
-      ExecCommand(file_total, FALSE);
+      ExecCommand(file_total, TRUE);
   }
 
   if(filter)
@@ -2031,14 +2059,85 @@ void BangBrowseFolder(HWND caller, char *args)
   char title[] = "LSXCommand Browse", path[_MAX_PATH];
   BROWSEINFO bi = {hWnd, NULL, path, "LSXCommand Browse", BIF_RETURNONLYFSDIRS, NULL, 0, 0};
   LPITEMIDLIST pidl;
+  IMalloc *pm;
+
+  bi.hwndOwner = hWnd;
+  bi.pidlRoot = NULL;
+  bi.pszDisplayName = path;
+  bi.lpszTitle = title;
+  bi.ulFlags = BIF_RETURNONLYFSDIRS;
+  bi.lpfn = NULL;
+  bi.lParam = 0;
+  bi.iImage = 0;
 
   pidl = SHBrowseForFolder(&bi);
 
   if(pidl && SHGetPathFromIDList(pidl, path)) {
-    ExecCommand(path, FALSE);
+    ExecCommand(path, TRUE);
+    SHGetMalloc(&pm);
+    if (pm) {
+      pm->lpVtbl->Free(pm,pidl);
+      pm->lpVtbl->Release(pm);
+    }
   }
 }
 #endif //LSXCOMMANDCLOCK_EXPORTS
+
+
+/***********************************************************
+* void BangMove()										                       *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - HWND caller                                         *
+*      The HWND of the window that called this !Bang       *
+*      Command.                                            *
+*    - char *args                                          *
+*      Space delimited pair of numbers telling how far to  *
+*      move left/right, up/down (depending on sign)        *
+*                         *  *  *  *                       *
+* Moves the main LSXCommand according to the input         *
+***********************************************************/
+
+void BangMove(HWND caller, char *args)
+{
+  int cx, cy;
+  char *str, *xstr, *ystr;
+
+  if(args && *args) {
+    str = (char *)malloc(strlen(args) + 1);
+    strcpy(str, args);
+
+    xstr = strtok(args, " \t");
+    ystr = strtok(args, "");
+
+    cy = GetSystemMetrics(SM_CYSCREEN);
+
+    if(xstr) {
+      cs->x += atoi(xstr);
+      cx = GetSystemMetrics(SM_CXSCREEN);
+
+      if(cs->x < 0)
+        cs->x = 0;
+      else if(cs->x > (cx - cs->width))
+        cs->x = cx - cs->width;
+    }
+
+    if(ystr) {
+      cs->y += atoi(ystr);
+      cy = GetSystemMetrics(SM_CYSCREEN);
+
+      if(cs->y < 0)
+        cs->y = 0;
+      else if(cs->y > (cy - cs->height))
+        cs->y = cy - cs->height;
+    }
+
+    SetWindowPos(hWnd, cs->NoAlwaysOnTop ? HWND_NOTOPMOST : HWND_TOPMOST, cs->x, cs->y, 0, 0, SWP_NOSIZE);
+    free(str);
+  }
+}
+
 
 /***********************************************************
 * int initModule()                                         *
@@ -2096,11 +2195,13 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
   AddBangCommand("!COMMANDHIDE", BangHideCommand);
   AddBangCommand("!COMMANDBROWSEFILE", BangBrowseFile);
   AddBangCommand("!COMMANDBROWSEFOLDER", BangBrowseFolder);
+  AddBangCommand("!COMMANDMOVE", BangMove);
 #else //LSXCOMMANDCLOCK_EXPORTS
 	AddBangCommand("!TOGGLECOMMANDCLOCK",BangToggleCommand);
 	AddBangCommand("!FOCUSCOMMANDCLOCK",BangFocusCommand);
   AddBangCommand("!COMMANDCLOCKSHOW", BangShowCommand);
   AddBangCommand("!COMMANDCLOCKHIDE", BangHideCommand);
+  AddBangCommand("!COMMANDCLOCKMOVE", BangMove);
 #endif
 	
   if(!cs->HiddenOnStart) {

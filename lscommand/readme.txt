@@ -3,8 +3,8 @@
                     *           by Visigoth           *
                     *   gandhimail@worldnet.att.net   *
                     *         ==============          *
-                    *         Version: 1.7.4          *
-                    *          July 24, 1999          *
+                    *         Version: 1.7.5          *
+                    *         August 10, 1999         *
                     *         ==============          *
                     * http://home.att.net/~gandhimail *
                     ***********************************
@@ -77,6 +77,10 @@ II.   How to use LSXCommand
            - *CommandAlias
 
       II.3 Added !Bang Commands
+           New to 1.7.5:
+           -------------
+           - !CommandMove
+           
            New to 1.7.3:
            -------------
            - !CommandBrowseFile
@@ -157,10 +161,11 @@ ii. Kudos
    -------
    The following people gave me ideas after I released version 1.0:
 
+   - Mike Thrall sent in the !bang commands to move LSXCommand
    - gizzmo also sent in the idea for switching between clock/amp mode
    - gizzmo first sent in the idea for a separate clock module
    - Kryten sent in the idea about Browse File and Folder
-   - Ikka Nisula sent in the request for multiple base support
+   - Ilkka Nisula sent in the request for multiple base support
    - Alasdair sent in a request for negative screen coordinates
    - John Kuhn sent in the WinAmp title scrolling idea
    - Reiner Meyer sent in the idea to add Clock functionality
@@ -194,6 +199,38 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.7.5
+   -------------
+   More bug fixes; new features
+   
+     Documentation Changes
+     `````````````````````
+     - Fixed Ilkka Nisula's name.
+     - Updated Search Engine list documentation to reflect
+       "categories"
+     - Updated Section II.1 to note that new engines are only added
+       to the master search engine list available on my web site.
+     
+     Bug Fixes
+     `````````
+     - Fixed !CommandBrowse* crashes
+     
+     New Features
+     ````````````
+     - Added Mike Thrall's code for moving LSXCommand via a !Bang
+       (see below)
+     - Added category feature to Search Engine list (see the end of
+       section II.1 for details)
+     - Added following !Bang Commands:
+     
+       * !CommandMove / !CommandClockMove
+     
+     - Added following Search Engines (see section II.1 for details)
+     
+       * DVDExpress
+       * CodeGuru
+       * ZDNet HotFiles
 
    Version 1.7.4
    -------------
@@ -780,13 +817,72 @@ II. How to use LSXCommand
 
    For more information about adding, removing, or changing engines
    in the list file, see the section below.
+   
+   PLEASE NOTE: LSXCommand's default search engine list is quite
+   large; however, there are tons of other good search engines out
+   there.  After version 1.5, all engines which are said to be Added
+   in the Change Log (above) are actually added to the master
+   LSXCommand Search Engines list available at my web site:
+   http://home.att.net/~gandhimail/litestep/lsxcommand-engines.list
+   
+   CATEGORY FUNCTIONALITY
+   
+   Before I start on the category functionality, I have to say the
+   following: your default search engine (identified by the
+   "Default ..." line in your search engines list) should be left
+   alone on a line by itself. Try and make it the first non-comment
+   line in your engines list.
+   
+   Just one more note: When a search engine is in a category, you
+   access it *THE SAME WAY* when typing a search command.
+   (ie. even if "Amazon" is in the "Books" category, you still use it
+   by typing "?Amazon <book>")
+   
+   That said, we can get to the meat of the subject.  Categories are
+   the same as sub-menus in the popup menu.  The only difference
+   between search engines in a category and not in a category is the
+   fact that one is in a sub-menu (such as "Books ->" or "MP3 ->") and
+   the other is in the root "Search Engines ->" sub-menu.
+   
+   To create a category in your search engines list, all you have to
+   do is type the name of the category and then an open brace ( "{" ).
+   This must be on its own line.  Now you can place as many search
+   engines as you like in that category, each one on its own line just
+   as in the original engines.list.  To close a category, simply place
+   a closing brace ( "}" ) on its own line.
+   
+   You can also have spaces in your category names (NOTE: This doesn't
+   mean you can have spaces in your search engine names.  That has
+   not been implemented).  To do this, enclose the category name in
+   quotes, such as "Music and Movies".  Also, you can have a keyboard
+   accelerator assigned to a sub-menu.  (You know how the File menu
+   and the Edit menu have underlines under the 'F' and 'E'?  You can
+   have that too - those are called keyboard accelerators).  To have
+   a keyboard accelerator for a particular letter in the category
+   name, place an ampersand ( "&" ) in front of the letter.  For
+   instance, "Music and &Movies".  If you want to have an ampersand
+   inside the name of a category, put two ampersands in a row.  As an
+   example, "Music && Movies" will have an ampersand between "Music"
+   and "Movies" but no keyboard accelerator.  "Music && &Movies" will
+   have both an ampersand and an accelerator.
+   
+   You are allowed to have sub-categories ad-infinitum (meaning, you
+   can make sub-menus on the sub-menus and just keep going as far as
+   you like.  You could do something like Computers->Software->
+   Download Libraries->.
+   
+   For human readability, you can also have white space in front of
+   both search engine lines and category lines.
+   
+   For an example, see the included engines.list file in this
+   distribution of LSXCommand.
 
 
    II.2 Added RC Commands
    ----------------------
      NOTE: Please see original LSCommand readme for previous
      RC Commands.
-     
+
      CommandAddExternalsToHistory
      ````````````````````````````
      Description: If this is on, LSXCommand will add any commands
@@ -1149,6 +1245,16 @@ II. How to use LSXCommand
    -------------------------
      NOTE: See Original LSCommand readme for previous !Bang Commands
      
+     !CommandMove
+     ````````````
+     Description: Moves the LSXCommand window by the amount specified
+     in the arguments.  The amount is a pair of numbers, separated by
+     a space, specifying the number of pixels to move left/right or
+     up/down.  If there is only one number, it is assumed to be
+     horizontal movement.
+     
+       !CommandMove 0 100  ; moves it 100 pixels down
+     
      !CommandBrowseFile
      ``````````````````
      Description: Brings up an Open Dialog Box to browse for a file
@@ -1498,6 +1604,11 @@ II. How to use LSXCommand
      * CommandClockScrollWinAmpTitle
      * CommandClockHideOnUnfocus
      * CommandClockString ****
+     * !ToggleCommandClock
+     * !FocusCommandClock
+     * !CommandClockShow
+     * !CommandClockHide
+     * !CommandClockMove
    
    **** NOTE: CommandClockString is the same as the "CommandTime"
    RC Command for LSXCommand (see section II.8 for details)
