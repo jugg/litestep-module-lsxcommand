@@ -126,6 +126,10 @@ SOURCE=.\menu.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\AggressiveOptimize.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\exports.h
 # End Source File
 # Begin Source File

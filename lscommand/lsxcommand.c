@@ -29,6 +29,15 @@
 #include "lsxcommand.h"
 #include "lsapi.h"
 
+//20021115
+int msgs[] = {LM_GETREVID, 0};
+const char szAppName[] = "lsxcommand.dll"; // Our window class, etc
+const char rcsRevision[] = "$Revision: 1.8.3"; // Our Version
+const char rcsId[] = "$Id: lsxcommand.c, v 1.8.3 beta$"; // The Full RCS ID.
+
+//20021114
+#define MAX_LINE_LENGTH 4096
+
 #ifndef LSXCOMMANDCLOCK_EXPORTS
 
 BOOL editfirst = FALSE, staticfirst = FALSE;
@@ -47,6 +56,8 @@ char *szApp = "LSXCommandClock";
 #endif //LSXCOMMANDCLOCK_EXPORTS
 
 BOOL visible = FALSE;
+BOOL lsboxed = FALSE;
+BOOL waitforlsBox = FALSE;
 char *szModuleIniPath = NULL;
 enum Timers curTimer = NO_TIMER;
 HINSTANCE hInst = NULL;
@@ -74,10 +85,17 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
 {
   int offsetx, offsety;
   RECT screen;
+  // 20021114
+  char szTemp[256];
+
   struct CommandSettings *settings = (struct CommandSettings *)malloc(sizeof(struct CommandSettings));
   szModuleIniPath = (char *)malloc(strlen(lsPath) + strlen("\\MODULES.INI") + 1);
   strcpy(szModuleIniPath, lsPath);
   strcat(szModuleIniPath, "\\MODULES.INI");
+
+  //20021114
+  settings->OnFocusCommand = NULL;
+  settings->OnUnfocusCommand = NULL;
 
 #ifndef LSXCOMMANDCLOCK_EXPORTS
 	GetRCString("CommandTextFontFace",settings->TextFontFace,"Arial",256);
@@ -101,6 +119,7 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
 	settings->NoClearOnCommand = GetRCBool("CommandNoClearOnCommand",TRUE);
 	settings->HideOnCommand = GetRCBool("CommandHideOnCommand",TRUE);
 	settings->HiddenOnStart = GetRCBool("CommandHiddenOnStart",TRUE);
+	settings->WaitForBox = GetRCBool("CommandWaitForBox",TRUE);
 	settings->ClearOnHide = GetRCBool("CommandClearOnHide",TRUE);
 	settings->NoCursorChange = GetRCBool("CommandNoCursorChange",TRUE);
   settings->SelectAllOnFocus = GetRCBool("CommandSelectAllOnFocus", TRUE);
@@ -149,6 +168,7 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
 	settings->NoAlwaysOnTop = GetRCBool("CommandClockNotAlwaysOnTop",TRUE);
 	settings->notmoveable = GetRCBool("CommandClockNotMoveable",TRUE);
 	settings->HiddenOnStart = GetRCBool("CommandClockHiddenOnStart",TRUE);
+	settings->WaitForBox = GetRCBool("CommandClockWaitForBox",TRUE);
 	settings->NoCursorChange = GetRCBool("CommandClockNoCursorChange",TRUE);
   settings->SelectAllOnFocus = GetRCBool("CommandClockSelectAllOnFocus", TRUE);
   settings->SelectAllOnMouseFocus = GetRCBool("CommandClockSelectAllOnMouseFocus", TRUE);
@@ -209,6 +229,15 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
     settings->origy = settings->y = screen.bottom / 2 - settings->height / 2 + settings->y;
   else
     settings->origy = settings->y = screen.bottom + settings->y;
+
+	//20021114
+	GetRCLine("CommandOnFocus", szTemp, MAX_LINE_LENGTH, "!NONE");
+	settings->OnFocusCommand = (char*) malloc((strlen(szTemp)+1)*sizeof(char));
+	strcpy(settings->OnFocusCommand, szTemp);
+  
+	GetRCLine("CommandOnUnfocus", szTemp, MAX_LINE_LENGTH, "!NONE");
+	settings->OnUnfocusCommand = (char*) malloc((strlen(szTemp)+1)*sizeof(char));
+	strcpy(settings->OnUnfocusCommand, szTemp);
 
 	return settings;
 }
@@ -642,7 +671,7 @@ void CreateAliasPopupMenu()
 //	original src - D:\VC\LiteStep\ls-b24\lsapi\lsapi.c
 //	tanuki modify version
 //
-#define MAX_LINE_LENGTH 4096
+
 int cz_LCTokenize (LPCSTR szString, LPSTR *lpszBuffers, DWORD dwNumBuffers, LPSTR szExtraParameters)
 {
 	int		index = 0;
@@ -1653,6 +1682,9 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
   case WM_KILLFOCUS:
     if(visible && cs->HideOnUnfocus) {
 	    ShowWindow(hWnd, SW_HIDE);
+		//20021114
+        if(cs->OnUnfocusCommand != NULL)
+			LSExecute(NULL,cs->OnUnfocusCommand, NULL);
 #ifndef LSXCOMMANDCLOCK_EXPORTS
       if(cs->ClearOnHide) {
         SetWindowText(hText,"");
@@ -1712,6 +1744,8 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		SendMessage(hText,WM_SETFONT,(WPARAM)hFont,FALSE);
 		//ShowWindow(hBG,SW_SHOW);
 		ShowWindow(hText,SW_SHOW);
+		//20021115
+		SendMessage(GetLitestepWnd(), LM_REGISTERMESSAGE, (WPARAM)hWnd, (LPARAM)msgs);
 		return 0;
 		}
 	case WM_SETCURSOR:
@@ -1772,6 +1806,20 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
       return 0;
     }
     break;
+  case WM_DESTROY:
+	    //20021115
+		SendMessage(GetLitestepWnd(), LM_UNREGISTERMESSAGE, (WPARAM)hWnd, (LPARAM)msgs);
+        if (lsboxed)
+		{
+			cs->WaitForBox = TRUE;
+			visible = TRUE;
+			SetWindowLong(hWnd, GWL_STYLE, (GetWindowLong(hWnd, GWL_STYLE) &~ WS_CHILD)|WS_POPUP);
+			SetParent(hWnd, 0);
+			SetWindowPos(hWnd,HWND_TOP,cs->x,cs->y,0,0,SWP_NOSIZE|SWP_HIDEWINDOW);
+			lsboxed = FALSE;
+			return 0;
+		}
+    break;
 #ifndef LSXCOMMANDCLOCK_EXPORTS
 	case WM_DROPFILES:
 		{
@@ -1783,6 +1831,26 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		return 0;
 		}
 #endif //LSXCOMMANDCLOCK_EXPORTS
+	//20021115
+	case LM_GETREVID:
+		{
+			char* buf = (char*)(lParam);
+	
+			switch (wParam)
+			{
+				case 0:
+					sprintf(buf, "LsxCommand %s ", &rcsRevision[11]);
+					buf[strlen(buf) - 1] = '\0';
+					break;
+				case 1:
+					strcpy(buf, &rcsId[1]);
+					buf[strlen(buf) - 1] = '\0';
+					break;
+				default:
+					strcpy(buf, "");
+			}
+			return strlen(buf);
+		}
 	}
 	return DefWindowProc(hWnd,msg,wParam,lParam);
 }
@@ -1809,7 +1877,7 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 VOID CALLBACK TimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
 #ifndef LSXCOMMANDCLOCK_EXPORTS
-  if(GetFocus() != hText && visible) {
+  if(GetFocus() != hText && visible && !cs->WaitForBox) {
 #else
   if(visible) {
 #endif
@@ -1904,6 +1972,9 @@ void BangFocusCommand(HWND caller, const char *args)
 	if(!visible) {
 		ShowWindow(hWnd,SW_SHOWNORMAL);
 		visible = TRUE;
+		//20021114
+		if(cs->OnFocusCommand)
+			LSExecute(NULL,cs->OnFocusCommand, NULL);
 	}
 	SetForegroundWindow(hText);
 	SetFocus(hText);
@@ -2396,6 +2467,50 @@ void BangSetText(HWND caller, const char *args)
 }
 #endif LSXCOMMANDCLOCK_EXPORTS
 
+/***********************************************************
+* void BangBoxHook()                                       *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - HWND caller                                         *
+*      The HWND of the window that called this !Bang       *
+*      Command.                                            *
+*    - const char *args                                    *
+*      Options passed by LsBox to LsxCommand               *
+*                         *  *  *  *                       *
+***********************************************************/
+void BangBoxHook(HWND caller, const char *args)
+{
+  char *handle = strrchr(args,' ');
+
+  if (handle) 
+  {
+	  HWND boxwnd = (HWND)atoi(handle+1);
+	  if (boxwnd) 
+	  {
+		  lsboxed = TRUE;
+
+		  if (boxwnd != GetParent(hWnd))
+		  {
+			  SetWindowLong(hWnd, GWL_STYLE, (GetWindowLong(hWnd, GWL_STYLE) &~ WS_POPUP)|WS_CHILD);
+			  SetParent(hWnd, boxwnd);
+			  // THis would cause problems in Win2k
+			  // SetWindowLong(hWnd, GWL_STYLE, (GetWindowLong(hWnd, GWL_STYLE) &~ WS_CHILD)|WS_POPUP);
+			  if (cs->WaitForBox)
+				  cs->WaitForBox = FALSE;
+			  //20021114
+			  if(cs->HiddenOnStart)
+				  ShowWindow(hWnd, SW_HIDE);
+			  else
+				  ShowWindow(hWnd, SW_SHOWNORMAL);
+		  }
+	  }
+  }
+	return;
+}
+
+
+
 
 /***********************************************************
 * int initModuleEx()                                       *
@@ -2458,6 +2573,7 @@ int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath)
   AddBangCommand("!COMMANDMOVE", BangMove);
   AddBangCommand("!COMMANDTOGGLETIMER", BangToggleTimer);
   AddBangCommand("!COMMANDSETTEXT", BangSetText);
+  AddBangCommand("!COMMANDBOXHOOK", BangBoxHook);
 #else //LSXCOMMANDCLOCK_EXPORTS
   AddBangCommand("!TOGGLECOMMANDCLOCK",BangToggleCommand);
   AddBangCommand("!FOCUSCOMMANDCLOCK",BangFocusCommand);
@@ -2465,10 +2581,14 @@ int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath)
   AddBangCommand("!COMMANDCLOCKHIDE", BangHideCommand);
   AddBangCommand("!COMMANDCLOCKMOVE", BangMove);
   AddBangCommand("!COMMANDCLOCKTOGGLETIMER", BangToggleTimer);
+  AddBangCommand("!COMMANDCLOCKBOXHOOK", BangBoxHook);
 #endif
 	
   if(!cs->HiddenOnStart) {
-		ShowWindow(hWnd,SW_SHOWNORMAL);
+	  if(cs->WaitForBox)
+		  ShowWindow(hWnd,SW_HIDE);
+	  else
+		  ShowWindow(hWnd,SW_SHOWNORMAL);
 		visible = TRUE;
   } else {
     ShowWindow(hWnd, SW_HIDE);
@@ -2568,5 +2688,18 @@ int quitModule(HINSTANCE dll)
 	DestroyWindow(hWnd);
 	UnregisterClass(szApp,hInst);
 	DeleteObject(hFont);
+	//20021114
+	if (cs->OnFocusCommand != NULL) {
+//		delete [] cs->OnFocusCommand;
+		free(cs->OnFocusCommand);
+		cs->OnFocusCommand = NULL;
+	}
+	if (cs->OnUnfocusCommand != NULL) {
+		//delete [] cs->OnUnfocusCommand;
+		free(cs->OnUnfocusCommand);
+		cs->OnUnfocusCommand = NULL;
+	}
+
+	
 	return 0;
 }

@@ -2,6 +2,7 @@
 #define LSCOMMAND_H
 
 #include "resource.h"
+#include "aggressiveoptimize.h"
 
 /* Timer Enumeration */
 enum Timers {
@@ -47,6 +48,7 @@ struct CommandSettings {
 	BOOL NoAlwaysOnTop;
 	BOOL notmoveable;
 	BOOL HiddenOnStart;
+	BOOL WaitForBox;
   BOOL SelectAllOnFocus;
   BOOL SelectAllOnMouseFocus;
   BOOL ScrollWinAmp;
@@ -76,6 +78,9 @@ struct CommandSettings {
 	COLORREF BGColor;
 	COLORREF TextColor;
 	COLORREF BorderColor;
+	//20021114
+	char* OnFocusCommand;
+	char* OnUnfocusCommand;
 };
 
 #ifndef LSXCOMMANDCLOCK_EXPORTS

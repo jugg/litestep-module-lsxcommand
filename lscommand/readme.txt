@@ -3,8 +3,8 @@
                     *            by Visigoth            *
                     *    gandhimail@worldnet.att.net    *
                     *          ===============          *
-                    *          Version: 1.8.2           *
-                    *         October 23, 2000          *
+                    *          Version: 1.8.3           *
+                    *         November 15, 2002         *
                     *          ===============          *
                     * http://floach.pimpin.net/visigoth *
                     *************************************
@@ -19,6 +19,11 @@ II.   How to use LSXCommand
 
       II.1 Internet Searches
       II.2 Added RC Commands
+           New to 1.8.3 (jesus_mjjg):
+           --------------------------
+           - CommandOnFocus
+           - CommandOnUnfocus
+
            New to 1.8.1:
            -------------
            - CommandMusicPlayer
@@ -85,6 +90,10 @@ II.   How to use LSXCommand
            - *CommandAlias
 
       II.3 Added !Bang Commands
+           New in a special version for lsbox:
+           -----------------------------------
+           - !CommandBoxHook
+
            New to 1.7.7:
            -------------
            - !CommandToggleTimer
@@ -224,6 +233,29 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.8.3 (jesus_mjjg)
+   -------------
+     Bug Fixes
+     `````````
+     - If lsxcommand was loaded in a box, CommandStartHidden wouldn't work, now it does.
+
+     New Features
+     ````````````
+     - CommandOnFocus
+       Will execute a command when you !FocusCommand
+     - CommandOnUnfocus
+       Will execute a command when you un-focus lsxcommand (get out of the edit box)
+     - Now there is a module version in the about box/ls control panel
+
+   Special Version for lsbox 2.75
+   ------------------------------
+     New Features
+     ````````````
+     - !CommandBoxHook
+       This is used with lsbox:
+       *ModuleHook !CommandBoxHook
+       Please check the LsBox documentation
 
    Version 1.8.2
    -------------
@@ -1412,6 +1444,24 @@ II. How to use LSXCommand
      Example: CommandSelectAllOnFocus	; Selects all on lsxcommand
 
 
+     CommandOnFocus
+     ``````````````
+     Description: Executes a command on !FocusCommand.
+
+     Default: -
+
+     Example: CommandOnFocus !LabelHide
+
+
+     CommandOnUnFocus
+     ````````````````
+     Description: Executes a command when the command box loses focus.
+
+     Default: -
+
+     Example: CommandOnUnFocus !LabelShow
+
+
      *CommandAlias
      `````````````
      Description: Aliases (or Binds) a phrase to another command.
@@ -1525,6 +1575,12 @@ II. How to use LSXCommand
      Description: Rescans the engines.list file.  Note: it does not
      load a new engines.list file if specified in the step.rc; it
      will attempt to reload the same engines.list file
+
+     !CommandBoxHook
+     ```````````````
+     Description: This is used with lsbox. Example:
+       *ModuleHook !CommandBoxHook
+     Please check the LsBox documentation.
 
 
    II.4 The engines.list File

@@ -108,6 +108,10 @@ PostBuild_Cmds=copy $(OutDir)\lsxcommand.dll c:\litestep\luxo\modules\debug\lsxc
 # PROP Default_Filter "h"
 # Begin Source File
 
+SOURCE=.\AggressiveOptimize.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\exports.h
 # End Source File
 # Begin Source File
