@@ -43,7 +43,8 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 1
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /G4 /MD /W3 /Gi /vd0 /GX /O1 /Ob2 /I "c:\litestep\source\ls-b24\litestep" /I "c:\litestep\source\ls-b24\lsapi" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DLL_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O1 /I "../../ls-b247/lsapi" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DLL_EXPORTS" /FD /c
+# SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -53,13 +54,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 lsapi.lib shlwapi.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib lsapi.lib shlwapi.lib /nologo /base:"0x15000000" /dll /machine:I386 /out:"Release/lsxcommand.dll" /libpath:"c:\litestep\source\ls-b24\lsapi\Release" /opt:nowin98
-# SUBTRACT LINK32 /pdb:none
-# Begin Special Build Tool
-OutDir=.\Release
-SOURCE="$(InputPath)"
-PostBuild_Cmds=copy $(OutDir)\lsxcommand.dll c:\litestep\luxo\modules\lsxcommand.dll
-# End Special Build Tool
+# ADD LINK32 lsapi.lib shlwapi.lib kernel32.lib user32.lib comdlg32.lib gdi32.lib shell32.lib advapi32.lib /nologo /base:"0x15000000" /dll /pdb:none /machine:I386 /out:"Release/lsxcommand.dll" /libpath:"../../ls-b247/lsapi/release" /opt:NOWIN98
+# SUBTRACT LINK32 /debug
 
 !ELSEIF  "$(CFG)" == "lscommand - Win32 Debug"
 
@@ -75,7 +71,7 @@ PostBuild_Cmds=copy $(OutDir)\lsxcommand.dll c:\litestep\luxo\modules\lsxcommand
 # PROP Ignore_Export_Lib 1
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "lscommand_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "c:\litestep\source\ls-b24\litestep" /I "c:\litestep\source\ls-b24\lsapi" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "lscommand_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "../../ls-b247/lsapi" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "lscommand_EXPORTS" /YX /FD /GZ /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -86,13 +82,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 lsapi.lib shlwapi.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"Debug/lsxcommand.dll" /pdbtype:sept /libpath:"c:\litestep\source\ls-b24\lsapi\Debug"
+# ADD LINK32 lsapi.lib shlwapi.lib kernel32.lib user32.lib comdlg32.lib gdi32.lib shell32.lib advapi32.lib /nologo /dll /debug /machine:I386 /out:"Debug/lsxcommand.dll" /pdbtype:sept /libpath:"../../ls-b247/lsapi/debug"
 # SUBTRACT LINK32 /pdb:none
-# Begin Special Build Tool
-OutDir=.\Debug
-SOURCE="$(InputPath)"
-PostBuild_Cmds=copy $(OutDir)\lsxcommand.dll c:\litestep\luxo\modules\debug\lsxcommand.dll
-# End Special Build Tool
 
 !ENDIF 
 

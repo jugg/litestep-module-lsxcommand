@@ -126,7 +126,7 @@ void ToggleCommand(HWND caller, char *args)
 		visible = FALSE;
 	}
 	else {
-		ShowWindow(hWnd,SW_SHOWNORMAL);
+		ShowWindow(hWnd,SW_SHOWNA);
 		SetForegroundWindow(hText);
 		SetFocus(hText);
 		visible = TRUE;
@@ -261,8 +261,8 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		wpOld = (WNDPROC)SetWindowLong(hText,GWL_WNDPROC,(long)EditProc);
 		//DragAcceptFiles(hBG, TRUE);
 		SendMessage(hText,WM_SETFONT,(WPARAM)hFont,FALSE);
-		ShowWindow(hBG,SW_SHOW);
-		ShowWindow(hText,SW_SHOW);
+		ShowWindow(hBG,SW_SHOWNOACTIVATE);
+		ShowWindow(hText,SW_SHOWNOACTIVATE);
 		return 0;
 		}
 	case WM_SETCURSOR:
@@ -312,7 +312,7 @@ int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath)
 	AddBangCommand("!TOGGLECOMMAND",ToggleCommand);
 	AddBangCommand("!FOCUSCOMMAND",FocusCommand);
 	if(!cs.HiddenOnStart) {
-		ShowWindow(hWnd,SW_SHOWNORMAL);
+		ShowWindow(hWnd,SW_SHOWNOACTIVATE);
 		visible = TRUE;
 	}
 	return 0;

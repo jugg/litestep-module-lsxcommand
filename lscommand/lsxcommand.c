@@ -32,8 +32,8 @@
 //20021115
 int msgs[] = {LM_GETREVID, 0};
 const char szAppName[] = "lsxcommand.dll"; // Our window class, etc
-const char rcsRevision[] = "$Revision: 1.8.3"; // Our Version
-const char rcsId[] = "$Id: lsxcommand.c, v 1.8.3 beta$"; // The Full RCS ID.
+const char rcsRevision[] = "$Revision: 1.8.4"; // Our Version
+const char rcsId[] = "$Id: lsxcommand.c, v 1.8.4$"; // The Full RCS ID.
 
 //20021114
 #define MAX_LINE_LENGTH 4096
@@ -58,7 +58,7 @@ char *szApp = "LSXCommandClock";
 BOOL visible = FALSE;
 BOOL lsboxed = FALSE;
 BOOL waitforlsBox = FALSE;
-char *szModuleIniPath = NULL;
+char szModuleIniPath[MAX_PATH];
 enum Timers curTimer = NO_TIMER;
 HINSTANCE hInst = NULL;
 HWND hWnd = NULL, hText = NULL, hBG = NULL;
@@ -89,16 +89,19 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
   char szTemp[256];
 
   struct CommandSettings *settings = (struct CommandSettings *)malloc(sizeof(struct CommandSettings));
-  szModuleIniPath = (char *)malloc(strlen(lsPath) + strlen("\\MODULES.INI") + 1);
-  strcpy(szModuleIniPath, lsPath);
-  strcat(szModuleIniPath, "\\MODULES.INI");
-
+  
   //20021114
   settings->OnFocusCommand = NULL;
   settings->OnUnfocusCommand = NULL;
 
 #ifndef LSXCOMMANDCLOCK_EXPORTS
-	GetRCString("CommandTextFontFace",settings->TextFontFace,"Arial",256);
+  if (!GetRCString("CommandHistoryFile", szModuleIniPath, NULL, MAX_PATH))
+  {
+      strcpy(szModuleIniPath, lsPath);
+      strcat(szModuleIniPath, "\\MODULES.INI");
+  }
+  
+    GetRCString("CommandTextFontFace",settings->TextFontFace,"Arial",256);
 	settings->BGColor = GetRCColor("CommandBGColor",RGB(255,255,255));
 	settings->TextColor = GetRCColor("CommandTextColor",RGB(0,0,0));
 	settings->TextSize = GetRCInt("CommandTextSize",14);
@@ -152,7 +155,12 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
   GetRCString("CommandMusicPlayer", settings->MusicPlayer, "WINAMP V1.X", sizeof(settings->MusicPlayer));
   //GetRCString("CommandTextAlign", settings->TextAlign, "Left Top", sizeof(settings->TextAlign));
 #else //LSXCOMMANDCLOCK_EXPORTS
-	GetRCString("CommandClockTextFontFace",settings->TextFontFace,"Arial",256);
+  if (!GetRCString("CommandClockHistoryFile", szModuleIniPath, NULL, MAX_PATH))
+  {
+      strcpy(szModuleIniPath, lsPath);
+      strcat(szModuleIniPath, "\\MODULES.INI");
+  }
+  GetRCString("CommandClockTextFontFace",settings->TextFontFace,"Arial",256);
 	settings->BGColor = GetRCColor("CommandClockBGColor",RGB(255,255,255));
 	settings->TextColor = GetRCColor("CommandClockTextColor",RGB(0,0,0));
 	settings->TextSize = GetRCInt("CommandClockTextSize",14);
@@ -1492,7 +1500,7 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
       // Move cursor to start of next word and select rest of the line.
       if(cs->TabFileComplete) {
         HANDLE handle;
-        LPWIN32_FIND_DATA found = (LPWIN32_FIND_DATA)malloc(sizeof(found));
+        WIN32_FIND_DATA found;
         BOOL bContinue;
 			  char path_buffer[_MAX_PATH];
 			  char drive[_MAX_DRIVE];
@@ -1501,14 +1509,14 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
         if(nFiles == 0) {
 		      GetWindowText(hText, buf, sizeof(buf));
 		      strcat(buf, "*");
-		      handle = FindFirstFile(buf, found);
+		      handle = FindFirstFile(buf, &found);
           bContinue = (handle != INVALID_HANDLE_VALUE);
 
           while(bContinue) {
-            if(*(found->cFileName) && strcmp(found->cFileName, ".") && strcmp(found->cFileName, "..")) {
-              HistoryAdd(&files, found->cFileName, &nFiles);
+            if(*(found.cFileName) && strcmp(found.cFileName, ".") && strcmp(found.cFileName, "..")) {
+              HistoryAdd(&files, found.cFileName, &nFiles);
             }
-            bContinue = FindNextFile(handle, found);
+            bContinue = FindNextFile(handle, &found);
           }
 
           if(nFiles != 0) {
@@ -1684,7 +1692,7 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 	    ShowWindow(hWnd, SW_HIDE);
 		//20021114
         if(cs->OnUnfocusCommand != NULL)
-			LSExecute(NULL,cs->OnUnfocusCommand, NULL);
+			LSExecute(NULL,cs->OnUnfocusCommand, 0);
 #ifndef LSXCOMMANDCLOCK_EXPORTS
       if(cs->ClearOnHide) {
         SetWindowText(hText,"");
@@ -1731,7 +1739,7 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	switch(msg) {
 	case WM_CREATE:
 		{
-		hFont = CreateFont(cs->TextSize,0,0,0,0,0,0,0,0,0,0,0,0,cs->TextFontFace);
+		hFont = CreateFont(cs->TextSize,0,0,0,0,0,0,0,DEFAULT_CHARSET,0,0,0,0,cs->TextFontFace);
 		hText = CreateWindowEx(0,"EDIT","",WS_CHILD|ES_AUTOHSCROLL,cs->LeftBorderSize,cs->TopBorderSize,cs->width-(cs->LeftBorderSize+cs->RightBorderSize),cs->height-(cs->TopBorderSize+cs->BottomBorderSize),hWnd,0,hInst,0);
 		hBGBrush = CreateSolidBrush(cs->BGColor);
 		hHollowBrush = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
@@ -1743,7 +1751,7 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		//DragAcceptFiles(hBG, TRUE);
 		SendMessage(hText,WM_SETFONT,(WPARAM)hFont,FALSE);
 		//ShowWindow(hBG,SW_SHOW);
-		ShowWindow(hText,SW_SHOW);
+		ShowWindow(hText,SW_SHOWNOACTIVATE);
 		//20021115
 		SendMessage(GetLitestepWnd(), LM_REGISTERMESSAGE, (WPARAM)hWnd, (LPARAM)msgs);
 		return 0;
@@ -1974,7 +1982,7 @@ void BangFocusCommand(HWND caller, const char *args)
 		visible = TRUE;
 		//20021114
 		if(cs->OnFocusCommand)
-			LSExecute(NULL,cs->OnFocusCommand, NULL);
+			LSExecute(NULL,cs->OnFocusCommand, 0);
 	}
 	SetForegroundWindow(hText);
 	SetFocus(hText);
@@ -2163,7 +2171,7 @@ void BangExecCommand(HWND caller, const char *args)
 void BangShowCommand(HWND caller, const char *args)
 {
   if(!visible) {
-		ShowWindow(hWnd, SW_SHOWNORMAL);
+		ShowWindow(hWnd, SW_SHOWNOACTIVATE);
 		visible = TRUE;
   }
 }
@@ -2502,7 +2510,7 @@ void BangBoxHook(HWND caller, const char *args)
 			  if(cs->HiddenOnStart)
 				  ShowWindow(hWnd, SW_HIDE);
 			  else
-				  ShowWindow(hWnd, SW_SHOWNORMAL);
+				  ShowWindow(hWnd, SW_SHOWNOACTIVATE);
 		  }
 	  }
   }
@@ -2588,7 +2596,7 @@ int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath)
 	  if(cs->WaitForBox)
 		  ShowWindow(hWnd,SW_HIDE);
 	  else
-		  ShowWindow(hWnd,SW_SHOWNORMAL);
+		  ShowWindow(hWnd,SW_SHOWNOACTIVATE);
 		visible = TRUE;
   } else {
     ShowWindow(hWnd, SW_HIDE);
@@ -2677,7 +2685,6 @@ int quitModule(HINSTANCE dll)
   HistoryRemoveAll(&aliases, &nAliases);
   free(defaultEngine);
 #endif //LSXCOMMANDCLOCK_EXPORTS
-  free(szModuleIniPath);
   free(cs);
 #ifndef LSXCOMMANDCLOCK_EXPORTS
   DestroyMenu(hHistoryMenu);
@@ -2688,6 +2695,9 @@ int quitModule(HINSTANCE dll)
 	DestroyWindow(hWnd);
 	UnregisterClass(szApp,hInst);
 	DeleteObject(hFont);
+    DeleteObject(hBGBrush);
+    DeleteObject(hHollowBrush);
+    DeleteObject(hBGBitmap);
 	//20021114
 	if (cs->OnFocusCommand != NULL) {
 //		delete [] cs->OnFocusCommand;
@@ -2700,6 +2710,5 @@ int quitModule(HINSTANCE dll)
 		cs->OnUnfocusCommand = NULL;
 	}
 
-	
 	return 0;
 }

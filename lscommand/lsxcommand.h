@@ -70,24 +70,24 @@ struct CommandSettings {
   BOOL RPNCalculator;
   BOOL ClockDisappears;
 	BOOL NoClearOnCommand;
-	BOOL HideOnCommand;
-	BOOL ClearOnHide;
-  BOOL WinAmpDisappears;
-  BOOL TabFileComplete;
+    BOOL HideOnCommand;
+    BOOL ClearOnHide;
+    BOOL WinAmpDisappears;
+    BOOL TabFileComplete;
 #endif // LSXCOMMANDCLOCK_EXPORTS
-	COLORREF BGColor;
-	COLORREF TextColor;
-	COLORREF BorderColor;
-	//20021114
-	char* OnFocusCommand;
-	char* OnUnfocusCommand;
+    COLORREF BGColor;
+    COLORREF TextColor;
+    COLORREF BorderColor;
+    //20021114
+    char* OnFocusCommand;
+    char* OnUnfocusCommand;
 };
 
 #ifndef LSXCOMMANDCLOCK_EXPORTS
 
 struct  History {
-  char *path;
-  struct History *next, *prev;
+    char *path;
+    struct History *next, *prev;
 };
 
 /* Settings */

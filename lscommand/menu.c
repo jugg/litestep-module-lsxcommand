@@ -31,19 +31,24 @@ void MenuAddItem(HMENU hMenu, char *pszValue, long def_id, BOOL insertAtTop)
   char *buf = pszValue ? (char *)malloc(strlen(pszValue) + 1) : NULL;
   MENUITEMINFO item;
 
-  if(buf && hMenu) {
-    strcpy(buf, pszValue);
-    item.cbSize = sizeof(MENUITEMINFO);
-    item.fMask = MIIM_TYPE | MIIM_ID;
-    item.fType = MFT_STRING;
-    if(total)
-      item.wID = GetMenuItemID(hMenu, total-1) + 1;
-    else
-      item.wID = def_id;
-    item.dwTypeData = buf;
-    item.cch = sizeof(buf);
+  if(buf)
+  {
+    if (hMenu)
+    {
+        strcpy(buf, pszValue);
+        item.cbSize = sizeof(MENUITEMINFO);
+        item.fMask = MIIM_TYPE | MIIM_ID;
+        item.fType = MFT_STRING;
+        if(total)
+            item.wID = GetMenuItemID(hMenu, total-1) + 1;
+        else
+            item.wID = def_id;
+        item.dwTypeData = buf;
+        item.cch = sizeof(buf);
+        
+        InsertMenuItem(hMenu, total, TRUE, &item);
+    }
 
-    InsertMenuItem(hMenu, total, TRUE, &item);
     free(buf);
   }
 }

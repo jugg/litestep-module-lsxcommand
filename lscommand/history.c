@@ -250,10 +250,12 @@ BOOL HistoryMoveToEntry(struct History **hist, char *pszValue, BOOL tokenize)
 
 struct History *HistoryAdd(struct History **hist, char *pszValue, int *count)
 {
-  char *szData = pszValue ? (char *)malloc(strlen(pszValue) + 1) : NULL;
   struct History *temp = NULL;
 
-  if(pszValue) {
+  if(pszValue)
+  {
+    char* szData = (char *)malloc(strlen(pszValue) + 1);
+    
     strcpy(szData, pszValue);
     if(*hist) {
       HistoryMoveToTail(hist);

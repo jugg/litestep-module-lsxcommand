@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Changes:
+
+24-01-03 (jesus_mjjg)
+- Added prefixes for use with Label for example (see example of use with taskbar3).
+
+28-11-02
+-Added a 'requires' attribute to the bang element (it was needed)
+
+27-11-02
+-Added a 'sound' parameter type element and changed all references in the files
+
+25-11-02
+-Added a 'default' attribute to all parameter type elements that didn't have one except 'list', 'paramset', 'repeat' and 'static'
+-removed the 'range' attribute from 'integer' and replaced it with 'min' and 'max' attributes
+-removed the 'type' attribute from 'integer' and added a 'accept-percentage' attribute
+-changed 'integer's 'default', 'min' and 'max' attributes to xs:string to allow values like '100%'
+
+24-11-02
+-Restructured the schema, basically moved al parameter type elements into the ParamTypes group
+-added a 'default' attribute to the 'color' element
+
+23-11-02
+-changed all elements, attributes and values to lowercase
+-decided to keep track of the changes <g>
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:element name="author">
+		<xs:annotation>
+			<xs:documentation>Provides info about an author</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="url"/>
+			</xs:choice>
+			<xs:attribute name="name" type="xs:string" use="optional">
+				<xs:annotation>
+					<xs:documentation>The real name of the author. The nickname should go in the PCData section.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="email" type="xs:string" use="optional">
+				<xs:annotation>
+					<xs:documentation>The email address of the author.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="icq" type="xs:string" use="optional">
+				<xs:annotation>
+					<xs:documentation>The ICQ UIN (Unique Identification Number) of the author.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="msn" type="xs:string" use="optional">
+				<xs:annotation>
+					<xs:documentation>The MSN screen name of the author.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="yim" type="xs:string" use="optional">
+				<xs:annotation>
+					<xs:documentation>The YIM screen name of the author.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="aim" type="xs:string" use="optional">
+				<xs:annotation>
+					<xs:documentation>The AIM screen name of the author.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bang">
+		<xs:annotation>
+			<xs:documentation>Defines a bang command with optional parameters</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="ParamTypes"/>
+				<xs:group ref="InfoTypes"/>
+			</xs:choice>
+			<xs:attribute name="name" type="xs:string" use="required">
+				<xs:annotation>
+					<xs:documentation>The name of the bang, without the exclamation mark/bang ('!')</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scope" type="xs:IDREFS" use="optional">
+				<xs:annotation>
+					<xs:documentation>Optionally defines a scope for the bang. This is used by popup2 for example. Popup2 defines bangs which can only be used inside popup definitions.
+
+Example: <bang name="PopupTasks" scope="Popup"/>
+
+The scope attribute is of type xs:IDREFS, which means you must supply a valid id (name) of a command or definition. Beware of the case sensitivity!</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="delimiter" type="xs:string" use="optional" default=" "/>
+			<xs:attribute name="requires" type="xs:IDREFS" use="optional">
+				<xs:annotation>
+					<xs:documentation>If the bang requires another command or definition to be definined in order to work, it should be stated here. The requires attribute is of type IDREFS, which means a valid ID (name) should be supplied. It's possible to supply multiple values, by separating them with a space character (" ").</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="command">
+		<xs:annotation>
+			<xs:documentation>Defines a step.rc command with optional parameters</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="ParamTypes"/>
+				<xs:group ref="InfoTypes"/>
+			</xs:choice>
+			<xs:attribute name="name" type="xs:ID" use="required"/>
+			<xs:attribute name="requires" type="xs:IDREFS" use="optional">
+				<xs:annotation>
+					<xs:documentation>If the command requires another command or definition to be definined in order to work, it should be stated here. The requires attribute is of type IDREFS, which means a valid ID (name) should be supplied. It's possible to supply multiple values, by separating them with a space character (" ").</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="overrides" type="xs:IDREFS" use="optional">
+				<xs:annotation>
+					<xs:documentation>If the command overrides another one, it should be stated here. The attribute is of type IDREFS, which means a valid ID (name) should be supplied. It's possible to supply multiple values, by separating them with a space character (" ").</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="alias" type="xs:ID" use="optional">
+				<xs:annotation>
+					<xs:documentation>Sometimes there is a command with exactly the same meaning and syntax as another. this is mostly done because of compatibility reasons. In that case, you can use this attribute to specify an alias. Please use the preferred name in the name attribute, and the depricated one here in the alias attribute.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="definition">
+		<xs:annotation>
+			<xs:documentation>Also known as a 'starlist' (like the '*popup' definitions), with optional parameters</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="ParamTypes"/>
+				<xs:group ref="InfoTypes"/>
+			</xs:choice>
+			<xs:attribute name="name" type="xs:ID" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="evar">
+		<xs:annotation>
+			<xs:documentation>Defines an environment variable</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:group ref="InfoTypes"/>
+			</xs:choice>
+			<xs:attribute name="name" type="xs:ID" use="required">
+				<xs:annotation>
+					<xs:documentation>The name of the Evar, without the dollar signs.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="group">
+		<xs:annotation>
+			<xs:documentation>Used for grouping commands and definitions, optionally providing a different location than step.rc.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="command"/>
+				<xs:element ref="definition"/>
+				<xs:group ref="InfoTypes"/>
+			</xs:choice>
+			<xs:attribute name="location" type="xs:string" use="optional">
+				<xs:annotation>
+					<xs:documentation>This provides a locatation for the settings contained in the group element, if the settings are to be stored in a file different from step.rc.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lsmd">
+		<xs:annotation>
+			<xs:documentation>The root element of a description file</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice maxOccurs="unbounded">
+				<xs:element ref="author" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="module" maxOccurs="unbounded"/>
+				<xs:group ref="InfoTypes"/>
+			</xs:choice>
+			<xs:attribute name="version" type="xs:string" use="required" fixed="0.1">
+				<xs:annotation>
+					<xs:documentation>The version of the lsmd schema.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="fileversion" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The version of the description file.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="module">
+		<xs:annotation>
+			<xs:documentation>This contains all elements describing the module</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="author"/>
+				<xs:element ref="bang"/>
+				<xs:element ref="command"/>
+				<xs:element ref="definition"/>
+				<xs:element ref="evar"/>
+				<xs:element ref="group"/>
+				<xs:element ref="url"/>
+				<xs:group ref="InfoTypes"/>
+			</xs:choice>
+			<xs:attribute name="crc" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The CRC32 (32-bit Cyclic Redundancy Checksum) of the module. This is used to be able to identify loaded modules without revision IDs, together with the size attribute. The value is hexadecimal.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="filename" type="xs:string" use="required">
+				<xs:annotation>
+					<xs:documentation>The filename of the module, without the path and with the extension (.dll, .app)</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="friendlyname" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The friendly name of the module, eg. the friendly name of popup2.dll would be "Popup 2"</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="size" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>The filesize of the module. This is used to be able to identify loaded modules without revision IDs, together with the crc attribute.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="type" default="loadmodule">
+				<xs:simpleType>
+					<xs:restriction base="xs:NMTOKEN">
+						<xs:enumeration value="loadmodule"/>
+						<xs:enumeration value="mixed-mode"/>
+						<xs:enumeration value="wharf"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="version" type="xs:string" use="required"/>
+			<xs:attribute name="zipfilename" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="url">
+		<xs:annotation>
+			<xs:documentation>Provides a link to a web resource.</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="src" type="xs:anyURI" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:group name="ParamTypes">
+		<xs:annotation>
+			<xs:documentation>Element group containing all parameter type elements</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="action">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice>
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="default" type="xs:string" use="optional" default="!None"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="bool">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:choice>
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="default" type="xs:boolean" use="optional" default="true"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="color">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:choice>
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="default" type="xs:string" use="optional" default="000000"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="file">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="mask" type="xs:string" use="required"/>
+					<xs:attribute name="default" type="xs:string" use="optional" default=".none"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="folder">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="default" type="xs:string" use="optional" default=".none"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="font">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice>
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="default" type="xs:string" use="optional" default="Arial"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="image">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="default" type="xs:string" use="optional" default=".none"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="integer">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="accept-negative" type="xs:boolean" use="optional" default="true"/>
+					<xs:attribute name="accept-percentage" type="xs:boolean" use="optional" default="false"/>
+					<xs:attribute name="default" type="xs:string" use="optional" default="0"/>
+					<xs:attribute name="min" type="xs:string" use="optional"/>
+					<xs:attribute name="max" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<!-- jesus_mjjg 20030123-->			
+			<xs:element name="prefixes">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc. The list contains items from which one may be selected.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="InfoTypes"/>
+						<xs:element name="prefix">
+							<xs:annotation>
+								<xs:documentation>See prefix</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="prefix-default">
+							<xs:annotation>
+								<xs:documentation>See prefix</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<!-- how to prevent this from appearing more than one time ??-->
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+				</xs:complexType>
+			</xs:element>
+			<!-- end jesus_mjjg 20030123-->			
+			<xs:element name="list">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc. 
+The list contains items from which one may be selected.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="InfoTypes"/>
+						<xs:element name="item">
+							<xs:annotation>
+								<xs:documentation>See list</xs:documentation>
+							</xs:annotation>
+							<xs:complexType mixed="true">
+								<xs:choice minOccurs="0" maxOccurs="unbounded">
+									<xs:group ref="InfoTypes"/>
+								</xs:choice>
+								<xs:attribute name="value" type="xs:string" use="required"/>
+								<xs:attribute name="default" type="xs:boolean"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="paramset">
+				<xs:annotation>
+					<xs:documentation>Parameter structure, allows for multiple syntaxes</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:choice>
+						<xs:group ref="ParamTypes"/>
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="repeat">
+				<xs:annotation>
+					<xs:documentation>Parameter structure, allows for parameter groups which can be repeated</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="ParamTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="min" type="xs:byte" use="optional"/>
+					<xs:attribute name="max" type="xs:byte" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="static">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="value" type="xs:string" use="required"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="string">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+					<xs:attribute name="default" type="xs:string" use="optional"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="sound">
+				<xs:annotation>
+					<xs:documentation>Parameter for commands, definitions, bangs, etc.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="InfoTypes"/>
+					</xs:choice>
+					<xs:attributeGroup ref="ParamAttributes"/>
+				</xs:complexType>
+			</xs:element>
+			<!-- jesus_mjjg 20030123-->
+		</xs:choice>
+	</xs:group>
+	<xs:group name="InfoTypes">
+		<xs:annotation>
+			<xs:documentation>Element group containing all informative elements (currently only 'description')</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="description">
+				<xs:annotation>
+					<xs:documentation>Description about the elemt it is contained in</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="lang" type="xs:string"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:choice>
+	</xs:group>
+	<xs:attributeGroup name="ParamAttributes">
+		<xs:annotation>
+			<xs:documentation>Attribute group containing common attributes for parameter types</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="optional" type="xs:boolean" use="optional">
+			<xs:annotation>
+				<xs:documentation>If this attribute is set to true, the parameter it is contained in may be omitted.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="delimiter" type="xs:string" use="optional" default=" ">
+			<xs:annotation>
+				<xs:documentation>This attribute defines a delimiter for a parameter. The default vale is the space character (" "). The delimiter is placed right AFTER the parameter.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+</xs:schema>

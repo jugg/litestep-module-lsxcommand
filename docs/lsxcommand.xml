@@ -1,0 +1,416 @@
+<!-- edited with XMLSPY v5 rel. 2 U (http://www.xmlspy.com) by jesus_mjjg (666) -->
+<lsmd version="0.1" fileversion="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="lsmd.xsd">
+	<author name="Arlo Kleijweg" email="mrmidi__AT__gmx__DOT__net" icq="7342277" msn="arlokleijweg__AT__msn__DOT__com" yim="arlokleijweg" aim="arlokleijweg">
+		Mr. Midi      
+		<url src="http://mrmidi.opweb.nl/">Mr. Midi's Homepage</url>
+	</author>
+	<module filename="lsxcommand.dll" friendlyname="lsxcommand" type="loadmodule" version="1.8.4" size="" crc="">
+		<description>
+The lsxcommand LoadModule is a text box that sits on your desktop.
+It will let you type !bangs, folder names, documents, apps, urls, etc an execute them. Think of it as a very customizable address bar :)
+if you specify a border width and you dont have CommandNotMoveable set, you can drag it around by the border.
+there is a problem that some people are having where the mouse cursor is not set back to a normal cursor after it is off the text box. to fix this, use CommandNoCursorChange to stop lsxcommand from changing the cursor.
+just a tip: lots of programs names work in lsxcommand.. you can type stuff like 'notepad', 'icq', 'netscape', to start some programs instead of the full path. 
+the history is working great. Not all the text docs are in the html docs. All of the step.rc and bang commands are, but not all explanations. If you want to read more about the calculator, time, transparency, ... check lsxcommand.txt.
+		</description>
+		<url src="http://home.att.net/~gandhimail/"/>
+		<author name="Visigoth" email="sgandhi__AT__andrew__DOT__cmu__DOT__edu" icq="" msn="" yim="" aim="">
+			jesus_mjjg
+			<url src="http://floach.pimpin.net/visigoth"/>
+		</author>
+		<command-group name="Positioning">
+		<command name="CommandX">
+			<integer>x coordinate</integer>
+			<description>
+			        x position on the screen.
+    	          </description>
+		</command>
+		<command name="CommandY">
+			<integer>x coordinate</integer>
+			<description>
+			        y position on the screen.
+    	          </description>
+		</command>
+		<command name="CommandWidth">
+			<integer>width</integer>
+			<description>
+			        width in pixels.
+    	          </description>
+		</command>
+		<command name="CommandHeight">
+			<integer>height</integer>
+			<description>
+			        height in pixels.
+    	          </description>
+		</command>
+		    <command name="CommandNotAlwaysOnTop">
+		        <bool/>
+		        <description>overides the default of being Always On Top of other windows
+		        </description>
+		    </command>
+		    <command name="CommandHiddenOnStart">
+		        <bool/>
+		        <description>start hidden
+		        </description>
+		    </command>
+		</command-group>
+		<command-group name="Special positioning settings">
+		    <command name="CommandOffsetX-CommandOffsetY">
+		        <integer default="0,0"/>
+		        <description>This value determines which point on the screen LSXCommand should use as a reference for the CommandX/Y values. The default is the upper left corner. 
+       0  -  Left / Top
+       1  -  Horizontal / Vertical Center
+       2  -  Right / Bottom
+		        </description>
+		    </command>
+		    <command name="CommandBevelBorder">
+		        <bool/>
+		        <description>
+		            Use bevels instead of borders.
+		        </description>
+		    </command>
+
+		</command-group>
+		<command-group name="LsBox">
+		        <command name="CommandWaitForBox">
+		        <bool/>
+		        <description>LsxCommand will not appear until he is loaded in a box with the !CommandBoxHook. Please check lsbox documentation.
+		        </description>
+		    </command>
+		</command-group>
+		<command-group name="Border and text">
+		    <command name="BorderSize">
+		        <prefixes>
+		            <prefix>Command</prefix>
+		            <prefix>CommandBottom</prefix>
+		            <prefix>CommandLeft</prefix>
+		            <prefix>CommandRight</prefix>
+		            <prefix>CommandTop</prefix>
+		        </prefixes>			 
+		        <integer default="2">
+		        </integer>
+	            <description>Width in pixels of the border. If you want to have different sized borders on each side, use CommandTopBorderSize, CommandBottomBorderSize, CommandLeft..., and CommandRight...
+     	            </description>
+		    </command>
+		    <command name="CommandTextSize">
+		        <integer>
+		        </integer>
+	            <description>pixel size of the text
+	            </description>
+		    </command>
+		</command-group>
+		<command-group name="Skins (see also lsxcommand.txt, section II.7 Backgrounds and Transparencies).">
+		    <command name="CommandBGColor">
+		        <color/>
+		        <description>background color
+		        </description>
+		    </command>
+		    <command name="CommandBackground">
+		        <image/>
+		        <description>Path to your background image.  If this is not an absolute path, LSXCommand looks in your images directory.  If this option is not specified, the background and border colors are used.
+		        </description>
+		    </command>
+		    <command name="CommandTransparentEditBox">
+		        <bool/>
+		        <description>Makes the area in which you type transparent to the background.  If this option is not specified, the background image shows through.  If there is no background, the background color is used.
+		        </description>
+		    </command>
+		    <command name="CommandTextColor">
+		        <color/>
+		        <description>text color
+		        </description>
+		    </command>
+		    <command name="CommandBorderColor">
+		        <color/>
+		        <description>color of the border
+		        </description>
+		    </command>
+		    <command name="CommandTextFontFace">
+		        <font>
+		        </font>
+		        <description>font for the text
+		        </description>
+		    </command>
+		</command-group>
+		<command-group name="Various settings">
+		    <command name="CommandNotMoveable">
+		        <bool/>
+		        <description>if this is set you will not be able to drag it around by the border
+		        </description>
+		    </command>
+		    <command name="CommandNoCursorChange">
+		        <bool/>
+		        <description>does not change mouse cursor when over the text box
+		        </description>
+		    </command>
+		    <command name="CommandAssumeNetAddress">
+		        <bool/>
+		        <description>If a command just doesn't cut it, you can have it start your browser with the address.
+		        </description>
+		    </command>
+		    <command name="CommandExplorePaths">
+		        <bool/>
+		        <description>If enabled, any directory path you enter into LSXCommand will open a treed explorer window, instead of the standard folder window.
+		        </description>
+		    </command>
+		</command-group>
+		<command-group name="History (see also lsxcommand.txt, section II.5 Tab-MicroComplete and Context Menu Access).">
+		    <!-- added May 25 2003-->
+		    <command name="CommandHistoryFile">
+		        <string default="modules.ini"/>
+		        <description>Specifies the file lsxcommand stores its history in. Defaults to modules.ini.</description>
+		    </command>		
+		    <command name="CommandHistoryEntries">
+		        <integer default="10"/>
+		        <description>Sets number of history entries of which to keep track. Note: I haven't really stress-tested LSXCommand, so I don't know how well it scales up, but it shouldn't be too taxing even at somewhere around 50 entries.  But I think that's a bit much anyway... 
+		        </description>
+		    </command>
+		    <command name="CommandHistoryMenuEntries">
+		        <integer/>
+		        <description>Sets the maximum number of history entries available from the context menu.
+		        </description>
+		    </command>
+		    <command name="CommandClearHistoryOnStartup">
+		        <bool/>
+		        <description>Clears the history on startup. NOTE: You *will* lose the history in modules.ini - not only the history in memory.
+		        </description>
+		    </command>
+		    <command name="CommandNewestHistoryItemsOnTop">
+		        <bool/>
+		        <description>This setting places newer history items at the top of the menu, instead of at the bottom.
+		        </description>
+		    </command>
+		    <command name="CommandUnixHistory">
+		        <bool/>
+		        <description>The most popular UNIX shell (bash) has the inverse history navigation: Up for previous, down for next.  You can use this system with this setting.
+		        </description>
+		    </command>
+		    <command name="CommandAddExternalsToHistory">
+		        <bool/>
+		        <description>If this is on, LSXCommand will add any commands launched with the !Command !Bang command to the history.  Since I've been using AlterScript with this a lot, it became annoying to have all of AlterScript's commands end up in LSXCommand's history.
+		        </description>
+		    </command>
+		</command-group>
+		<command-group name="Context menu">
+		    <command name="CommandContextMenuStandardItems">
+		        <bool/>
+		        <description>This item does two things.  It first turns on the standard menu items: Cut, Copy and Paste.  Second, it tells where to put the standard items, above or below the LSXCommand specific menus.
+     Example: CommandContextMenuStandardItems 1   ; Above
+              CommandContextMenuStandardItems 2   ; Below
+              CommandContextMenuStandardItems 0   ; Off (Default)
+		        </description>
+		    </command>
+<!--
+AUTOPOPUP STUFF - UNDOCUMENTED, CAN'T PULL OFF WITH REGULAR MENUS
+commented in the code
+
+		    <command name="CommandContextMenuAutoPopup">
+		        <bool/>
+		    </command>
+-->
+		    <command name="CommandContextMenuAboveBox">
+		        <bool/>
+		        <description>If you have your LSXCommand window at the bottom of the screen, you will want to turn this on.  If at the top, leave this off.  This sets where the context menu will appear - above or below the LSXCommand box.
+		        </description>
+		    </command>
+		    <command name="CommandContextMenuExecute">
+		        <bool/>
+		        <description>Tells LSXCommand to execute a selection from the context menu instead of copying its data to the LSXCommand box. 
+		                            NOTE: Since the point of search engines is to have you enter a search phrase, it is not possible to have search engines execute.
+		        </description>
+		    </command>
+		    <command name="CommandContextMenuOrder">
+		        <string default="012"/>
+		        <description>Specifies which order each submenu should appear. For instance, you can have History, Alias, then Search Engines or Alias, History, Search Engines, or... 
+
+     The setting is 3 numbers: 0, 1, and 2.  The combination of these numbers sets in which order each submenu appears.  The first number is the position of the History submenu.  The second is the Alias submenu.  And the last is the Search Engines submenu.
+		        </description>
+		    </command>
+		</command-group>
+		<command-group name="CommandOn settings">
+		    <command name="CommandNoWarnOnError">
+		        <bool/>
+		        <description>If there is an error (for instance, if the command you entered is invalid or the calculator couldn't evaluate the expression you entered), you will get an error message.  This, when turned on, will suppress it.
+		        </description>
+		    </command>
+		    <command name="CommandHideOnCommand">
+		        <bool/>
+		        <description>
+		            Hides lsxcommand when a command is issued.
+		        </description>
+		    </command>
+		    <command name="CommandSelectAllOnFocus">
+		        <bool/>
+		        <description>Selects everything in the command box on focus.
+		        </description>
+		    </command>
+		    <command name="CommandSelectAllOnMouseFocus">
+		        <bool/>
+		        <description>Just like CommandSelectAllOnFocus, just that it only works when clicking to focus LSXCommand.  The reason these are two separate options is for people like me: I like to be able to just click once to put the cursor where I want it -not select the entire command.  But, some people like the explorer way of doing things better, so I added it.
+		        </description>
+		    </command>
+		    <command name="CommandHideOnUnfocus">
+		        <bool/>
+		        <description>Hides LSXCommand when it loses keyboard focus. This can be used to hide LSXCommand after it runs an app.
+		        </description>
+		    </command>
+		    <command name="CommandNoClearOnCommand">
+		        <bool/>
+		        <description>wont clear the input after you hit enter
+		        </description>
+		    </command>
+		    <command name="CommandClearOnHide">
+		        <bool/>
+		        <description>clear the text when mod is hidden
+		        </description>
+		    </command>
+		</command-group>
+		<command-group name="Clock">
+		    <command name="CommandTime">
+		        <string/>
+		        <description>Format string that tells LSXCommand how you want your time and date to look.(see lsxcommand.txt, section II.8 Clock Settings).
+		        </description>
+		    </command>
+		    <command name="CommandClockDisappearsOnFocus">
+		        <bool/>
+		        <description>If you want the clock to automatically disappear when you click in LSXCommand, set this on.  Otherwise, the clock will "pause" at the current time/date.  This makes it easier for you to copy/paste the time and date into any app.
+ 		        </description>
+		    </command>
+		</command-group>
+		<command-group name="Winamp">
+		    <command name="CommandScrollWinAmpTitle">
+		        <bool/>
+		        <description>If on, this setting takes WinAmp's scrolling title and displays it in LSXCommand.  Note that WinAmp's scroll song title preference must be on for this to happen.  A neat trick with this is to have both a clock and a WinAmp scroller.  The WinAmp scroller will show when WinAmp is running.  If not, the clock will show.
+		        </description>
+		    </command>
+		    <command name="CommandWinAmpDisappearsOnFocus">
+		        <bool/>
+		        <description>Just like CommandClockDisappearsOnFocus, but for the WinAmp scrolling feature.</description>
+		    </command>
+		    <command name="CommandMusicPlayer">
+		        <string default="WINAMP V1.X"/>
+		        <description>This command enables LSXCommand to use the titles of other music players besides WinAmp.  You should set it to the class name of the application you are looking for.
+		        </description>
+		    </command>
+		</command-group>
+		<command-group name="CommandTab settings">
+		    <command name="CommandNoTabMicroComplete">
+		        <bool/>
+		        <description>Stops Tab-MicroCompletes (see also lsxcommand.txt, section II.5 Tab-MicroComplete and Context Menu Access) from taking place. When you are typing in LSXCommand and get an autocompletion, you may want to automatically go on to the next word.
+		        </description>
+		    </command>
+		    <command name="CommandTabFileComplete">
+		        <bool/>
+		        <description>Enables the completion of file names by using the tab key (see also lsxcommand.txt, section II.9 Tab File Completion)..
+		        </description>
+		    </command>
+		    <command name="CommandNoAutoComplete">
+		        <bool/>
+		        <description>Turns *off* AutoComplete.  Someone asked for it, so I coded it :).</description>
+		    </command>
+		    <command name="CommandCommaDelimiter">
+		        <bool/>
+		        <description>Some Eurpoean countries use commas as decimal delimiters, so this changes decimals from periods to commas.
+		        </description>
+		    </command>
+		    <command name="CommandRPNCalculator">
+		        <bool/>
+		        <description>Makes the calculator an RPN calculator.  If you don't know what this is, don't use it!  You'll only confuse yourself.  Others call RPN "Postfix" notation.  If you want to learn more, obtain a Hewlett-Packard RPN calculator (the 48/49 series are especially nice, IMO :).
+		        </description>
+		    </command>
+		    <command name="CommandSearchEngineList">
+		        <string/>
+		        <description>The path to your engines.list (see also lsxcommand.txt, section II.4 The engines.list File). - the list of search engines to use with LSXCommand.</description>
+		    </command>
+		    <command name="CommandSearchEngineBrowser">
+		        <string/>
+		        <description>Path to the browser to be used with search engines. If not specified, LSXCommand uses the default browser on your system.
+		        </description>
+		    </command>
+		</command-group>
+		<command-group name="CommandOn actions">
+		    <command name="CommandOnFocus">
+		        <string default="!none"/>
+		        <description>Will execute a command when you !FocusCommand
+		        </description>
+		    </command>
+		    <command name="CommandOnUnfocus">
+		        <string default="!none"/>
+		        <description> Will execute a command when you un-focus lsxcommand (get out of the edit box)
+		        </description>
+		    </command>
+		</command-group>
+		<!-- ********************************************************************************************************************************************************************************* -->
+		<bangs>
+		<bang name="ToggleCommand">
+			<description>Toggle lsxcommand visibility.</description>
+		</bang>
+		<bang name="FocusCommand">
+			<description>Set focus to command (nice for binding to hotkeys).
+	    </description>
+		</bang>
+        <bang name="CommandRescanEngines">
+            <description>Rescans the engines.list file.  Note: it does not load a new engines.list file if specified in the step.rc; it will attempt to reload the same engines.list file.
+            </description>
+        </bang>
+        <bang name="CommandClearHistory">
+            <description>Clears both the history in memory *and* the history in modules.ini
+            </description>
+        </bang>
+        <bang name="CommandShowContextMenu">
+            <description>Makes LSXCommand's Context Menu visible wherever the cursor is on the screen, regardless of LSXCommand's visibility.
+            </description>
+        </bang>
+        <bang name="Command">
+            <description>Now use the power of LSXCommand anywhere within Litestep!  Shortcuts, wharf items, whatever that can run !bang commands outside of its own can now use LSXCommand.
+            </description>
+        </bang>
+        <bang name="CommandShow">
+            <description>Just shows LSXCommand.  NOTE: It does *not* give LSXCommand focus.  To do this, use !FocusCommand - this command gives focus to LSXCommand, and if it's not visible, it shows it also.
+            </description>
+        </bang>
+        <bang name="CommandHide">
+            <description>Just hides LSXCommand.  Nothing really special.
+            </description>
+        </bang>
+        <bang name="CommandBrowseFile">
+            <description>Brings up an Open Dialog Box to browse for a file for LSXCommand to open.  It's just the same as typing in the file's name.  NOTE: You can send an argument to this !Bang command to specify the filter for the open box.
+For instance, to see just Text Files, you might do this:
+       !CommandBrowseFile    All Text Files (*.txt, *.ini)|*.txt;*.ini
+            </description>
+        </bang>
+        <bang name="CommandBrowseFolder">
+            <description>Brings up a folder selection dialog.  You can select a folder to browse to.  There are no arguments for this !Bang command. 
+            </description>
+        </bang>
+        <bang name="CommandMove">
+            <description>Moves the LSXCommand window either to an absolute position, or by a delta along each axis.  The horizontal and vertical values can be configured separately (you can mix absolute and delta values).
+
+     If the horizontal or vertical values are surrounded by parentheses, they are interpreted as absolute values.  Otherwise, they are interpreted as +/- deltas along their respective axis.
+
+     If there is only one parameter, it is interpreted as a horizontal value.
+
+       !CommandMove 0 100  ; moves it 100 pixels down
+
+     When !CommandMove is called without parameters, it moves to the current mouse cursor position.  If !CommandMove is called with "home" as its parameter, it moves back to the original position it received from step.rc
+            </description>
+        </bang>
+        <bang name="CommandToggleTimer">
+            <description>Toggles the current timer.  If you use this, the WinAmp timer no longer takes precedence over the clock.  You have to call this !Bang again for the WinAmp scroller to appear.
+            </description>
+        </bang>
+        <bang name="CommandSetText">
+            <description>This !Bang sets the text in LSXCommand to its arguments.  This makes for some really neat stuff (for instance, a shortcut that pops up LSXCommand with a question mark and a space already in it ready for an argument to search with).
+    Note that this !Bang command does not show LSXCommand if it is hidden.
+     Example: !SetText "?Altavista "
+            </description>
+        </bang>
+        <bang name="CommandBoxHook">
+            <description>This is used with lsbox: *ModuleHook !CommandBoxHook
+             Please, check LsBox documentation 
+            </description>
+        </bang>
+	</bangs>
+		<!-- ********************************************************************************************************************************************************************************* -->
+	</module>
+</lsmd>

@@ -3,8 +3,8 @@
                     *            by Visigoth            *
                     *    gandhimail@worldnet.att.net    *
                     *          ===============          *
-                    *          Version: 1.8.3           *
-                    *         November 15, 2002         *
+                    *          Version: 1.8.4           *
+                    *           June 09, 2003           *
                     *          ===============          *
                     * http://floach.pimpin.net/visigoth *
                     *************************************
@@ -19,6 +19,10 @@ II.   How to use LSXCommand
 
       II.1 Internet Searches
       II.2 Added RC Commands
+           New to 1.8.4 (ilmcuts):
+           -------------
+           - CommandHistoryFile
+
            New to 1.8.3 (jesus_mjjg):
            --------------------------
            - CommandOnFocus
@@ -155,7 +159,7 @@ i. Quick & Dirty Install
      3. Add the CommandHistoryEntries and CommandSearchEngineList
         RC Commands to your step.rc (see below for specifics)
         Note: CommandSearchEngineList must be an absolute path, as in
-        C:\Litestep\engines.list
+        C:\Litestep\engines.list ($evars$ are allowed)
      4. Place the engines.list file to the place pointed to by
         CommandSearchEngineList
      5. I would really recommend at least browsing through the
@@ -233,6 +237,21 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.8.4 (ilmcuts/rabidcow)
+   -------------
+     New Features
+     ````````````
+     - CommandHistoryFile
+       Specifies the file lsxcommand stores its history in. Defaults to modules.ini.
+
+     Bug Fixes
+     `````````
+     - Fixed tab completion crashing lsxcommand.
+     - Fixed a few font issues.
+     - In certain situations lsxcommand should no longer steal focus from the
+       foreground app.
+     - (rabidcow) Fixed some resource leaks.
 
    Version 1.8.3 (jesus_mjjg)
    -------------
@@ -1442,6 +1461,15 @@ II. How to use LSXCommand
      Default: True
 
      Example: CommandSelectAllOnFocus	; Selects all on lsxcommand
+
+
+     CommandHistoryFile
+     ``````````````````
+     Description: Specifies the file lsxcommand stores its history in.
+
+     Default: "$Litestepdir$modules.ini"
+
+     Example: CommandHistoryFile "$LiteStepDir$personal\lsxhistory.ini"
 
 
      CommandOnFocus
