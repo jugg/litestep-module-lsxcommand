@@ -2,11 +2,11 @@
 *        LSXCommand - Extended LSCommand Module            *
 * This module adds to the functionality of limpid's        *
 * LSCommand module.  Among the extentions are a resizable  *
-* history, AutoCompletion, and Internet Searching          *
+* history, AutoCompletion, Internet Searching, and Aliases *
 *                         *  *  *  *                       *
 * Coding:                                                  *
-*   B - Visigoth (Shaheen Gandhi in real life)             *
-*                 e-mail: sgandhi@andrew.cmu.edu           *
+*   LSXCommand - Visigoth (Shaheen Gandhi in real life)    *
+*                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
 * Last Update:  May 25, 1999  8:00 PM                      *
@@ -715,6 +715,9 @@ void AliasInit()
       }
     }
   }
+
+  if(f)
+    LCClose(f);
 }
 
 

@@ -24,3 +24,9 @@ Floach		http://floach.pimpin.net/search.shtml?query=<args>
 UPS		http://wwwapps.ups.com/etracking/tracking.cgi?submit=Track&InquiryNumber1=<args>&TypeOfInquiryNumber=T
 FedEx		http://www.fedex.com/cgi-bin/track_it?airbills=<args>
 Airborne	http://www.airborne.com/cgi-bin/AirbillTrace?ShipmentNumber=<args>
+Dictionary	http://www.m-w.com/cgi-bin/dictionary?book=Dictionary&va=<args>
+Thesaurus	http://www.m-w.com/cgi-bin/thesaurus?book=Thesaurus&va=<args>
+OTH		http://oth.ipmedia.net:8080/cgi-bin/search?q=<args>&cl=1
+FOLDOC		http://wombat.doc.ic.ac.uk/foldoc/foldoc.cgi?query=<args>
+Quote		http://fast.quote.com/fq/quotecom/quote?symbols=<args>
+FileDemon	http://171.64.175.32/armen/servlets/TestServlet8?filename=<args>

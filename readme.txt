@@ -3,8 +3,8 @@
                     *         by Visigoth         *
                     * gandhimail@worldnet.att.net *
                     *       ==============        *
-                    *        Version: 1.1         *
-                    *        May 25, 1999         *
+                    *       Version: 1.1.1        *
+                    *        May 27, 1999         *
                     *******************************
 
 Table of Contents
@@ -73,6 +73,16 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.1.1
+   -------------
+   Just one bug fix, but important:
+
+     Bug Fixes
+     `````````
+     - Bug where you couldn't edit your step.rc as long as
+       lsxcommand.dll was loaded.
+
 
    Version 1.1
    -----------
