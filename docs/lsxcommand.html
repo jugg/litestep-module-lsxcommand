@@ -1,570 +1,701 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
-<link rel="stylesheet" href="docs.css" type="text/css">
-<title>lsxcommand.dll v1.8.4</title>
+<style>
+table		{ width: 100%; border-collapse: collapse; }
+td		{ border: 1px solid }
+h1, h3.head	{ padding: 0px; margin: 0px; }
+</style>
 </head>
 <body>
-<table border="0" width="100%">
-<tr class="border">
-<td>
-<table class="main" cellspacing="0" cellpadding="0" border="0" width="100%">
+<table style="text-align: center">
 <tr>
-<td>
-<table cellspacing="0" cellpadding="10" border="0" width="100%">
-<tr>
-<td>
-<div class="title">lsxcommand.dll documentation
-                                                    </div>
-<span class="info">
-                                                        XML/XSL-generated documentation, on the official litestep docs model.<br>
-                                                        docs layout written by the LiteStep Documentation Effort, August 2000<br>
-                                                        XML schema by <A HREF="mailto:mrmidi__AT__gmx__DOT__net">MrMidi</A>, XSL by <A HREF="mailto:jesus_mjjg__AT__skynet__DOT__be">jesus_mjjg</A>
-<br>
-</span></td><td valign="middle" align="right"><img alt="" src="images/logo.gif"></td>
-</tr>
-</table>
+<td style="background-color: black; color: white; border-color: black;">
+<h1>lsxcommand.dll</h1>
 </td>
 </tr>
 <tr>
 <td>
-<div class="head">What does lsxcommand.dll do?</div>
-<div class="body">
-The lsxcommand LoadModule is a text box that sits on your desktop.
-It will let you type !bangs, folder names, documents, apps, urls, etc an execute them. Think of it as a very customizable address bar :)
-if you specify a border width and you dont have CommandNotMoveable set, you can drag it around by the border.
-there is a problem that some people are having where the mouse cursor is not set back to a normal cursor after it is off the text box. to fix this, use CommandNoCursorChange to stop lsxcommand from changing the cursor.
-just a tip: lots of programs names work in lsxcommand.. you can type stuff like 'notepad', 'icq', 'netscape', to start some programs instead of the full path. 
-the history is working great. Not all the text docs are in the html docs. All of the step.rc and bang commands are, but not all explanations. If you want to read more about the calculator, time, transparency, ... check lsxcommand.txt.
-		<br>
+<h3 class="head">By: Visigoth (blkhawk, ilmcuts, jesus_mjjg, rabidcow)<span style="font-size:0.75em">
+      (<a href="mailto:litestep[AT]litestep[DOT]wuzzle[DOT]org">email</a>)
+    </span>
+</h3>
+<span style="font-size: 0.9em"></span></td>
+</tr>
+</table>
 <br>
-</div>
-<div class="head">Step.rc syntax for lsxcommand.dll:</div>
-<div class="head2">Positioning</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
+<h2>What does lsxcommand.dll do?</h2>
+		The lsxcommand LoadModule is a text box that sits on your desktop.
+		It will let you type !bangs, folder names, documents, apps, urls, etc
+		and execute them. Think of it as a very customizable address bar :)<br>
+		if you specify a border width and you dont have CommandNotMoveable set,
+		you can drag it around by the border. there is a problem that some people
+		are having where the mouse cursor is not set back to a normal cursor after
+		it is off the text box. to fix this, use CommandNoCursorChange to stop 
+		lsxcommand from changing the cursor.<br>
+		just a tip: lots of programs names work in lsxcommand.. you can type stuff
+		like 'notepad', 'icq', 'netscape', to start some programs instead of the 
+		full path. the history is working great.<br>
 		
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandX</code></td><td width="60%" class="data">
-			        x position on the screen.
-    	          </td>
-</tr>
-		
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandY</code></td><td width="60%" class="data">
-			        y position on the screen.
-    	          </td>
-</tr>
-		
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandWidth</code></td><td width="60%" class="data">
-			        width in pixels.
-    	          </td>
-</tr>
-		
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandHeight</code></td><td width="60%" class="data">
-			        height in pixels.
-    	          </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandNotAlwaysOnTop</code></td><td width="60%" class="data">overides the default of being Always On Top of other windows
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandHiddenOnStart</code></td><td width="60%" class="data">start hidden
-		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">Special positioning settings</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandOffsetX-CommandOffsetY</code></td><td width="60%" class="data">This value determines which point on the screen LSXCommand should use as a reference for the CommandX/Y values. The default is the upper left corner. 
-       0  -  Left / Top
-       1  -  Horizontal / Vertical Center
-       2  -  Right / Bottom
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandBevelBorder</code></td><td width="60%" class="data">
-		            Use bevels instead of borders.
-		        </td>
-</tr>
-
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">LsBox</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		        
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandWaitForBox</code></td><td width="60%" class="data">LsxCommand will not appear until he is loaded in a box with the !CommandBoxHook. Please check lsbox documentation.
-		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">Border and text</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>BorderSize</code></td><td width="60%" class="data">Width in pixels of the border. If you want to have different sized borders on each side, use CommandTopBorderSize, CommandBottomBorderSize, CommandLeft..., and CommandRight...
-     	            </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandTextSize</code></td><td width="60%" class="data">pixel size of the text
-	            </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">Skins (see also lsxcommand.txt, section II.7 Backgrounds and Transparencies).</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandBGColor</code></td><td width="60%" class="data">background color
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandBackground</code></td><td width="60%" class="data">Path to your background image.  If this is not an absolute path, LSXCommand looks in your images directory.  If this option is not specified, the background and border colors are used.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandTransparentEditBox</code></td><td width="60%" class="data">Makes the area in which you type transparent to the background.  If this option is not specified, the background image shows through.  If there is no background, the background color is used.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandTextColor</code></td><td width="60%" class="data">text color
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandBorderColor</code></td><td width="60%" class="data">color of the border
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandTextFontFace</code></td><td width="60%" class="data">font for the text
-		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">Various settings</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandNotMoveable</code></td><td width="60%" class="data">if this is set you will not be able to drag it around by the border
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandNoCursorChange</code></td><td width="60%" class="data">does not change mouse cursor when over the text box
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandAssumeNetAddress</code></td><td width="60%" class="data">If a command just doesn't cut it, you can have it start your browser with the address.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandExplorePaths</code></td><td width="60%" class="data">If enabled, any directory path you enter into LSXCommand will open a treed explorer window, instead of the standard folder window.
-		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">History (see also lsxcommand.txt, section II.5 Tab-MicroComplete and Context Menu Access).</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandHistoryFile</code></td><td width="60%" class="data">Specifies the file lsxcommand stores its history in. Defaults to modules.ini.</td>
-</tr>		
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandHistoryEntries</code></td><td width="60%" class="data">Sets number of history entries of which to keep track. Note: I haven't really stress-tested LSXCommand, so I don't know how well it scales up, but it shouldn't be too taxing even at somewhere around 50 entries.  But I think that's a bit much anyway... 
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandHistoryMenuEntries</code></td><td width="60%" class="data">Sets the maximum number of history entries available from the context menu.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandClearHistoryOnStartup</code></td><td width="60%" class="data">Clears the history on startup. NOTE: You *will* lose the history in modules.ini - not only the history in memory.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandNewestHistoryItemsOnTop</code></td><td width="60%" class="data">This setting places newer history items at the top of the menu, instead of at the bottom.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandUnixHistory</code></td><td width="60%" class="data">The most popular UNIX shell (bash) has the inverse history navigation: Up for previous, down for next.  You can use this system with this setting.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandAddExternalsToHistory</code></td><td width="60%" class="data">If this is on, LSXCommand will add any commands launched with the !Command !Bang command to the history.  Since I've been using AlterScript with this a lot, it became annoying to have all of AlterScript's commands end up in LSXCommand's history.
-		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">Context menu</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandContextMenuStandardItems</code></td><td width="60%" class="data">This item does two things.  It first turns on the standard menu items: Cut, Copy and Paste.  Second, it tells where to put the standard items, above or below the LSXCommand specific menus.
-     Example: CommandContextMenuStandardItems 1   ; Above
-              CommandContextMenuStandardItems 2   ; Below
-              CommandContextMenuStandardItems 0   ; Off (Default)
-		        </td>
-</tr>
-
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandContextMenuAboveBox</code></td><td width="60%" class="data">If you have your LSXCommand window at the bottom of the screen, you will want to turn this on.  If at the top, leave this off.  This sets where the context menu will appear - above or below the LSXCommand box.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandContextMenuExecute</code></td><td width="60%" class="data">Tells LSXCommand to execute a selection from the context menu instead of copying its data to the LSXCommand box. 
-		                            NOTE: Since the point of search engines is to have you enter a search phrase, it is not possible to have search engines execute.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandContextMenuOrder</code></td><td width="60%" class="data">Specifies which order each submenu should appear. For instance, you can have History, Alias, then Search Engines or Alias, History, Search Engines, or... 
-
-     The setting is 3 numbers: 0, 1, and 2.  The combination of these numbers sets in which order each submenu appears.  The first number is the position of the History submenu.  The second is the Alias submenu.  And the last is the Search Engines submenu.
-		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">CommandOn settings</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandNoWarnOnError</code></td><td width="60%" class="data">If there is an error (for instance, if the command you entered is invalid or the calculator couldn't evaluate the expression you entered), you will get an error message.  This, when turned on, will suppress it.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandHideOnCommand</code></td><td width="60%" class="data">
-		            Hides lsxcommand when a command is issued.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandSelectAllOnFocus</code></td><td width="60%" class="data">Selects everything in the command box on focus.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandSelectAllOnMouseFocus</code></td><td width="60%" class="data">Just like CommandSelectAllOnFocus, just that it only works when clicking to focus LSXCommand.  The reason these are two separate options is for people like me: I like to be able to just click once to put the cursor where I want it -not select the entire command.  But, some people like the explorer way of doing things better, so I added it.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandHideOnUnfocus</code></td><td width="60%" class="data">Hides LSXCommand when it loses keyboard focus. This can be used to hide LSXCommand after it runs an app.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandNoClearOnCommand</code></td><td width="60%" class="data">wont clear the input after you hit enter
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandClearOnHide</code></td><td width="60%" class="data">clear the text when mod is hidden
-		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">Clock</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandTime</code></td><td width="60%" class="data">Format string that tells LSXCommand how you want your time and date to look.(see lsxcommand.txt, section II.8 Clock Settings).
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandClockDisappearsOnFocus</code></td><td width="60%" class="data">If you want the clock to automatically disappear when you click in LSXCommand, set this on.  Otherwise, the clock will "pause" at the current time/date.  This makes it easier for you to copy/paste the time and date into any app.
- 		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">Winamp</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandScrollWinAmpTitle</code></td><td width="60%" class="data">If on, this setting takes WinAmp's scrolling title and displays it in LSXCommand.  Note that WinAmp's scroll song title preference must be on for this to happen.  A neat trick with this is to have both a clock and a WinAmp scroller.  The WinAmp scroller will show when WinAmp is running.  If not, the clock will show.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandWinAmpDisappearsOnFocus</code></td><td width="60%" class="data">Just like CommandClockDisappearsOnFocus, but for the WinAmp scrolling feature.</td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandMusicPlayer</code></td><td width="60%" class="data">This command enables LSXCommand to use the titles of other music players besides WinAmp.  You should set it to the class name of the application you are looking for.
-		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">CommandTab settings</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandNoTabMicroComplete</code></td><td width="60%" class="data">Stops Tab-MicroCompletes (see also lsxcommand.txt, section II.5 Tab-MicroComplete and Context Menu Access) from taking place. When you are typing in LSXCommand and get an autocompletion, you may want to automatically go on to the next word.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandTabFileComplete</code></td><td width="60%" class="data">Enables the completion of file names by using the tab key (see also lsxcommand.txt, section II.9 Tab File Completion)..
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandNoAutoComplete</code></td><td width="60%" class="data">Turns *off* AutoComplete.  Someone asked for it, so I coded it :).</td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandCommaDelimiter</code></td><td width="60%" class="data">Some Eurpoean countries use commas as decimal delimiters, so this changes decimals from periods to commas.
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandRPNCalculator</code></td><td width="60%" class="data">Makes the calculator an RPN calculator.  If you don't know what this is, don't use it!  You'll only confuse yourself.  Others call RPN "Postfix" notation.  If you want to learn more, obtain a Hewlett-Packard RPN calculator (the 48/49 series are especially nice, IMO :).
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandSearchEngineList</code></td><td width="60%" class="data">The path to your engines.list (see also lsxcommand.txt, section II.4 The engines.list File). - the list of search engines to use with LSXCommand.</td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandSearchEngineBrowser</code></td><td width="60%" class="data">Path to the browser to be used with search engines. If not specified, LSXCommand uses the default browser on your system.
-		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<div class="head2">CommandOn actions</div>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandOnFocus</code></td><td width="60%" class="data">Will execute a command when you !FocusCommand
-		        </td>
-</tr>
-		    
-<tr class="item">
-<td width="40%" class="data" align="center"><code>CommandOnUnfocus</code></td><td width="60%" class="data"> Will execute a command when you un-focus lsxcommand (get out of the edit box)
-		        </td>
-</tr>
-		
-</table>
-</td>
-</tr>
-</table>
-<h2>Bang commands:</h2>
-<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
-<tr class="border">
-<td>
-<table cellspacing="0" cellpadding="10" border="1" width="100%">
-<tbody>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !ToggleCommand</code></td><td width="60%" class="data">Toggle lsxcommand visibility.</td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !FocusCommand</code></td><td width="60%" class="data">Set focus to command (nice for binding to hotkeys).
-	    </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandRescanEngines</code></td><td width="60%" class="data">Rescans the engines.list file.  Note: it does not load a new engines.list file if specified in the step.rc; it will attempt to reload the same engines.list file.
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandClearHistory</code></td><td width="60%" class="data">Clears both the history in memory *and* the history in modules.ini
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandShowContextMenu</code></td><td width="60%" class="data">Makes LSXCommand's Context Menu visible wherever the cursor is on the screen, regardless of LSXCommand's visibility.
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !Command</code></td><td width="60%" class="data">Now use the power of LSXCommand anywhere within Litestep!  Shortcuts, wharf items, whatever that can run !bang commands outside of its own can now use LSXCommand.
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandShow</code></td><td width="60%" class="data">Just shows LSXCommand.  NOTE: It does *not* give LSXCommand focus.  To do this, use !FocusCommand - this command gives focus to LSXCommand, and if it's not visible, it shows it also.
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandHide</code></td><td width="60%" class="data">Just hides LSXCommand.  Nothing really special.
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandBrowseFile</code></td><td width="60%" class="data">Brings up an Open Dialog Box to browse for a file for LSXCommand to open.  It's just the same as typing in the file's name.  NOTE: You can send an argument to this !Bang command to specify the filter for the open box.
-For instance, to see just Text Files, you might do this:
-       !CommandBrowseFile    All Text Files (*.txt, *.ini)|*.txt;*.ini
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandBrowseFolder</code></td><td width="60%" class="data">Brings up a folder selection dialog.  You can select a folder to browse to.  There are no arguments for this !Bang command. 
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandMove</code></td><td width="60%" class="data">Moves the LSXCommand window either to an absolute position, or by a delta along each axis.  The horizontal and vertical values can be configured separately (you can mix absolute and delta values).
-
-     If the horizontal or vertical values are surrounded by parentheses, they are interpreted as absolute values.  Otherwise, they are interpreted as +/- deltas along their respective axis.
-
-     If there is only one parameter, it is interpreted as a horizontal value.
-
-       !CommandMove 0 100  ; moves it 100 pixels down
-
-     When !CommandMove is called without parameters, it moves to the current mouse cursor position.  If !CommandMove is called with "home" as its parameter, it moves back to the original position it received from step.rc
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandToggleTimer</code></td><td width="60%" class="data">Toggles the current timer.  If you use this, the WinAmp timer no longer takes precedence over the clock.  You have to call this !Bang again for the WinAmp scroller to appear.
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandSetText</code></td><td width="60%" class="data">This !Bang sets the text in LSXCommand to its arguments.  This makes for some really neat stuff (for instance, a shortcut that pops up LSXCommand with a question mark and a space already in it ready for an argument to search with).
-    Note that this !Bang command does not show LSXCommand if it is hidden.
-     Example: !SetText "?Altavista "
-            </td>
-</tr>
-<tr class="item">
-<td width="40%" class="data" align="center"><code>
-                    !CommandBoxHook</code></td><td width="60%" class="data">This is used with lsbox: *ModuleHook !CommandBoxHook
-             Please, check LsBox documentation 
-            </td>
-</tr>
-</tbody>
-</table>
-</td>
-</tr>
-</table>
-<div class="head">
-                About lsxcommand.dll v1.8.4:<br>
-</div>
-<div class="body">
-                    Author contact informations:<br>
-                    Name: Visigoth<br>
-                        E-mail:<a href="mailto:sgandhi__AT__andrew__DOT__cmu__DOT__edu">sgandhi__AT__andrew__DOT__cmu__DOT__edu</a>
+<span style="font-weight: bold">Note:</span> Not all the text docs are in the html docs. All of the step.rc
+		and bang commands are, but not all explanations. If you want to read more
+		about the calculator, time, transparency, ... check lsxcommand.txt.
+	<br>
+<h2>Step.rc Commands for lsxcommand.dll</h2>
+<table>
+<tr>
+<td style="width: 50%; text-align: center;">CommandX [integer] </td><td style="width: 50%;">
+	    	x position on the screen.
+	    <br>
 <br>
-                        Project homepage: <a href="http://home.att.net/~gandhimail/">http://home.att.net/~gandhimail/</a>
+<b>Default: </b>0 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandY [integer] </td><td style="width: 50%;">
+	    	y position on the screen.
+	    <br>
 <br>
-</div>
+<b>Default: </b>0 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandWidth [integer] </td><td style="width: 50%;">
+	    	width in pixels.
+	    <br>
+<br>
+<b>Default: </b>160 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandHeight [integer] </td><td style="width: 50%;">
+	    	height in pixels.
+	    <br>
+<br>
+<b>Default: </b>20 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandNotAlwaysOnTop [bool] </td><td style="width: 50%;">
+	
+<br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandHiddenOnStart [bool] </td><td style="width: 50%;">
+	    	start hidden
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandOffsetX [integer] </td><td style="width: 50%;">
+	    	This value determines which point on the screen LSXCommand should use as a reference
+	    	for the CommandX value.<br>
+	    	0: left -  1: horizontal center 2: right
+	    <br>
+<br>
+<b>Default: </b>0 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandOffsetY [integer] </td><td style="width: 50%;">
+	    	This value determines which point on the screen LSXCommand should use as a reference
+	    	for the CommandY value.<br>
+	    	0: top - 1: horizontal center - 2: bottom
+	    <br>
+<br>
+<b>Default: </b>0 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandBevelBorder [bool] </td><td style="width: 50%;">
+	    	Use bevels instead of borders.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandWaitForBox [bool] </td><td style="width: 50%;">
+	    	LsxCommand will not appear until he is loaded in a box with the !CommandBoxHook.<br>
+	    	Please check lsbox documentation.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandBorderSize [integer] </td><td style="width: 50%;">
+	    	Width in pixels of the border.<br>
+	    	If you want to have different sized borders on each side, use CommandTopBorderSize,
+	    	CommandBottomBorderSize, CommandLeftBorderSize, and CommandRightBorderSize.
+	    <br>
+<br>
+<b>Default: </b>-1 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandBottomBorderSize [integer] </td><td style="width: 50%;">
+	    	Height in pixels of the bottom border, overrides $CommandBorderSize$ for that border.
+	    <br>
+<br>
+<b>Default: </b>2 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandTopBorderSize [integer] </td><td style="width: 50%;">
+	    	Height in pixels of the top border, overrides $CommandBorderSize$ for that border.
+	    <br>
+<br>
+<b>Default: </b>2 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandLeftBorderSize [integer] </td><td style="width: 50%;">
+	    	Width in pixels of the left border, overrides $CommandBorderSize$ for that border.
+	    <br>
+<br>
+<b>Default: </b>2 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandRightBorderSize [integer] </td><td style="width: 50%;">
+	    	Width in pixels of the right border, overrides $CommandBorderSize$ for that border.
+	    <br>
+<br>
+<b>Default: </b>2 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandTextSize [integer] </td><td style="width: 50%;">
+	    	pixel size of the text
+	    <br>
+<br>
+<b>Default: </b>14 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandTextBold [bool] </td><td style="width: 50%;">
+	    	Is the text going to be bold.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandTextUnderline [bool] </td><td style="width: 50%;">
+	    	Is the text going to be underlined.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandTextItalic [bool] </td><td style="width: 50%;">
+	    	Is the text going to be italic.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandBGColor [color] </td><td style="width: 50%;">
+	    	background color
+	    <br>
+<br>
+<b>Default: </b>FFFFFF </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandBackground [image] </td><td style="width: 50%;">
+	    	Path to your background image. If this is not an absolute path, LSXCommand looks in
+	    	your images directory.<br>
+	    	
+<span style="font-weight: bold">Note:</span> If this option is not specified, the background and border colors are used.
+	    <br>
+<br>
+<b>Default: </b> </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandStretchBackground [bool] </td><td style="width: 50%;">
+	    	If set to true, the background image will be stretched.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandTransparentEditBox [bool] </td><td style="width: 50%;">
+	    	Makes the area in which you type transparent to the background. If this option is
+	    	not specified, the background image shows through.<br>
+	    	If there is no background, the background color is used.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandTextColor [color] </td><td style="width: 50%;">
+	    	text color
+	    <br>
+<br>
+<b>Default: </b>000000 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandBorderColor [color] </td><td style="width: 50%;">
+	    	color of the border
+	    <br>
+<br>
+<b>Default: </b>666666 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandTextFontFace [string] </td><td style="width: 50%;">
+	    	font for the text
+	    <br>
+<br>
+<b>Default: </b>Arial </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandNotMoveable [bool] </td><td style="width: 50%;">
+	    	if this is set you will not be able to drag it around by the border
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandNoCursorChange [bool] </td><td style="width: 50%;">
+	    	does not change mouse cursor when over the text box
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandAssumeNetAddress [bool] </td><td style="width: 50%;">
+	    	If a command just doesn't cut it, you can have it start your browser with the address.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandExplorePaths [bool] </td><td style="width: 50%;">
+	    	If enabled, any directory path you enter into LSXCommand will open a treed explorer window, instead of the standard folder window.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandHistoryFile [string] </td><td style="width: 50%;">
+	    	Specifies the file lsxcommand stores its history in.
+	    <br>
+<br>
+<b>Default: </b>$LitestepDir$\modules.ini </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandHistoryEntries [integer] </td><td style="width: 50%;">
+	    	Sets number of history entries of which to keep track.
+	    	<span style="font-weight: bold">Note:</span> I haven't really stress-tested LSXCommand, so I don't know how well
+	    	it scales up, but it shouldn't be too taxing even at somewhere around 50 entries.
+	    	But I think that's a bit much anyway...
+	    <br>
+<br>
+<b>Default: </b>10 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandHistoryMenuEntries [integer] </td><td style="width: 50%;">
+	    	Sets the maximum number of history entries available from the context menu.
+	    <br>
+<br>
+<b>Default: </b>$CommandHistoryEntries-1$ </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandClearHistoryOnStartup [bool] </td><td style="width: 50%;">
+	    	Clears the history on startup.<br>
+	    	
+<span style="font-weight: bold">Note:</span> You *will* lose the history in $CommandHistoryFile$ - not only the history in memory.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandNewestHistoryItemsOnTop [bool] </td><td style="width: 50%;">
+	    	This setting places newer history items at the top of the menu, instead of at the bottom.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandUnixHistory [bool] </td><td style="width: 50%;">
+	    	The most popular UNIX shell (bash) has the inverse history navigation: Up for previous, down for next. You can use this system with this setting.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandAddExternalsToHistory [bool] </td><td style="width: 50%;">
+	    	If this is on, LSXCommand will add any commands launched with the !Command !Bang command to the history. Since I've been using AlterScript with this a lot, it became annoying to have all of AlterScript's commands end up in LSXCommand's history.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandContextMenuStandardItems [integer] </td><td style="width: 50%;">
+	    	This item does two things. It first turns on the standard menu items: Cut, Copy and Paste. Second, it tells where to put the standard items, above or below the LSXCommand specific menus.<br>
+	    	Example:<br>
+	    	CommandContextMenuStandardItems 1 ; Above<br>
+	    	CommandContextMenuStandardItems 2 ; Below<br>
+	    	CommandContextMenuStandardItems 0 ; Off (Default)
+	    <br>
+<br>
+<b>Default: </b>0 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandContextMenuAboveBox [bool] </td><td style="width: 50%;">
+	    	If you have your LSXCommand window at the bottom of the screen, you will want to turn
+	    	this on.  If at the top, leave this off.  This sets where the context menu will appear
+	    	- above or below the LSXCommand box.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandContextMenuExecute [bool] </td><td style="width: 50%;">
+	    	Tells LSXCommand to execute a selection from the context menu instead of copying its
+	    	data to the LSXCommand box.<br>
+	    	
+<span style="font-weight: bold">Note:</span> Since the point of search engines is to have you enter a search phrase,
+	    	it is not possible to have search engines execute.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandContextMenuOrder [string] </td><td style="width: 50%;">
+	    	Specifies which order each submenu should appear.<br>
+	    	For instance, you can have History, Alias, then Search Engines or Alias, History,
+	    	Search Engines, or...<br>
+	    	The setting is 3 numbers: 0, 1, and 2. The combination of these numbers sets in
+	    	which order each submenu appears. The first number is the position of the History
+	    	submenu. The second is the Alias submenu. And the last is the Search Engines submenu.
+	    <br>
+<br>
+<b>Default: </b>012 </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandContextMenuAutoPopup [bool] </td><td style="width: 50%;">
+		If you set this to true, then everytime the mouse will come over the lsxcommand box,
+		the contect menu will appear.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandNoWarnOnError [bool] </td><td style="width: 50%;">
+	    	If there is an error (for instance, if the command you entered is invalid or the
+	    	calculator couldn't evaluate the expression you entered), you will get an error
+	    	message. This, when turned on, will suppress it.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandHideOnCommand [bool] </td><td style="width: 50%;">
+	    	Hides lsxcommand when a command is issued.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandSelectAllOnFocus [bool] </td><td style="width: 50%;">
+	    	Selects everything in the command box on focus.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandSelectAllOnMouseFocus [bool] </td><td style="width: 50%;">
+	    	Just like CommandSelectAllOnFocus, just that it only works when clicking to focus
+	    	LSXCommand.<br>
+	    	The reason these are two separate options is for people like me: I like to be able
+	    	to just click once to put the cursor where I want it -not select the entire command.
+	    	But, some people like the explorer way of doing things better, so I added it.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandHideOnUnfocus [bool] </td><td style="width: 50%;">
+	    	Hides LSXCommand when it loses keyboard focus. This can be used to hide LSXCommand
+	    	after it runs an app.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandNoClearOnCommand [bool] </td><td style="width: 50%;">
+	    	wont clear the input after you hit enter
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandClearOnHide [bool] </td><td style="width: 50%;">
+	    	clear the text when mod is hidden
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandOnFocus [string] </td><td style="width: 50%;">
+	    	Will execute a command when you !FocusCommand (or when you focus it with the mouse).
+	    <br>
+<br>
+<b>Default: </b>!none </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandOnUnfocus [string] </td><td style="width: 50%;">
+	    	 Will execute a command when you un-focus lsxcommand (get out of the edit box)
+	    <br>
+<br>
+<b>Default: </b>!none </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandTime [string] </td><td style="width: 50%;">
+	    	Format string that tells LSXCommand how you want your time and date to look.<br>
+	    	(see lsxcommand.txt, section II.8 Clock Settings).
+	    <br>
+<br>
+<b>Default: </b> </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandClockDisappearsOnFocus [bool] </td><td style="width: 50%;">
+	    	If you want the clock to automatically disappear when you click in LSXCommand, set
+	    	this on. Otherwise, the clock will "pause" at the current time/date. This makes it
+	    	easier for you to copy/paste the time and date into any app.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandScrollWinAmpTitle [bool] </td><td style="width: 50%;">
+	    	If on, this setting takes WinAmp's scrolling title and displays it in LSXCommand.
+	    	Note that WinAmp's scroll song title preference must be on for this to happen.
+	    	A neat trick with this is to have both a clock and a WinAmp scroller. The WinAmp
+	    	scroller will show when WinAmp is running. If not, the clock will show.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandWinAmpDisappearsOnFocus [bool] </td><td style="width: 50%;">
+	    	Just like CommandClockDisappearsOnFocus, but for the WinAmp scrolling feature.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandMusicPlayer [string] </td><td style="width: 50%;">
+	    	This command enables LSXCommand to use the titles of other music players besides
+	    	WinAmp. You should set it to the class name of the application you are looking for.
+	    <br>
+<br>
+<b>Default: </b>WINAMP V1.X </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandNoTabMicroComplete [bool] </td><td style="width: 50%;">
+	    	Stops Tab-MicroCompletes from taking place. When you are typing in LSXCommand and
+	    	get an autocompletion, you may want to automatically go on to the next word.<br>
+	    	see also lsxcommand.txt, section II.5 Tab-MicroComplete and Context Menu Access
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandTabFileComplete [bool] </td><td style="width: 50%;">
+	    	Enables the completion of file names by using the tab key.<br>
+	    	see also lsxcommand.txt, section II.9 Tab File Completion
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandNoAutoComplete [bool] </td><td style="width: 50%;">
+	    	Turns *off* AutoComplete. Someone asked for it, so I coded it :).
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandCommaDelimiter [bool] </td><td style="width: 50%;">
+	    	Some Eurpoean countries use commas as decimal delimiters, so this changes decimals
+	    	from periods to commas.
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandRPNCalculator [bool] </td><td style="width: 50%;">
+	    	Makes the calculator an RPN calculator. If you don't know what this is, don't use
+	    	it! You'll only confuse yourself. Others call RPN "Postfix" notation. If you want
+	    	to learn more, obtain a Hewlett-Packard RPN calculator (the 48/49 series are
+	    	especially nice, IMO :).
+	    <br>
+<br>
+<b>Default: </b>false </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandSearchEngineList [string] </td><td style="width: 50%;">
+	    	The path to your engines.list - the list of search engines to use with LSXCommand.<br>
+	    	see also lsxcommand.txt, section II.4 The engines.list File.
+	    <br>
+<br>
+<b>Default: </b>engines.list </td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">CommandSearchEngineBrowser [string] </td><td style="width: 50%;">
+	    	Path to the browser to be used with search engines. If not specified, LSXCommand
+	    	uses the default browser on your system.
+	    <br>
+<br>
+<b>Default: </b> </td>
+</tr>
+</table>
+<br>
+<h2>!Bang Commands for lsxcommand.dll</h2>
+<table>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !ToggleCommand</td><td style="width: 50%;">
+	    	Toggle lsxcommand visibility.
+	    <br>
 </td>
 </tr>
-<tr class="body">
-<td align="right" valign="bottom">
-<div align="right">
-<img alt="valid-html401" src="images/valid-html401.gif"></div>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !FocusCommand</td><td style="width: 50%;">
+	    	Set focus to command (nice for binding to hotkeys).
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandRescanEngines</td><td style="width: 50%;">
+	    	Rescans the engines.list file.<br>
+	    	
+<span style="font-weight: bold">Note:</span> it does not load a new engines.list file if specified in the step.rc;
+	    	it will attempt to reload the same engines.list file.
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandClearHistory</td><td style="width: 50%;">
+	    	Clears both the history in memory *and* the history in $CommandHistoryFile$.
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandShowContextMenu</td><td style="width: 50%;">
+	    	Makes LSXCommand's Context Menu visible wherever the cursor is on the screen,
+	    	regardless of LSXCommand's visibility.
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !Command</td><td style="width: 50%;">
+	    	Now use the power of LSXCommand anywhere within Litestep! Shortcuts, wharf items,
+	    	whatever that can run !bang commands outside of its own can now use LSXCommand.
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandShow</td><td style="width: 50%;">
+	    	Just shows LSXCommand.<br>
+	    	
+<span style="font-weight: bold">Note:</span> It does *not* give LSXCommand focus. To do this, use !FocusCommand
+	    	- this command gives focus to LSXCommand, and if it's not visible, it shows it also.
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandHide</td><td style="width: 50%;">
+	    	Just hides LSXCommand. Nothing really special.
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandBrowseFile</td><td style="width: 50%;">
+	    	Brings up an Open Dialog Box to browse for a file for LSXCommand to open.
+	    	It's just the same as typing in the file's name.<br>
+	    	Note: You can send an argument to this !Bang command to specify the filter for
+	    	the open box.<br>
+	    	For instance, to see just Text Files, you might do this: !CommandBrowseFile All
+	    	Text Files (*.txt, *.ini)|*.txt;*.ini
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandBrowseFolder</td><td style="width: 50%;">
+	    	Brings up a folder selection dialog. You can select a folder to browse to.
+	    	There are no arguments for this !Bang command.
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandMove</td><td style="width: 50%;">
+	    	Moves the LSXCommand window either to an absolute position, or by a delta along
+	    	each axis. The horizontal and vertical values can be configured separately (you
+	    	can mix absolute and delta values).<br>
+	    	If the horizontal or vertical values are surrounded by parentheses, they are
+	    	interpreted as absolute values. Otherwise, they are interpreted as +/- deltas along
+	    	their respective axis.<br>
+	    	If there is only one parameter, it is interpreted as a horizontal value.<br>
+	    	!CommandMove 0 100 ; moves it 100 pixels down<br>
+	    	When !CommandMove is called without parameters, it moves to the current mouse cursor
+	    	position.<br>
+	    	If !CommandMove is called with "home" as its parameter, it moves back to the
+	    	original position it received from step.rc
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandToggleTimer</td><td style="width: 50%;">
+	    	Toggles the current timer. If you use this, the WinAmp timer no longer takes
+	    	precedence over the clock.<br>
+	    	You have to call this !Bang again for the WinAmp scroller to appear.
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandSetText</td><td style="width: 50%;">
+	    	This !Bang sets the text in LSXCommand to its arguments.<br>
+	    	This makes for some really neat stuff (for instance, a shortcut that pops up
+	    	LSXCommand with a question mark and a space already in it ready for an argument
+	    	to search with).<br>
+	    	
+<span style="font-weight: bold">Note</span>: this !Bang command does not show LSXCommand if it is hidden.<br>
+	    	Example: !SetText "?Altavista "
+	    <br>
+</td>
+</tr>
+<tr>
+<td style="width: 50%; text-align: center;">
+        !CommandBoxHook</td><td style="width: 50%;">
+	    	This is used with lsbox: *ModuleHook !CommandBoxHook<br>
+	    	Please, check LsBox documentation
+	    <br>
 </td>
 </tr>
 </table>
+<br>
+<h2>Changelog for lsxcommand.dll</h2>
+<table>
+<tr>
+<td style="width: 100%;">
+        Version 1.8.5 (jesus_mjjg/ilmcuts)<ul>
+<li>Added CommandStretchBackground.</li>
+<li>Added CommandTextBold, CommandTextUnderline and CommandTextItalic.</li>
+<li>Fixed multiple access violations.</li>
+<li>Fixed some pointers being used without any prior validation.</li>
+<li>Docs/XML converted to the Litestep "official" format ... a lot more work to do though, stay tuned.</li>
+</ul>
 </td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td style="width: 100%; text-align: center;">(c) 2003 <a href="http://lsdocs.litestep.net/" title="LiteStep Documentation Project">LiteStep Documentation Project</a></td>
 </tr>
 </table>
 </body>

@@ -1,8 +1,10 @@
 /******************************************************************************
 *                                                                             *
-* This is a part of the AlterScript LiteStep module Source code.              *
+* This is a part of the LsxCommand LiteStep module Source code.               *
 *                                                                             *
-* Copyright (C) 1999 Visigoth (Shaheen Gandhi in real life)                   *
+* Copyright (C) 1999-2000 Visigoth (Shaheen Gandhi in real life)              *
+* Based on limpid's lscommand.                                                *
+* Updated by blkhawk, ilmcuts, jesus_mjjg, rabidcow.                          *
 * Look at the documentation for more informations.                            *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify        *
@@ -21,25 +23,52 @@
 *                                                                             *
 ******************************************************************************/
 
-#ifndef EXPORTS_H
-#define EXPORTS_H
-
 /******************************************************************************
-*	MSVC++ 6.0                                                                *
-*	Go to Tools -> Options -> Directories                                     *
-*	Select "Include file" in the list box and add the path to the directory   *
-*	where you store your litestep core source files.                          *
-*                                                                             *
-*	Don't forget to do the same for the library file.                         *
-*                                                                             *
-*	Please do this to help portability and to support some development        *
-*   standards.                                                                *
+*                  menu.c - Provides Menu Management                          *
+*                                   *  *  *  *                                *
+*           Last Update:  July 16, 1999  2:A0 AM                              *
 ******************************************************************************/
-#include <utility/wharfdata.h>
 
-/* Exported Functions */
-__declspec( dllexport ) int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd);
-__declspec( dllexport ) int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath);
-__declspec( dllexport ) int quitModule(HINSTANCE dll);
+#ifndef LSXCOMMANDCLOCK_EXPORTS
 
-#endif
+#include <windows.h>
+#include <stdio.h>
+#include "lsxcommand.h"
+
+void MenuDeleteItem(HMENU hMenu, int index)
+{
+  if(index >= 0) {
+    DeleteMenu(hMenu, index, MF_BYPOSITION);
+  }
+}
+
+void MenuAddItem(HMENU hMenu, char *pszValue, long def_id, BOOL insertAtTop)
+{
+  int total = hMenu ? GetMenuItemCount(hMenu) : 0;
+  int index = insertAtTop ? 0 : total;
+  char *buf = pszValue ? (char *)malloc(strlen(pszValue) + 1) : NULL;
+  MENUITEMINFO item;
+
+  if(buf)
+  {
+    if (hMenu)
+    {
+        strcpy(buf, pszValue);
+        item.cbSize = sizeof(MENUITEMINFO);
+        item.fMask = MIIM_TYPE | MIIM_ID;
+        item.fType = MFT_STRING;
+        if(total)
+            item.wID = GetMenuItemID(hMenu, total-1) + 1;
+        else
+            item.wID = def_id;
+        item.dwTypeData = buf;
+        item.cch = sizeof(buf);
+        
+        InsertMenuItem(hMenu, total, TRUE, &item);
+    }
+
+    free(buf);
+  }
+}
+
+#endif //LSXCOMMANDCLOCK_EXPORTS

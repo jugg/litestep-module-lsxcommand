@@ -1,197 +1,180 @@
-<!-- **************************************************************************************************************** -->
-<xsl:stylesheet  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"  version="1.0">
-<xsl:output method="html" doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" indent="yes"/>
-    <xsl:template match="/lsmd">
-        <html>
-            <head>
-                    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-                <link type="text/css" href="docs.css" rel="stylesheet"/>
-                <title>
-                    <xsl:value-of select="module/@filename"/> v<xsl:value-of select="module/@version"/>
-                </title>
-            </head>
-            <body>
-<!-- -->
-                <table width="100%" border="0">
-                    <tr class="border">
-                        <td>
-                            <table width="100%" border="0" cellpadding="0" cellspacing="0" class="main">
-                                <tr>
-                                    <td>
-                                        <table width="100%" border="0" cellpadding="10" cellspacing="0">
-                                            <tr>
-                                                <td>
-                                                    <div class="title">
-                                                        <xsl:value-of select="module/@filename"/> documentation
-                                                    </div>
-                                                    <span class="info">
-                                                        XML/XSL-generated documentation, on the official litestep docs model.<br/>
-                                                        docs layout written by the LiteStep Documentation Effort, August 2000<br/>
-                                                        XML schema by <A HREF="mailto:mrmidi__AT__gmx__DOT__net">MrMidi</A>, XSL by <A HREF="mailto:jesus_mjjg__AT__skynet__DOT__be">jesus_mjjg</A><br/>
-                                                    </span>
-                                                </td>
-                                                <td align="right" valign="middle">
-                                                    <img src="images/logo.gif" alt=""/>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            <tr>
-                        <td>
-<!-- -->
-        <div class="head">What does <xsl:value-of select="module/@filename"/> do?</div>
-        <div class="body"><xsl:value-of select="module/description"/><br/><br/></div>
-                <!-- -->
-        <div class="head">Step.rc syntax for <xsl:value-of select="module/@filename"/>:</div>
-                <!-- -->
-                <xsl:apply-templates select="module/command-group"/>
-                <xsl:apply-templates select="module/bangs"/>
-                <!-- -->
-                <div class="head">
-                About <xsl:value-of select="module/@filename"/> v<xsl:value-of select="module/@version"/>:<br/>
-                </div>
-                <div class="body">
-                    Author contact informations:<br/>
-                    Name: <xsl:value-of select="module/author/@name"/><br/>
-                    <xsl:if test="string(module/author/@email)">
-                        E-mail:<a><xsl:attribute name="href">mailto:<xsl:value-of select="module/author/@email"/>
-                        </xsl:attribute><xsl:value-of select="module/author/@email"/></a><br/>
-                    </xsl:if>
-                    <xsl:if test="string(module/author/@icq)">
-                        Icq: <xsl:value-of select="module/author/@icq"/><br/>
-                    </xsl:if>
-                    <xsl:if test="string(module/author/@msn)">
-                        Msn: <xsl:value-of select="module/author/@msn"/><br/>
-                    </xsl:if>
-                    <xsl:if test="string(module/author/@yim)">
-                        Yim: <xsl:value-of select="module/author/@yim"/><br/>
-                    </xsl:if>
-                    <xsl:if test="string(module/author/@aim)">
-                        Aim: <xsl:value-of select="module/author/@aim"/><br/>
-                    </xsl:if>
-                    <xsl:if test="string(module/author/@url)">
-                        Homepage: <a>
-                                      <xsl:attribute name="href">
-                                          <xsl:value-of select="module/author/@url"/>
-                                      </xsl:attribute>
-                                      <xsl:value-of select="module/author/@url"/>
-                                  </a><br/>
-                    </xsl:if>
-                    <xsl:if test="string(module/url/@src)">
-                        Project homepage: <a>
-                                              <xsl:attribute name="href">
-                                                  <xsl:value-of select="module/url/@src"/>
-                                              </xsl:attribute>
-                                              <xsl:value-of select="module/url/@src"/>
-                                          </a><br/>
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:template match="/">
+<html>
+<head>
+<style>
+table		{ width: 100%; border-collapse: collapse; }
+td		{ border: 1px solid }
+h1, h3.head	{ padding: 0px; margin: 0px; }
+</style>
+</head>
+<body>
+  <xsl:for-each select="lsdoc/module">
+    <table style="text-align: center">
+    <tr><td style="background-color: black; color: white; border-color: black;"><h1><xsl:value-of select="@filename" /></h1></td></tr>
+    <tr><td>
+    <h3 class="head">By: <xsl:value-of select="author/@name" /> <span style="font-size:0.75em">
+    <xsl:if test="string-length(author/@website) &gt; 0">
+      (<xsl:element name="a">
+        <xsl:attribute name="href">http://<xsl:value-of select="author/@website" /></xsl:attribute>
+        <!-- xsl:value-of select="author/@website" / -->
+        <xsl:text>homepage</xsl:text>
+      </xsl:element>) 
+    </xsl:if>
+    <xsl:if test="string-length(author/@email) &gt; 0">
+      (<xsl:element name="a">
+        <xsl:attribute name="href">mailto:<xsl:value-of select="author/@email" /></xsl:attribute>
+        <!-- xsl:value-of select="author/@email" / -->
+        <xsl:text>email</xsl:text>
+      </xsl:element>)
+    </xsl:if>
+    </span>
+    </h3>
+    <span style="font-size: 0.9em">
+    <xsl:if test="string-length(author/@icq) &gt; 0">
+      <b>ICQ</b>: <xsl:value-of select="author/@icq" /><br />
+    </xsl:if>
+    <xsl:if test="string-length(author/@msn) &gt; 0">
+      <b>MSN</b>: <xsl:value-of select="author/@msn" /><br />
+    </xsl:if>
+    <xsl:if test="string-length(author/@yim) &gt; 0">
+      <b>Y!</b>: <xsl:value-of select="author/@yim" /><br />
+    </xsl:if>
+    <xsl:if test="string-length(author/@aim) &gt; 0">
+      <b>AIM</b>: <xsl:value-of select="author/@aim" /><br />
+    </xsl:if>
+    </span>
+    </td></tr>
+    </table><br />
+    
+    <xsl:if test="count(description) &gt; 0">
+      <xsl:apply-templates select="description" />
+    </xsl:if>
+   
+    <h2>Step.rc Commands for <xsl:value-of select="@filename" /></h2>
+    <table>
+    <xsl:for-each select="command">
+      <tr><td style="width: 50%; text-align: center;">
+        <xsl:value-of select="@name" />
+        <xsl:apply-templates select="child::*" mode="paramtypes" />
+      </td><td style="width: 50%;">
+        <xsl:apply-templates select="description" />
+        <xsl:if test="count(child::*[@default]) &gt; 0">
+          <br /><b>Default: </b><xsl:apply-templates select="child::*[@default]" mode="defvalue" />
+        </xsl:if>
+      </td></tr>
+    </xsl:for-each>
+    </table><br />
+  
+    <h2>!Bang Commands for <xsl:value-of select="@filename" /></h2>
+    <table>
+    <xsl:for-each select="bang">
+      <tr><td style="width: 50%; text-align: center;">
+        !<xsl:value-of select="@name" />
+      </td><td style="width: 50%;">
+        <xsl:apply-templates select="description" />
+      </td></tr>
+    </xsl:for-each>
+    </table><br />
 
-                    </xsl:if>
-                </div>
-                <!-- -->
-</td>
-</tr>
+    <!-- Environment variables :: jesus_mjjg :: 20030930 - 23h31 -->
+      <xsl:if test="count(evar) &gt; 0">
+      <h2>Environment Variables for <xsl:value-of select="@filename" /></h2>
+      <table>
+      <xsl:for-each select="evar">
+        <tr><td style="width: 50%; text-align: center;">
+          $<xsl:value-of select="@name" />$
+        </td><td style="width: 50%;">
+          <xsl:apply-templates select="description" />
+        </td></tr>
+      </xsl:for-each>
+      </table><br />
+    </xsl:if>
+    
+    <xsl:if test="count(changelog) &gt; 0">
+      <h2>Changelog for <xsl:value-of select="@filename" /></h2>
+      <table>
+      <tr><td style="width: 100%;">
+      <xsl:for-each select="changelog/version">
+        Version <xsl:value-of select="@id" />
+        <ul>
+        <xsl:for-each select="entry">
+          <li><xsl:value-of select="text()" /></li>
+        </xsl:for-each>
+        </ul>
+      </xsl:for-each>
+      </td></tr>
+      </table>
+    </xsl:if>
+    <br />
+    <table>
+    <tr><td style="width: 100%; text-align: center;">
+    <xsl:for-each select="copyright">
+      <xsl:apply-templates />
+    </xsl:for-each>
+    </td></tr>
+    </table>
+  </xsl:for-each>
+</body>
+</html>
+</xsl:template>
 
-        <tr class="body">
-            <td valign="bottom" align="right">
-                <div align="right">
-                    <img src="images/valid-html401.gif" alt="valid-html401"/>
-                </div>
-            </td>
-        </tr>
-<!--    </tbody>-->
-</table>
-</td>
-</tr>
-</table>
+<xsl:template match="description" mode="paramtypes">
+</xsl:template>
 
-            </body>
-        </html>        
-    </xsl:template>
-<!-- ****************************************************************************************************************
-     * Here are the templates                                                                                       *
-     **************************************************************************************************************** -->
-    <xsl:template match="module">
-        <xsl:apply-templates/>
-    </xsl:template>
-<!-- **************************************************************************************************************** -->
-    <xsl:template match="command-group">
-        <div class="head2">
-            <xsl:value-of select="@name"/>
-        </div>
-        <table width="100%" cellspacing="0" cellpadding="0" border="1" align="center">
-            <tr class="border">
-                <td>
-                    <table width="100%" border="1" cellpadding="10" cellspacing="0">
-                        <xsl:apply-templates/>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </xsl:template>
-<!-- **************************************************************************************************************** -->
-    <xsl:template match="command">
-        <tr class="item">
-            <td align="center" class="data" width="40%">
-        <code>
-                    <xsl:value-of select="@name"/>
-        </code>
-            </td>
-            <td class="data" width="60%">
-                <xsl:value-of select="description"/>
-            </td>
-        </tr>
-    </xsl:template>
-<!-- **************************************************************************************************************** -->
-    <xsl:template match="bangs">
-        <h2>Bang commands:</h2>
-        <table width="100%" cellspacing="0" cellpadding="0" border="1" align="center">
-            <tr class="border">
-                <td>
-                    <table width="100%" border="1" cellpadding="10" cellspacing="0">
-                        <tbody>
-                            <!--<xsl:apply-templates/>-->
-                            <xsl:apply-templates select="./bang"/>
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </xsl:template>
-<!-- **************************************************************************************************************** -->
-    <xsl:template match="bang">
-        <tr class="item">
-            <td align="center" class="data" width="40%">
-                <code>
-                    !<xsl:value-of select="@name"/>
-                </code>
-            </td>
-            <td class="data" width="60%">
-                <xsl:value-of select="description"/>
-            </td>
-        </tr>
-    </xsl:template>
-<!-- **************************************************************************************************************** -->
-    <xsl:template match="description">
-        <div class="body">
-                <xsl:value-of select="."/>
-        </div>
-    </xsl:template>
-<!-- **************************************************************************************************************** -->
-    <xsl:template match="author">
-        </xsl:template>
-    </xsl:stylesheet>
-<!-- **************************************************************************************************************** -->
-<!-- **************************************************************************************************************** -->
-<!--
-        "<xsl:text/>
-            <xsl:choose>
-                <xsl:when test='@CAT="F"'>Fiction</xsl:when>
-                <xsl:when test='@CAT="S"'>Science</xsl:when>
-                <xsl:when test='@CAT="C"'>Computing</xsl:when>
-                <xsl:when test='@CAT="X"'>Crime</xsl:when>
-                <xsl:otherwise>Unclassified</xsl:otherwise>
-            </xsl:choose>)
-        "<xsl:text/>
+<xsl:template match="*" mode="defvalue">
+    <xsl:value-of select="@default" /><xsl:text> </xsl:text>
+</xsl:template>
 
--->
+<xsl:template match="*" mode="paramtypes">
+  <xsl:text> [</xsl:text><xsl:value-of select="name(current())" /><xsl:text>] </xsl:text>
+</xsl:template>
+
+<xsl:template match="list" mode="paramtypes">
+  <xsl:text> [</xsl:text><xsl:value-of select="@name" /><xsl:text>] </xsl:text>
+</xsl:template>
+
+<xsl:template match="description">
+    <xsl:if test="string-length(@header) &gt; 0">
+      <!-- Right title header :: jesus_mjjg :: 20030930 - 23h31 -->
+      <!-- <h3><xsl:value-of select="@header" /></h3> -->
+      <h2><xsl:value-of select="@header" /></h2>
+    </xsl:if>
+    <xsl:apply-templates /><br />
+</xsl:template>
+
+<xsl:template match="url">
+  <xsl:element name="a">
+    <xsl:attribute name="href"><xsl:value-of select="@src" /></xsl:attribute>
+    <xsl:attribute name="title"><xsl:value-of select="text()" /></xsl:attribute>
+    <xsl:apply-templates />
+  </xsl:element>
+</xsl:template>
+
+<xsl:template match="b">
+  <xsl:element name="span">
+    <xsl:attribute name="style">font-weight: bold</xsl:attribute>
+    <xsl:apply-templates />
+  </xsl:element>
+</xsl:template>
+
+<xsl:template match="i">
+  <xsl:element name="span">
+    <xsl:attribute name="style">font-style: italic</xsl:attribute>
+    <xsl:apply-templates />
+  </xsl:element>
+</xsl:template>
+
+<xsl:template match="u">
+  <xsl:element name="span">
+    <xsl:attribute name="style">text-decoration: underline</xsl:attribute>
+    <xsl:apply-templates />
+  </xsl:element>
+</xsl:template>
+
+<xsl:template match="br">
+  <xsl:element name="br" />
+</xsl:template>
+
+</xsl:stylesheet>

@@ -1,3 +1,28 @@
+/******************************************************************************
+*                                                                             *
+* This is a part of the LsxCommand LiteStep plugin Source code.               *
+*                                                                             *
+* Copyright (C) 1999-2000 Visigoth (Shaheen Gandhi in real life)              *
+* Based on limpid's lscommand.                                                *
+* Updated by blkhawk, ilmcuts, jesus_mjjg, rabidcow.                          *
+* Look at the documentation for more informations.                            *
+*                                                                             *
+* This program is free software; you can redistribute it and/or modify        *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation; either version 2 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* This program is distributed in the hope that it will be useful,             *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with this program; if not, write to the Free Software                 *
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA   *
+*                                                                             *
+******************************************************************************/
+
 #ifndef LSCOMMAND_H
 #define LSCOMMAND_H
 
@@ -26,6 +51,15 @@ enum Timers {
 
 /* Data Structures */
 struct CommandSettings {
+	//image sizes
+	int m_nWidth;
+	int m_nHeight;
+	BOOL m_bStretchImage;
+	//font
+	BOOL m_bTextBold;
+	BOOL m_bTextUnderline;
+	BOOL m_bTextItalic; 
+	//go on with what was before
 	char TextFontFace[256], SearchEngineList[_MAX_PATH], ContextMenuOrder[4], Background[_MAX_PATH], Clock[256], TextAlign[15], BrowserPath[_MAX_PATH], MusicPlayer[128];
 	int TextSize;
 	int x, origx;

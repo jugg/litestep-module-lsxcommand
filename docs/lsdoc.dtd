@@ -1,0 +1,132 @@
+<!-- XML DTD For Litestep Documentation -->
+<!-- Original XML Document Type Definition created by Aaron Dunlap -->
+<!-- Modifications done by Brian Hartvigsen -->
+<!-- Based losely on http://mrmidi.opweb.nl/litestep_module_description_file.htm -->
+<!-- Generated: 03/25/2003:  The Litestep Dev Team -->
+
+ <!DOCTYPE 	lsdoc [ 
+    <!ELEMENT	lsdoc		(module) >
+
+    <!ELEMENT	module		(author, description?, changelog?, (group, evar)*) >
+    <!ATTLIST	module
+    		friendlyname	CDATA				#IMPLIED
+		    filename	CDATA				#REQUIRED
+		    type		CDATA				#IMPLIED
+		    load		(loadmodule|mixed-mode|wharf)	#IMPLIED
+		    version		CDATA				#IMPLIED
+		    size		CDATA				#IMPLIED
+		    crc		CDATA				#IMPLIED >
+		
+    <!ELEMENT	group		(description?, (bang|command|definition)*) >
+    <!ATTLIST	group
+	    	header		CDATA		#IMPLIED >
+		
+    <!ELEMENT 	author		EMPTY >
+    <!ATTLIST	author
+	    	name		CDATA		#REQUIRED
+		    email		CDATA		#REQUIRED
+		    website		CDATA		#IMPLIED
+		    icq		CDATA		#IMPLIED
+		    msn		CDATA		#IMPLIED
+		    yim		CDATA		#IMPLIED
+		    aim		CDATA		#IMPLIED >
+
+    <!ELEMENT	changelog	(version+) >
+
+    <!ELEMENT	version		(description?, entry*) >
+    <!ATTLIST	version
+	        	id		CDATA		#REQUIRED >
+		
+    <!ELEMENT	entry		(#PCDATA) >
+
+    <!ELEMENT	copyright	(#PCDATA, url)* >
+		
+    <!ELEMENT 	command		(description?, (action, bool, color, file, folder, image, integer, list, string, require)*) >
+    <!ATTLIST	command
+	    	name		CDATA		#REQUIRED >
+		
+    <!ELEMENT	definition	(description?, (action, bool, color, file, folder, image, integer, list, string, require)*) >
+    <!ATTLIST	definition
+	    	name		CDATA		#REQUIRED >
+		
+    <!ELEMENT 	bang		(description?, (action, bool, color, file, folder, image, integer, list, string)*) >
+    <!ATTLIST	bang
+	    	name		CDATA		#REQUIRED >
+		
+    <!ELEMENT	action		EMPTY >
+    <!ATTLIST	action
+	    	optional	(optional)	#IMPLIED >
+		
+    <!ELEMENT	bool		EMPTY >
+    <!ATTLIST	bool
+		    default		(true|false)	#IMPLIED
+		    optional	(optional)	#IMPLIED >
+		
+    <!ELEMENT	color		EMPTY >
+    <!ATTLIST	color
+	    	default		CDATA		#IMPLIED
+		    optional	(optional)	#IMPLIED >
+
+    <!ELEMENT	file		(#PCDATA) >
+    <!ATTLIST	file
+		    mask		CDATA		#IMPLIED >
+		
+    <!ELEMENT	folder		(#PCDATA) >
+    <!ATTLIST	folder
+		    default		CDATA		#IMPLIED
+		    optional	(optional)	#IMPLIED >
+		
+    <!ELEMENT	font		EMPTY >
+    <!ATTLIST	font
+	    	default		CDATA		#IMPLIED
+    		optional	(optional)	#IMPLIED >
+		
+    <!ELEMENT	image		(#PCDATA) >
+    <!ATTLIST	image
+	    	default		CDATA		#IMPLIED
+		    optional	(optional)	#IMPLIED >
+		
+    <!ELEMENT	integer		EMPTY >
+    <!ATTLIST	integer
+	    	accept-negative	(accept-negative)	#IMPLIED
+		    default		CDATA			#IMPLIED
+		    optional	(optional)		#IMPLIED
+		    maxvalue	CDATA			#IMPLIED
+		    minvalue	CDATA			#IMPLIED
+		    type		(relative|absolute)	#IMPLIED >
+
+    <!ELEMENT	list		(item+, description?) >
+    <!ATTLIST	list
+	    	optional	(optional)	#IMPLIED >
+		
+    <!ELEMENT	item		(description) >
+    <!ATTLIST	item
+	    	name		CDATA		#REQUIRED
+    		value		CDATA		#REQUIRED
+	    	default		(default)	#IMPLIED >
+	
+    <!ELEMENT	string		EMPTY >
+    <!ATTLIST	string
+    		default		CDATA		#IMPLIED
+		    optional	(optional)	#IMPLIED >
+		
+    <!ELEMENT	require		EMPTY >
+    <!ATTLIST	require
+		    name		CDATA		#REQUIRED >	
+		
+    <!ELEMENT	evar		(description?) >
+    <!ATTLIST	evar
+		    name		CDATA		#REQUIRED >
+
+    <!ELEMENT	description	(#PCDATA, b, br, i, u, url)* >
+
+    <!ELEMENT	url		(#PCDATA) >
+    <!ATTLIST	url
+		    src		CDATA		#REQUIRED >
+		
+    <!ELEMENT	br		EMPTY >
+    <!ELEMENT	b		(br, i, u, url, #PCDATA)* >
+    <!ELEMENT	i		(b, br, u, url, #PCDATA)* >
+    <!ELEMENT	u		(b, br, i, url, #PCDATA)* >
+]>
+

@@ -27,7 +27,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "lscommand"=.\lscommand.dsp - Package Owner=<4>
+Project: "lsxcommand"=.\lsxcommand.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -1,22 +1,33 @@
-/***********************************************************
-*        LSXCommand - Extended LSCommand Module            *
-* This module adds to the functionality of limpid's        *
-* LSCommand module.  Among the extentions are a resizable  *
-* history, AutoCompletion, Internet Searching, Aliases,    *
-* calculator functionality, backgrounds, transparency, and *
-* clock functionality.  Maybe this is starting to bloat..  *
-* Heck, this thing can even use the WinAmp scrolling title *
-* feature.                                                 *
-*                         *  *  *  *                       *
-* Coding:                                                  *
-*   LSXCommand - Visigoth (Shaheen Gandhi in real life)    *
-*                e-mail: sgandhi@andrew.cmu.edu            *
-*   Original LSCommand - limpid                            *
-*                         *  *  *  *                       *
-* Last Update:  October 23, 2000 11:00 PM                  *
-*                         *  *  *  *                       *
-* Copyright (c) 1999 Shaheen Gandhi                        *
-***********************************************************/
+/******************************************************************************
+*                                                                             *
+* This is a part of the LsxCommand LiteStep module Source code.               *
+*                                                                             *
+* Copyright (C) 1999-2000 Visigoth (Shaheen Gandhi in real life)              *
+* Based on limpid's lscommand.                                                *
+* Updated by blkhawk, ilmcuts, jesus_mjjg, rabidcow.                          *
+* Look at the documentation for more informations.                            *
+*                                                                             *
+* This program is free software; you can redistribute it and/or modify        *
+* it under the terms of the GNU General Public License as published by        *
+* the Free Software Foundation; either version 2 of the License, or           *
+* (at your option) any later version.                                         *
+*                                                                             *
+* This program is distributed in the hope that it will be useful,             *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of              *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               *
+* GNU General Public License for more details.                                *
+*                                                                             *
+* You should have received a copy of the GNU General Public License           *
+* along with this program; if not, write to the Free Software                 *
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA   *
+*                                                                             *
+******************************************************************************/
+
+/******************************************************************************
+*                lsxcommand.c - Main lsxcommand source file                   *
+*                                   *  *  *  *                                *
+*           Last Update:  October 31, 2003  10:20 A M                         *
+******************************************************************************/
 
 #include <windows.h>
 #include <shlwapi.h>
@@ -27,13 +38,24 @@
 #include "resource.h"
 #include "exports.h"
 #include "lsxcommand.h"
-#include "lsapi.h"
+
+/******************************************************************************
+*	MSVC++ 6.0                                                                *
+*	Go to Tools -> Options -> Directories                                     *
+*	Select "Include file" in the list box and add the path to the directory   *
+*	where you store your litestep core source files.                          *
+*                                                                             *
+*	Don't forget to do the same for the library file.                         *
+*                                                                             *
+*	Please do this to help portability and to support some development        *
+*   standards.                                                                *
+******************************************************************************/
+#include <lsapi/lsapi.h>
 
 //20021115
 int msgs[] = {LM_GETREVID, 0};
 const char szAppName[] = "lsxcommand.dll"; // Our window class, etc
-const char rcsRevision[] = "$Revision: 1.8.4"; // Our Version
-const char rcsId[] = "$Id: lsxcommand.c, v 1.8.4$"; // The Full RCS ID.
+const char rcsRevision[] = "1.8.5"; // Our Version
 
 //20021114
 #define MAX_LINE_LENGTH 4096
@@ -105,6 +127,11 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
 	settings->BGColor = GetRCColor("CommandBGColor",RGB(255,255,255));
 	settings->TextColor = GetRCColor("CommandTextColor",RGB(0,0,0));
 	settings->TextSize = GetRCInt("CommandTextSize",14);
+	settings->m_bTextBold = settings->m_bTextUnderline = settings->m_bTextItalic = FALSE;
+	settings->m_bTextBold = GetRCBool("CommandTextBold",TRUE);
+	settings->m_bTextUnderline = GetRCBool("CommandTextUnderline",TRUE);
+	settings->m_bTextItalic = GetRCBool("CommandTextItalic",TRUE);
+
 	settings->origx = settings->x = GetRCInt("CommandX",0);
 	settings->origy = settings->y = GetRCInt("CommandY",0);
 	settings->width = GetRCInt("CommandWidth",160);
@@ -150,6 +177,7 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
   GetRCString("CommandSearchEngineList", settings->SearchEngineList, "engines.list", sizeof(settings->SearchEngineList));
   GetRCString("CommandContextMenuOrder", settings->ContextMenuOrder, "012", sizeof(settings->ContextMenuOrder));
   GetRCString("CommandBackground", settings->Background, "", sizeof(settings->Background));
+  settings->m_bStretchImage = GetRCBoolDef("CommandStretchBackground", FALSE);
   GetRCString("CommandTime", settings->Clock, "", sizeof(settings->Clock));
   GetRCString("CommandSearchEngineBrowser", settings->BrowserPath, "", sizeof(settings->BrowserPath));
   GetRCString("CommandMusicPlayer", settings->MusicPlayer, "WINAMP V1.X", sizeof(settings->MusicPlayer));
@@ -492,12 +520,15 @@ void WriteHistory()
   struct History *temp = current;
 
   HistoryMoveToHead(&current);
-  while(current->next) {   // We stop the last entry since it is NULL - this is intentional
-    _itoa(i, name, 10);
-    WritePrivateProfileString("LSXCOMMAND", name, current->path, szModuleIniPath);
 
-    HistoryMoveNext(&current, 1);
-    ++i;
+  if( current ){
+	  while(current->next) {   // We stop the last entry since it is NULL - this is intentional
+		_itoa(i, name, 10);
+		WritePrivateProfileString("LSXCOMMAND", name, current->path, szModuleIniPath);
+
+		HistoryMoveNext(&current, 1);
+		++i;
+	  }
   }
 
   current = temp;
@@ -1096,21 +1127,23 @@ BOOL AutoComplete(HWND hText, char *szPath)
     if(len == 1)
       HistoryMoveToTail(&current);
 
-    while(current->prev && strlen(current->prev->path)) {
-      if(!_strnicmp(current->prev->path, szPath, len)) {
-        szText = malloc(strlen(current->prev->path) + 1);
-        p = current->prev->path + len*sizeof(char);
-        strcpy(szText, szPath);
-        strcat(szText, p);
-        SetWindowText(hText, szText);
-        HistoryRemoveAll(&files, &nFiles);
-        SendMessage(hText, EM_SETSEL, len, -1);
-        HistoryMovePrev(&current, 1); // This just keeps everything flowing smooth if the user
-        free(szText);                 // hits up/down next - see WM_CHAR below
-        return TRUE;
-      }
-      HistoryMovePrev(&current, 1);
-    }
+	if( current ){
+		while(current->prev && strlen(current->prev->path)) {
+		  if(!_strnicmp(current->prev->path, szPath, len)) {
+			szText = malloc(strlen(current->prev->path) + 1);
+			p = current->prev->path + len*sizeof(char);
+			strcpy(szText, szPath);
+			strcat(szText, p);
+			SetWindowText(hText, szText);
+			HistoryRemoveAll(&files, &nFiles);
+			SendMessage(hText, EM_SETSEL, len, -1);
+			HistoryMovePrev(&current, 1); // This just keeps everything flowing smooth if the user
+			free(szText);                 // hits up/down next - see WM_CHAR below
+			return TRUE;
+		  }
+		  HistoryMovePrev(&current, 1);
+		}
+	}
   }
 
   return FALSE;
@@ -1134,7 +1167,9 @@ void HistoryUsePrev(HWND hText)
 {
 	char *szBuf = "";
   HistoryMovePrev(&current, 1);
+  if( current ){
 	SetWindowText(hText,current->path);
+  }
   HistoryRemoveAll(&files, &nFiles);
 	return;
 }
@@ -1157,7 +1192,9 @@ void HistoryUseNext(HWND hText)
 {
 	char *szBuf = "";
   HistoryMoveNext(&current, 1);
+  if( current ){
 	SetWindowText(hText,current->path);
+  }
   HistoryRemoveAll(&files, &nFiles);
 	return;
 }
@@ -1739,11 +1776,29 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	switch(msg) {
 	case WM_CREATE:
 		{
-		hFont = CreateFont(cs->TextSize,0,0,0,0,0,0,0,DEFAULT_CHARSET,0,0,0,0,cs->TextFontFace);
+		//hFont = CreateFont(cs->TextSize,0,0,0,0,0,0,0,DEFAULT_CHARSET,0,0,0,0,cs->TextFontFace);
+		hFont = CreateFont(
+			cs->TextSize,				// height of font
+			0,							// average character width
+			0,							// angle of escapement
+			0,							// base-line orientation angle
+			(cs->m_bTextBold ? FW_BOLD: FW_NORMAL),	// font weight
+			cs->m_bTextItalic,							// italic attribute option
+			cs->m_bTextUnderline,					    // underline attribute option
+			0,							// strikeout attribute option
+			DEFAULT_CHARSET,			// character set identifier
+			0,							// output precision
+			0,							// clipping precision
+			0,							// output quality
+			0,							// pitch and family
+			cs->TextFontFace			// typeface name
+		);
 		hText = CreateWindowEx(0,"EDIT","",WS_CHILD|ES_AUTOHSCROLL,cs->LeftBorderSize,cs->TopBorderSize,cs->width-(cs->LeftBorderSize+cs->RightBorderSize),cs->height-(cs->TopBorderSize+cs->BottomBorderSize),hWnd,0,hInst,0);
 		hBGBrush = CreateSolidBrush(cs->BGColor);
 		hHollowBrush = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
 		hBGBitmap = *(cs->Background) ? LoadLSImage(cs->Background, NULL) : NULL;
+		if( cs->m_bStretchImage )
+			GetLSBitmapSize ( hBGBitmap, &cs->m_nWidth, &cs->m_nHeight );
 		if(!hText) {
 			MessageBox(hWnd,"Error creating window",szApp,MB_OK);
 		}
@@ -1806,9 +1861,16 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
       HDC src = CreateCompatibleDC(NULL);
       HDC hdc = BeginPaint(hWnd, &ps);
       SelectObject(src, hBGBitmap);
-      if(!BitBlt(hdc, 0, 0, cs->width, cs->height, src, 0, 0, SRCCOPY))
-        break;
-      //TransparentBltLS((HDC)wParam, 0, 0, cs->width, cs->height, src, 0, 0, RGB(255,0,255));
+	  if( cs->m_bStretchImage ){
+		  SetStretchBltMode( hdc, STRETCH_DELETESCANS ); 
+		  if( !StretchBlt( hdc, 0, 0, cs->width, cs->height, src, 0, 0, cs->m_nWidth, cs->m_nHeight, SRCCOPY ) )
+			break;
+	  }
+	  else{
+		if(!BitBlt(hdc, 0, 0, cs->width, cs->height, src, 0, 0, SRCCOPY))
+			break;
+		//TransparentBltLS((HDC)wParam, 0, 0, cs->width, cs->height, src, 0, 0, RGB(255,0,255));
+	  }
       EndPaint(hWnd, &ps);
       DeleteDC(src);
       return 0;
@@ -1847,12 +1909,8 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			switch (wParam)
 			{
 				case 0:
-					sprintf(buf, "LsxCommand %s ", &rcsRevision[11]);
-					buf[strlen(buf) - 1] = '\0';
-					break;
 				case 1:
-					strcpy(buf, &rcsId[1]);
-					buf[strlen(buf) - 1] = '\0';
+					sprintf(buf, "LsxCommand %s ", rcsRevision);
 					break;
 				default:
 					strcpy(buf, "");
@@ -2544,6 +2602,9 @@ int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath)
 
 	hInst = dll;
   cs = ReadSettings(szPath);
+  if( !cs ){
+	  return 1;
+  }
 	hBr = CreateSolidBrush(cs->BorderColor);
 #ifndef LSXCOMMANDCLOCK_EXPORTS
   SearchEngineInit(cs);
@@ -2684,14 +2745,11 @@ int quitModule(HINSTANCE dll)
   HistoryRemoveAll(&searchEngines, &nSearchEngines);
   HistoryRemoveAll(&aliases, &nAliases);
   free(defaultEngine);
-#endif //LSXCOMMANDCLOCK_EXPORTS
-  free(cs);
-#ifndef LSXCOMMANDCLOCK_EXPORTS
   DestroyMenu(hHistoryMenu);
   DestroyMenu(hSearchEngineMenu);
   DestroyMenu(hAliasMenu);
   DestroyMenu(hContextMenu);
-#endif LSXCOMMANDCLOCK_EXPORTS
+#endif //LSXCOMMANDCLOCK_EXPORTS
 	DestroyWindow(hWnd);
 	UnregisterClass(szApp,hInst);
 	DeleteObject(hFont);
@@ -2699,15 +2757,20 @@ int quitModule(HINSTANCE dll)
     DeleteObject(hHollowBrush);
     DeleteObject(hBGBitmap);
 	//20021114
-	if (cs->OnFocusCommand != NULL) {
-//		delete [] cs->OnFocusCommand;
-		free(cs->OnFocusCommand);
-		cs->OnFocusCommand = NULL;
-	}
-	if (cs->OnUnfocusCommand != NULL) {
-		//delete [] cs->OnUnfocusCommand;
-		free(cs->OnUnfocusCommand);
-		cs->OnUnfocusCommand = NULL;
+	if (cs)
+	{
+		if (cs->OnFocusCommand != NULL) {
+			//delete [] cs->OnFocusCommand;
+			free(cs->OnFocusCommand);
+			cs->OnFocusCommand = NULL;
+		}
+		if (cs->OnUnfocusCommand != NULL) {
+			//delete [] cs->OnUnfocusCommand;
+			free(cs->OnUnfocusCommand);
+			cs->OnUnfocusCommand = NULL;
+		}
+		free(cs);
+
 	}
 
 	return 0;
