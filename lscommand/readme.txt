@@ -3,8 +3,8 @@
                     *            by Visigoth            *
                     *    gandhimail@worldnet.att.net    *
                     *          ===============          *
-                    *          Version: 1.8.1           *
-                    *          June 21,  2000           *
+                    *          Version: 1.8.2           *
+                    *         October 23, 2000          *
                     *          ===============          *
                     * http://floach.pimpin.net/visigoth *
                     *************************************
@@ -224,6 +224,17 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.8.2
+   -------------
+     Bug Fixes
+     `````````
+     - Fixed !CommandMove home making LSXCommand invisible
+
+     New Features
+     ````````````
+     - !CommandMove has absolute position support
+       See !CommandMove documentation below.
 
    Version 1.8.1
    -------------
@@ -1435,11 +1446,18 @@ II. How to use LSXCommand
 
      !CommandMove
      ````````````
-     Description: Moves the LSXCommand window by the amount specified
-     in the arguments.  The amount is a pair of numbers, separated by
-     a space, specifying the number of pixels to move left/right or
-     up/down.  If there is only one number, it is assumed to be
-     horizontal movement.
+     Description: Moves the LSXCommand window either to an absolute
+     position, or by a delta along each axis.  The horizontal and
+     vertical values can be configured separately (you can mix
+     absolute and delta values).
+
+     If the horizontal or vertical values are surrounded by
+     parentheses, they are interpreted as absolute values.  Otherwise,
+     they are interpreted as +/- deltas along their respective
+     axis.
+
+     If there is only one parameter, it is interpreted as a horizontal
+     value.
 
        !CommandMove 0 100  ; moves it 100 pixels down
 

@@ -13,7 +13,7 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  June 13, 2000 11:00 PM                     *
+* Last Update:  October 23, 2000 11:00 PM                  *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
@@ -137,8 +137,8 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
 	settings->BGColor = GetRCColor("CommandClockBGColor",RGB(255,255,255));
 	settings->TextColor = GetRCColor("CommandClockTextColor",RGB(0,0,0));
 	settings->TextSize = GetRCInt("CommandClockTextSize",14);
-	settings->x = GetRCInt("CommandClockX",0);
-	settings->y = GetRCInt("CommandClockY",0);
+	settings->origx = settings->x = GetRCInt("CommandClockX",0);
+	settings->origy = settings->y = GetRCInt("CommandClockY",0);
 	settings->width = GetRCInt("CommandClockWidth",160);
 	settings->height = GetRCInt("CommandClockHeight",20);
 	settings->BorderSize = GetRCInt("CommandClockBorderSize", -1);
@@ -196,21 +196,19 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
   /* Offsets */
   if(offsetx == 0) {
     if(settings->x < 0)
-      settings->x = screen.right + settings->x;
-  }
-  else if(offsetx == 1)
-    settings->x = screen.right / 2 - settings->width / 2 + settings->x;
+      settings->origx = settings->x = screen.right + settings->x;
+  } else if(offsetx == 1)
+    settings->origx = settings->x = screen.right / 2 - settings->width / 2 + settings->x;
   else
-    settings->x = screen.right + settings->x;
+    settings->origx = settings->x = screen.right + settings->x;
 
   if(offsety == 0) {
     if(settings->y < 0)
-      settings->y = screen.bottom + settings->y;
-  }
-  else if(offsety == 1)
-    settings->y = screen.bottom / 2 - settings->height / 2 + settings->y;
+      settings->origy = settings->y = screen.bottom + settings->y;
+  } else if(offsety == 1)
+    settings->origy = settings->y = screen.bottom / 2 - settings->height / 2 + settings->y;
   else
-    settings->y = screen.bottom + settings->y;
+    settings->origy = settings->y = screen.bottom + settings->y;
 
 	return settings;
 }
@@ -2277,11 +2275,16 @@ void BangMove(HWND caller, const char *args)
       str = (char *)malloc(strlen(args) + 1);
       strcpy(str, args);
 
-      xstr = strtok(args, " \t");
+      xstr = strtok(str, " \t");
       ystr = strtok(NULL, "");
 
       if(xstr) {
-        cs->x += atoi(xstr);
+        if(*xstr == '(' && xstr[strlen(xstr) - 1] == ')') {
+          xstr[strlen(xstr) - 1] = '\0';
+          cs->x = atoi(xstr + 1);
+        } else
+          cs->x += atoi(xstr);
+
         cx = GetSystemMetrics(SM_CXSCREEN);
 
         if(cs->x < 0)
@@ -2291,7 +2294,12 @@ void BangMove(HWND caller, const char *args)
       }
 
       if(ystr) {
-        cs->y += atoi(ystr);
+        if(*ystr == '(' && ystr[strlen(ystr) - 1] == ')') {
+          ystr[strlen(ystr) - 1] = '\0';
+          cs->y = atoi(ystr + 1);
+        } else
+          cs->y += atoi(ystr);
+
         cy = GetSystemMetrics(SM_CYSCREEN);
 
         if(cs->y < 0)
@@ -2312,7 +2320,8 @@ void BangMove(HWND caller, const char *args)
   }
 
   if(oldx != cs->x || oldy != cs->y) {
-    SetWindowPos(hWnd, cs->NoAlwaysOnTop ? HWND_NOTOPMOST : HWND_TOPMOST, cs->x, cs->y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
+    //SetWindowPos(hWnd, cs->NoAlwaysOnTop ? HWND_NOTOPMOST : HWND_TOPMOST, cs->x, cs->y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
+    MoveWindow(hWnd, cs->x, cs->y, cs->width, cs->height, TRUE);
     visible = TRUE;
   }
 
