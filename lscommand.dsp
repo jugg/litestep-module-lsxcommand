@@ -101,20 +101,24 @@ PostBuild_Cmds=copy $(OutDir)\lsxcommand.dll c:\litestep\bebox\bemodules\debug\l
 # Begin Group "LSXCommand"
 
 # PROP Default_Filter ""
+# Begin Group "Headers"
+
+# PROP Default_Filter "h"
 # Begin Source File
 
-SOURCE=.\lsxcommand.c
-
-!IF  "$(CFG)" == "lscommand - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "lscommand - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=.\exports.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\lsxcommand.h
+# End Source File
+# End Group
+# Begin Group "Source"
+
+# PROP Default_Filter "c"
+# Begin Source File
+
+SOURCE=.\calculator.c
 
 !IF  "$(CFG)" == "lscommand - Win32 Release"
 
@@ -123,6 +127,31 @@ SOURCE=.\lsxcommand.h
 !ENDIF 
 
 # End Source File
+# Begin Source File
+
+SOURCE=.\history.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\lsxcommand.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\menu.c
+# End Source File
+# End Group
+# Begin Group "Rescources"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\resource.rc
+# End Source File
+# End Group
 # End Group
 # Begin Group "Original LSCommand"
 

@@ -3,8 +3,8 @@
                     *         by Visigoth         *
                     * gandhimail@worldnet.att.net *
                     *       ==============        *
-                    *       Version: 1.1.1        *
-                    *        May 27, 1999         *
+                    *       Version: 1.5.2        *
+                    *        May 31, 1999         *
                     *******************************
 
 Table of Contents
@@ -17,17 +17,47 @@ II.   How to use LSXCommand
 
       II.1 Internet Searches
       II.2 Added RC Commands
+           New to 1.5.1:
+           -------------
+           - CommandUnixHistory
+
+           New to 1.5:
+           -----------
+           - CommandNoWarnOnError
+           - CommandHistoryMenuEntries
+           - CommandNewestHistoryItemsOnTop
+           - CommandContextMenuAboveBox
+           - CommandContextMenuExecute
+           - CommandContextMenuOrder
+           - CommandNoTabMicroComplete
+           - CommandClearHistoryOnStartup
+           - CommandAssumeNetAddress
+
+           New to LSXCommand:
+           ------------------
            - CommandHistoryEntries
            - CommandSearchEngineList
            - CommandSelectAllOnFocus
            - *CommandAlias
+
       II.3 Added !Bang Commands
+           New to 1.5:
+           -----------
+           - !CommandClearHistory
+           - !CommandShowContextMenu
+
+           New to LSXCommand:
+           ------------------
            - !CommandRescanEngines
+
       II.4 The engines.list File
+      II.5 Tab-MicroComplete & Context Menu Access
+      II.6 Calculator Functionality
 
 III.  Known Bugs / Limitations
 
       III.1 Old history entries remain
+      III.2 Quoted Names a Problem
 
 IV.   Comments / Questions / Flames / Bug Reports
 V.    Source Code
@@ -71,17 +101,215 @@ ii. Kudos
    is based.  Thanks limpid!
 
 
+   Credits
+   -------
+   The following people gave me ideas after I released version 1.0:
+
+   - SXW sent in the basic idea behind AssumeNetAddress and
+     SelectAllOnFocus
+   - Jay Kerr sent in the idea behind Aliases / Bindings
+   - neep sent in a preliminary ideas about a context menu
+   - tin_omen and Jay Kerr sent in fond thoughts of quoted paths and
+     complex string parsing :P
+   - Tomislav Mutak sent in the idea for a command line calculator
+   - Kevin Werner sent in the idea for bash-like history navigator
+   - Andrew Hornback sent in a reference to the need for multiple
+     arguments (I'm working on it!!)
+
+   The following people sent in lists of engines (I won't list each
+   engine - it would just take too long)
+
+   - Kryten sent in the Merriam-Webster stuff
+   - bizquik sent in the File Demon engine
+   - mirul sent in the MS Knowledge Base
+   - Jason Murray sent in more than 230 engines!!!  That's just
+     overboard, IMO
+   - Scott Ferguson sent in MetaCrawler
+
+
 iii. Change Log
 ===============
+
+   Version 1.5.2
+   -------------
+   More bug fixes - most related to string parsing and memory
+   allocation.  Programmers: forgive me!  I didn't check all the
+   NULL pointers I was supposed to!  I only hope I caught all of
+   them in this release...
+
+   Quote of the release: What was I smoking when I released 1.5.1
+   anyway?
+
+     Bug Fixes
+     `````````
+     - Fixed Calculator () crashing bug
+     - Fixed multiple history menu entries of same command
+     - Fixed times when history menu wouldn't do anything
+     - Fixed No-Argument searching (not possible now)
+     - Fixed case when CommandNewestHistoryItemsOnTop was *not* on
+     - Fixed LSXCommand hiding / showing itself on inappropriate
+       commands from the context menu
+     - Fixed command parsing by rewriting code - woopee!!
+
+     New Features
+     ````````````
+     - Totally re-written command parser  (This is also a bug fix)
+     - Added following engines:
+
+       * IMDB	- Search for movies by title at imdb.com
+
+     Notes
+     `````
+     This section will just comment on the new command parser, since
+     it's not big enough for it's own section.
+
+     The new command parser allows for anything to be quoted.
+     However, do NOT try and use quoted names for aliases and search
+     engines in your configuration files yet - they just aren't
+     implemented.  I want this release to entirely stabilize before
+     adding other features and moving on to other stuff for a while.
+
+     Anyway, back to the parser.  Before, things like this would not
+     run: (Let's say you have an alias of: nt notepad)
+
+       "nt" c:\litestep\step.rc <ENTER>
+       "nt c:\litestep\step.rc" <ENTER>
+
+     The first, now, *will* run.  The second *will NOT* run.  This
+     should be obvious: the first explicitly says nt is a command
+     of its own.  The second says the whole line is a command of its
+     own.  Since there is no command that fits this at all, nothing
+     will happen.
+
+     Also, quoted paths are now allowed.  So, you can now use
+
+       "c:\program files\something"
+
+     to launch files.  NOTE: If you left the quotes *off* of this,
+     the command would still work - like the explorer way of doing
+     things.
+
+     LSXCommand now operates in the following fashion when given a
+     command:
+
+       - Try against Aliases
+       - See if it fits !Bang / Calculator / Search
+       - If not, try to execute the command and parsed arguments
+       - If this does not work, but the command *was* a path,
+         then try the whole line alone.  If it wasn't a path,
+         your AssumeNetAddress setting kicks in and decides whether
+         or not to launch your browser.
+
+
+   Version 1.5.1
+   -------------
+   A QBF: Quick Bug Fix and one feature
+
+     Bug Fixes
+     `````````
+     - Fixed all one word commands.  Seemed to be really broken, eh?
+
+     New Features
+     ````````````
+     - Added following RC Commands (see Section II.2 for details)
+
+       * CommandUnixHistory
+
+
+   Version 1.5
+   -----------
+   Features, features, features:
+
+     Documentation Changes
+     `````````````````````
+     NOTE: This section only relates to changes made to documentation
+     that existed prior to the current version.
+
+     - Added information about how to make engine entries for engines
+       using POST method instead of GET.  (See section II.4)
+
+     Bug Fixes
+     `````````
+     - Fixed memory leak on every autocomplete
+     - Fixed bug where people couldn't edit their engines.list
+       while LSXCommand was loaded.
+     - Fixed bug where, if you don't have CommandClearOnHide or
+       CommandNoClearOnCommand *was* on, the history wasn't in the
+       correct place the next time you used lsxcommand.  (Didn't
+       catch that, did ya?!)
+     - Fixed bug where quoted paths / search phrases were ignored.
+
+     New Features
+     ````````````
+     - Version Resource added for completeness.
+     - Calculator Functionality (see Section II.6 for details)
+     - Tab-MicroComplete (see Section II.5 for details
+     - Context Menu Command Access (see Section II.5 for details)
+     - Quoted Paths and Quoted Search Phrases
+     - Added following RC Commands: (see Section II.2 for details)
+
+       * CommandNoWarnOnError
+       * CommandHistoryMenuEntries
+       * CommandNewestHistoryItemsOnTop
+       * CommandContextMenuAboveBox
+       * CommandContextMenuExecute
+       * CommandContextMenuOrder
+       * CommandClearHistoryOnStartup
+       * CommandAssumeNetAddress
+
+     - Added following !Bang Commands: (see Section II.3 for details)
+
+       * !CommandClearHistory
+       * !CommandShowContextMenu
+
+     - Added following engines:
+
+       * BigBook - Find businesses in all 50 US states
+       * BarnesAndNoble - Find books at Barnes & Nobles
+       * MediaFindMP3 - Use Mediafind for MP3 searching
+       * Reel - Find movies by title
+       * Archieplex - Huge Archie (FTP) database
+       * Filez - Search with Filez.com
+       * Shareware - C|Net Shareware.com
+       * NorthernLight - A real search engine.. :)
+       * OpenText - Another search engine
+       * InfoSpace - ''
+       * GoTo - ''
+       * Pathfinder - ''
+       * MetaCrawler - ''
+       * Top5 - Top 5% of all web sites (so they say..)
+       * A2Z - The Lycos A2Z guide
+       * AskJeeves - The famous ask jeeves
+       * MerckMan - The Merck Manual
+       * APWire - The Associated Press Wire
+       * WhoWhere - E-Mail search
+       * LibraryOfCongress - Search *the* Library
+       * Finger - finger user@hostname
+       * NSLookup - NSLookup...
+       * LettermanTop10 - Search Dave Letterman's Top Ten
+       * Anonymizer - Anonymize yourself!
+
 
    Version 1.1.1
    -------------
    Just one bug fix, but important:
 
+     New Features
+     ````````````
+     - Added following search "engines":
+
+       * Dictionary	- searches Merriam-Webster's Dictionary
+       * Thesaurus	- searches Merriam-Webster's Thesaurus
+       * OTH		- Archie search for MP3s, I think...
+       * FOLDOC		- Free On-Line Dict. Of Computing
+       * Quote		- Quote.Com stock quotes
+       * FileDemon	- Software search of major sites
+
      Bug Fixes
      `````````
      - Bug where you couldn't edit your step.rc as long as
        lsxcommand.dll was loaded.
+     - Same bug for engines.list
 
 
    Version 1.1
@@ -119,6 +347,8 @@ I. About LSXCommand
      * AutoComplete
      * Internet Search
      * Aliasing - or Binding, if you like
+     * Calculator Functionality
+     * Context Menu (Right-Click) Access
      * A few speed tweaks
 
 
@@ -192,6 +422,33 @@ II. How to use LSXCommand
      * FedEx		(?FedEx 1092831023)
      * Airborne		(?Airborne 123934309)
 
+     Added as of 1.5: (sorry, I gave up on examples - too many!)
+
+     * BigBook
+     * BarnesAndNoble
+     * MediaFindMP3
+     * Reel
+     * Archieplex
+     * Filez
+     * Shareware
+     * NorthernLight
+     * OpenText
+     * InfoSpace
+     * GoTo
+     * Pathfinder
+     * MetaCrawler
+     * Top5
+     * A2Z
+     * AskJeeves
+     * MerckMan
+     * APWire
+     * WhoWhere
+     * LibraryOfCongress
+     * Finger
+     * NSLookup
+     * LettermanTop10
+     * Anonymizer
+
    Just a couple of notes:
      - LycosMP3 and ScourMP3 are customized versions of Lycos
        (lycos.com) and Scour (www.scour.net) to search strictly for
@@ -214,6 +471,134 @@ II. How to use LSXCommand
 
    II.2 Added RC Commands
    ----------------------
+     NOTE: Please see original LSCommand readme for previous
+     RC Commands.
+
+     CommandUnixHistory
+     ``````````````````
+     Description: The most popular UNIX shell (bash) has the inverse
+     history navigation: Up for previous, down for next.  You can
+     use this system with this setting.
+
+     Default: Down is previous; Up is next
+
+     Example: CommandUnixHistory	; I like my old command line
+
+
+     CommandNoWarnOnError
+     ````````````````````
+     Description: If there is an error (for instance, if the command
+     you entered is invalid or the calculator couldn't evaluate the
+     expression you entered), you will get an error message.  This,
+     when turned on, will suppress it.
+
+     Default: Off (meaning - you get the error message)
+
+     Example: CommandNoWarnOnError	; Stops error messages
+
+
+     CommandHistoryMenuEntries
+     `````````````````````````
+     Description: Sets the maximum number of history entries available
+     from the context menu.
+
+     Default: The max number of history entries
+
+     Example: CommandHistoryMenuEntries 10	; 10 Entries available
+
+
+     CommandNewestHistoryItemsOnTop
+     ``````````````````````````````
+     Description: This setting places newer history items at the top
+     of the menu, instead of at the bottom.
+
+     Default: Newest items go on the bottom
+
+     Example: CommandNewestItemsOnTop	; Puts newest stuff on top
+
+
+     CommandContextMenuAboveBox
+     ``````````````````````````
+     Description: If you have your LSXCommand window at the bottom of
+     the screen, you will want to turn this on.  If at the top, leave
+     this off.  This sets where the context menu will appear - above
+     or below the LSXCommand box.
+
+     Default: Context Menu appears below box
+
+     Example: CommandContextMenuAboveBox	; Menu appears above box
+
+
+     CommandContextMenuExecute
+     `````````````````````````
+     Description: Tells LSXCommand to execute a selection from the
+     context menu instead of copying its data to the LSXCommand box.
+     NOTE: Since the point of search engines is to have you enter a
+     search phrase, it is not possible to have search engines
+     execute.
+
+     Default: Copies data (ie history / alias entry) to the box.
+
+     Example: CommandContextMenuExecute	; Execute a command, no copy
+
+
+     CommandContextMenuOrder
+     ```````````````````````
+     Description: Specifies which order each submenu should appear.
+     For instance, you can have History, Alias, then Search Engines
+     or Alias, History, Search Engines, or...
+
+     The setting is 3 numbers: 0, 1, and 2.  The combination of
+     these numbers sets in which order each submenu appears.  The
+     first number is the position of the History submenu.  The
+     second is the Alias submenu.  And the last is the Search
+     Engines submenu.
+
+     Default: 012
+
+     Example: So, to have a menu where Search Engines are at the top,
+     Aliases next and the History at the bottom, you would specify:
+
+     CommandContextMenuOrder 210
+
+
+     CommandNoTabMicroComplete
+     ````````````````````````
+     Description: Stops Tab-MicroCompletes from taking place.  See
+     section II.5 on more about Tab-MicroComplete
+
+     Default: Tab-MicroComplete is on
+
+     Example: CommandNoTabMicroComplete	; I don't like fancy stuff
+
+
+     CommandClearHistoryOnStartup
+     ````````````````````````````
+     Description: Clears the history on startup. NOTE: You *will*
+     lose the history in modules.ini - not only the history in
+     memory.
+
+     Default: Keeps last session's history
+
+     Example: CommandClearHistoryOnStartup
+
+
+     CommandAssumeNetAddress
+     ```````````````````````
+     Description: If a command just doesn't cut it, you can have it
+     start your browser with the address.
+
+     Default: You will get an error message - this is suppressable by
+     CommandNoWarnOnError
+
+     Example: CommandAssumeNetAddress
+
+     Example (in lsxcommand): home
+
+     If home is not found in your path, your browser is loaded with
+     http://home (which usually gets changed to http://home.com or
+     http://www.home.com)
+
 
      CommandHistoryEntries
      `````````````````````
@@ -264,6 +649,20 @@ II. How to use LSXCommand
 
    II.3 Added !Bang Commands
    -------------------------
+     NOTE: See Original LSCommand readme for previous !Bang Commands
+
+     !CommandClearHistory
+     ````````````````````
+     Description: Clears both the history in memory *and* the history
+     in modules.ini
+
+
+     !CommandShowContextMenu
+     ```````````````````````
+     Description: Makes LSXCommand's Context Menu visible wherever
+     the cursor is on the screen, regardless of LSXCommand's
+     visibility.
+
 
      !CommandRescanEngines
      `````````````````````
@@ -316,6 +715,61 @@ II. How to use LSXCommand
    own.  Then, replace the phrase you searched for with the key
    <args>.
 
+   The above type of an engine is one that uses the GET method to
+   send data to the web server.  The other type of method is called
+   POST.  This is the one that doesn't have all the &'s and ='s in
+   the URL.  What you have to do is go back to the search page and
+   go into the actual HTML.  Find the place with the <FORM> tag and
+   from here on, you have to set up your own &'s and ='s from the
+   names and values listed, using the ACTION= property of the form
+   tag as a base.  Sorry if it's confusing, but it's almost 5 AM.
+
+
+   II.5 Tab-MicroComplete & Context Menu Access
+   --------------------------------------------
+   Tab-MicroComplete is a feature I made up on my own - not even
+   Microsoft has it.  When you are typing in LSXCommand and get
+   an autocompletion, you may want to automatically go on to the next
+   word.  For instance, when you search with a particular search
+   engine, and then want to search with the same engine again, but
+   with a different phrase.
+
+   With Tab-MicroComplete, you can do that.  If you hit tab while in
+   LSXCommand, the cursor will be moved to the start of the next
+   word, or to the end of the line (depending on where the current
+   cursor is).
+
+   LSXCommand now has Context Menu Access!  You can either right-
+   click on LSXCommand's command box or call the !CommandContextMenu
+   !bang command.  If you use the !bang command, the menu appears
+   wherever your mouse is on screen.  The Context Menu contains
+   past history entries, all your aliases, and all search engines.
+
+
+   II.6 Calculator Functionality
+   -----------------------------
+   Currently, the calculator functionality in LSXCommand is a bit
+   skimpy, though it does support order of operations and
+   parentheses.  To invoke a calculation, the procedure is much like
+   a search or !bang command.  Just type an = sign at the prompt and
+   enter the expression to calculate.
+
+   LSXCommand handles float precision, so decimals are allowed.  The
+   result will be placed right back into LSXCommand's command box
+   with an equals sign in front of it and a space after it.  This
+   enables you to use the result of the last command right off the
+   bat!  (By the way - spaces are allowed)
+
+   LSXCommand understands the following operators:
+
+     + - * \ / ^ ( )
+
+     Addition, Subtraction, Multiplication, Division, Division,
+     Power, Open Parenthesis, Close Parenthesis.
+
+     Yes, there are two division operators - some people like \ and
+     others like /.
+
 
 III. Known Bugs / Limitations
 =============================
@@ -326,6 +780,15 @@ III. Known Bugs / Limitations
    LSXCommand will keep track to a lower number, history entries that
    filled slots above this number will remain in modules.ini.  This
    is a known bug - I'll fix it some day...
+
+
+   III.2 Quoted Names a Problem
+   ----------------------------
+   Quoted names for search engines and aliases are a problem.  Since
+   this would require re-writing a lot of list management code, I
+   decided to put it off until next revision.  Either way, plans I
+   have for the next version of LSXCommand would require a massive
+   rewrite.
 
 
 IV. Comments/Questions/Flames/Bug Reports
