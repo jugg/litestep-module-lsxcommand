@@ -75,7 +75,7 @@ PostBuild_Cmds=copy $(OutDir)\lsxcommand.dll c:\litestep\bebox\bemodules\lsxcomm
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "lscommand_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "c:\litestep\source\ls-b24\litestep" /I "c:\litestep\source\ls-b24\lsapi" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "lscommand_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "c:\litestep\source\ls-b24\litestep" /I "c:\litestep\source\ls-b24\lsapi" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "lscommand_EXPORTS" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -110,6 +110,10 @@ SOURCE=.\exports.h
 # End Source File
 # Begin Source File
 
+SOURCE="..\ls-b24\lsapi\lsapi.h"
+# End Source File
+# Begin Source File
+
 SOURCE=.\lsxcommand.h
 # End Source File
 # End Group
@@ -119,13 +123,6 @@ SOURCE=.\lsxcommand.h
 # Begin Source File
 
 SOURCE=.\calculator.c
-
-!IF  "$(CFG)" == "lscommand - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "lscommand - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 

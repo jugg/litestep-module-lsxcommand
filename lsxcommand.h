@@ -8,7 +8,7 @@
 
 /* Data Structures */
 struct CommandSettings {
-	char TextFontFace[256], SearchEngineList[_MAX_PATH], ContextMenuOrder[3];
+	char TextFontFace[256], SearchEngineList[_MAX_PATH], ContextMenuOrder[4], Background[_MAX_PATH], Clock[256], TextAlign[15];
 	int TextSize;
 	int x;
 	int y;
@@ -17,6 +17,7 @@ struct CommandSettings {
 	int BorderSize;
   int MaxHistoryEntries;
   int MaxHistoryMenuEntries;
+  int Transparent;
 	BOOL NoCursorChange;
 	BOOL BevelBorder;
 	BOOL NoAlwaysOnTop;
@@ -37,6 +38,10 @@ struct CommandSettings {
   BOOL ContextMenuExecute;
   BOOL UnixHistory;
   BOOL ExplorePaths;
+  BOOL AutoComplete;
+  BOOL CommaDelimiter;
+  BOOL RPNCalculator;
+  BOOL ClockDisappears;
 	COLORREF BGColor;
 	COLORREF TextColor;
 	COLORREF BorderColor;
@@ -66,7 +71,7 @@ extern struct History *HistoryRemoveAll(struct History **hist, int *count);
 #define STATE_OPERATOR 3
 #define UNARY_NEG "(-)"
 
-extern double Evaluate(char *expr, struct CommandSettings *cs, BOOL *error);
+extern double Evaluate(char *expr, struct CommandSettings *cs, BOOL *error, BOOL alreadyRPN);
 
 /* Menu Services - menu.c */
 

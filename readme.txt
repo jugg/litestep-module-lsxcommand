@@ -1,11 +1,13 @@
-                    *******************************
-                    *         LSXCommand          *
-                    *         by Visigoth         *
-                    * gandhimail@worldnet.att.net *
-                    *       ==============        *
-                    *       Version: 1.5.3        *
-                    *        June 8, 1999         *
-                    *******************************
+                    ***********************************
+                    *           LSXCommand            *
+                    *           by Visigoth           *
+                    *   gandhimail@worldnet.att.net   *
+                    *         ==============          *
+                    *          Version: 1.7           *
+                    *          June 14, 1999          *
+                    *         ==============          *
+                    * http://home.att.net/~gandhimail *
+                    ***********************************
 
 Table of Contents
 =================
@@ -17,6 +19,16 @@ II.   How to use LSXCommand
 
       II.1 Internet Searches
       II.2 Added RC Commands
+           New to 1.7:
+           -----------
+           - CommandNoAutoComplete
+           - CommandCommaDelimiter
+           - CommandTransparentEditBox
+           - CommandBackground
+           - CommandRPNCalculator
+           - CommandClock
+           - CommandClockDisappearsOnFocus
+
            New to 1.5.3:
            -------------
            - CommandExplorePaths
@@ -58,6 +70,8 @@ II.   How to use LSXCommand
       II.4 The engines.list File
       II.5 Tab-MicroComplete & Context Menu Access
       II.6 Calculator Functionality
+      II.7 Backgrounds & Transparencies
+      II.8 Clock Settings
 
 III.  Known Bugs / Limitations
 
@@ -110,6 +124,11 @@ ii. Kudos
    -------
    The following people gave me ideas after I released version 1.0:
 
+   - Reiner Meyer sent in the idea to add Clock functionality
+   - Hugo Ahlenius sent in the idea for RPN mode and the comma
+     delimiter
+   - Francis Tyers wanted to be able to turn off AutoComplete for
+     some reason.
    - SXW sent in the basic idea behind AssumeNetAddress and
      SelectAllOnFocus
    - Jay Kerr sent in the idea behind Aliases / Bindings
@@ -134,6 +153,49 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.7
+   -----------
+   New features...
+   
+     Documentation Changes
+     `````````````````````
+     NOTE: This section notifies you about changes to existing
+     documentation.  New documentation is not listed here.  Pay
+     close attention to Section II, since all major features have
+     their own documentation added under this section.
+     
+     - Added note about RPN functionality to Calculator section II.6
+     - Added shameless plug <g> for the full engines.list at my web
+       site in section II.4.
+
+     Bug Fixes
+     `````````
+     - Proper handling of border sizes (retheming may be required)
+
+     New Features
+     ````````````
+     - Added following RC Commands (see section II.2 for details)
+
+       * CommandNoAutoComplete
+       * CommandCommaDelimiter
+       * CommandTransparentEditBox
+       * CommandBackground
+       * CommandRPNCalculator
+       * CommandClock
+       * CommandClockDisappearsOnFocus
+
+     Notes
+     `````
+     While doing some theming of LSXCommand myself, I noticed that
+     when I set BorderSize to 0, it still had a border around it.
+     I fixed that kind of stuff in this revision.  NOTE: Some re-
+     theming may be required.
+
+     If you set CommandTransparentEditBox on for whatever reason, you
+     *WILL* see flashing while typing in the command box.  No doubt.
+     I strongly suggest reading section II.2 for more about
+     transparency and backgrounds.
 
    Version 1.5.3
    -------------
@@ -370,8 +432,10 @@ I. About LSXCommand
      * AutoComplete
      * Internet Search
      * Aliasing - or Binding, if you like
-     * Calculator Functionality
+     * Calculator Functionality (Regular & RPN!)
      * Context Menu (Right-Click) Access
+     * Backgrounds & Transparency
+     * A Clock with Date functionality as well
      * A few speed tweaks
 
 
@@ -496,6 +560,93 @@ II. How to use LSXCommand
    ----------------------
      NOTE: Please see original LSCommand readme for previous
      RC Commands.
+     
+     CommandNoAutoComplete
+     `````````````````````
+     Description: Turns *off* AutoComplete.  Someone asked for it, so
+     I coded it :).
+     
+     Example: CommandNoAutoComplete
+     
+     
+     CommandCommaDelimiter
+     `````````````````````
+     Description: Some Eurpoean countries use commas as decimal
+     delimiters, so this changes decimals from periods to commas.
+     
+     Example: CommandCommaDelimiter
+     
+     
+     CommandRPNCalculator
+     ````````````````````
+     Description: Makes the calculator an RPN calculator.  If you
+     don't know what this is, don't use it!  You'll only confuse
+     yourself.  Others call RPN "Postfix" notation.  If you want
+     to learn more, obtain a Hewlett-Packard RPN calculator (the
+     48/49 series are especially nice, IMO :).
+     
+     NOTE: This does not make the history a stack!  It merely
+     means that you can write your expressions as postfix and it
+     will be calculated correctly.  For instance, typing:
+     
+       5 <ENTER> 2 <ENTER> + <ENTER>
+     
+     will NOT work.  You must type "=5 2 +" to get the answer
+     
+     Example: CommandRPNCalculator
+     
+     
+     CommandBackground
+     `````````````````
+     Description: Path to your background image.  If this is not an
+     absolute path, LSXCommand looks in your images directory.  If
+     this option is not specified, the background & border colors
+     are used (see the original lscommand readme for info on these
+     colors).
+     
+     NOTE: See section II.7 for more about backgrounds and their
+     relationship to transparency.
+     
+     Example: CommandBackground "lsxcommand_background.bmp"
+     
+     
+     CommandTransparentEditBox
+     `````````````````````````
+     Description: Makes the area in which you type transparent to the
+     background.  If this option is not specified, the background
+     image shows through.  If there is no background, the background
+     color is used (see the original lscommand readme for info on
+     these colors).
+     
+     NOTE: See section II.7 for more about backgrounds and
+     transparency.
+     
+     Example: CommandTransparentEditBox
+     
+     
+     CommandClock
+     ````````````
+     Description: Format string that tells LSXCommand how you want
+     your time & date to look.
+     
+     NOTE: See section II.8 on different format strings and what
+     effect they have.  It's quite long, but worth it.
+     
+     Example: CommandClock "%#c"
+     
+     NOTE: The above results in something like "Monday, June 14, 1999
+     18:00:30" depending on the real date and time.
+     
+     
+     CommandClockDisappearsOnFocus
+     `````````````````````````````
+     Description: If you want the clock to automatically disappear
+     when you click in LSXCommand, set this on.  Otherwise, the
+     clock will "pause" at the current time/date.  This makes it
+     easier for you to copy/paste the time & date into any app.
+     
+     Example: CommandClockDisappearsOnFocus
+     
 
      CommandSelectAllOnMouseFocus
      ````````````````````````````
@@ -748,6 +899,12 @@ II. How to use LSXCommand
    their full extent - for instance, the "Simple Search" function on
    the Lyrics server - www.lyrics.ch - has more than one search
    field.
+   
+   You can find the full engines.list (the one shipped with
+   LSXCommand is by no means complete and neither is this one, but it
+   is larger) here:
+   
+     http://home.att.net/~gandhimail/litestep/lsxcommand-engines.list
 
    TO MAKE YOUR OWN SEARCH ENTRIES:
 
@@ -812,6 +969,113 @@ II. How to use LSXCommand
 
      Yes, there are two division operators - some people like \ and
      others like /.
+     
+   RPN CALCULATOR FUNCTIONALITY
+   
+   As of version 1.7, you can use LSXCommand as a "Postfix"
+   calculator.  If you are not familiar with this expression, leave
+   it be and don't worry about it!  If you really want to learn more,
+   obtain a Hewlett-Packard RPN calculator and learn to use it.
+   
+   RPN mode does *not* turn your history into a stack.  It does,
+   however, make LSXCommand accept postfix notation expressions. See
+   the documentation for the CommandRPNCalculator RC Command above in
+   section II.2.
+   
+   
+   II.7 Backgrounds & Transparencies
+   ---------------------------------
+   I'm sure many people have been wanting these features, so I made
+   my best attempt at added them to LSXCommand.
+   
+   Backgrounds are just that - backgrounds.  However, they only fill
+   the background window, much like the background can be set in
+   mIRC, but it doesn't show through the channel windows.  If you
+   want a background to show through to the place you are typing,
+   set the CommandTransparentEditBox RC Command.
+   
+   If there is no background set, CommandTransparentEditBox is
+   automatically turned off since the only effect will be to slow
+   down performance and other nasty things.
+   
+   If there is a background, but CommandTransparentEditBox is *not*
+   set, the background acts like a border around the text box.
+   
+   DISCLAIMER: If you turn CommandTransparentEditBox *on*, you WILL
+   see flashing as you are doing normal things with LSXCommand - such
+   as typing.  Seriously, though, I have no doubts that you will get
+   some type of flashing effect in LSXCommand no matter what you do.
+   Until I write my own text output routines, you will just have to
+   deal.
+   
+   
+   II.8 Clock Settings
+   -------------------
+   The clock functionality in LSXCommand is quite robust, though hard
+   to use since the format commands look nothing like what you would
+   expect them to.  If you want a quick format command that gives you
+   both the date and time, use "%#c".  If you want more
+   customization, you will just have to read below.  Sorry...
+   
+   Okay, so you want more control, eh?  The following comes straight
+   from the Microsoft Developer Network Library.  It is a table of
+   format commands you must use to create your time & date string.
+   Examples are listed below the table.
+   
+   %a                 Abbreviated weekday name
+   %A                 Full weekday name
+   %b                 Abbreviated month name
+   %B                 Full month name
+   %c                 Date & time representation for current location
+   %d                 Day of month as number (01 - 31)
+   %H                 Hour in 24-Hour format (00 - 23)
+   %I                 Hour in 12-Hour format (01 - 12)
+   %j                 Day of year as number (001 - 366)
+   %m                 Month as number (01 - 12)
+   %M                 Minute as number (00 - 59)
+   %p                 AM / PM indicator for current location
+   %S                 Second as number (00 - 59)
+   %U                 Week of year as number, with Sunday as first
+                      day of the week (00 - 53)
+   %w                 Weekday as number, with Sunday as 0 (0 - 6)
+   %W                 Week of year as number, with Monday as first
+                      day of the week (00 - 53)
+   %x                 Date representation for current location
+   %X                 Time representation for current location
+   %y                 Year without century (two digits) (00 - 99)
+   %Y                 Year with century (four digits)
+   %z                 Time-zone name / abbreviation
+   %Z                 Same as %z
+   %%                 Percent sign
+   
+   The # sign (pound, hash, whatever you like..) can be used as a
+   prefix for most format commands.  For instance, %#<character>. The
+   following lists the change in meaning for those commands that are
+   affected:
+   
+   %#c                Long date & time representation for current
+                      location.
+   %#x                Long date representation only for current
+                      location.
+   %#d, %#H, %#I,     Remove leading zeros.
+   %#j, %#m, %#M,
+   %#S, %#U, %#w,
+   %#W, %#y, %#Y
+   
+   So, what the heck does all that crap mean?  Basically, you think
+   of how you want your date & time to look, and then substitute the
+   proper codes where they are needed, for instance:
+   
+     Think Of..             Code Used
+     ``````````             `````````
+     05:30:00 PM            %I:%M:%S %p
+     Monday 06/14/99        %A %x
+     Mon. 6/14/1999         %a %#m/%#d/%Y  -  Removes leading zeros
+     June 14, 1999          %B %d, %Y
+     Monday, June 14, 1999  %#x
+     
+   I hope that's enough examples.  If you have any problems, see
+   section IV about contacting me.
 
 
 III. Known Bugs / Limitations

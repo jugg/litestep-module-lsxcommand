@@ -2,15 +2,16 @@
 *        LSXCommand - Extended LSCommand Module            *
 * This module adds to the functionality of limpid's        *
 * LSCommand module.  Among the extentions are a resizable  *
-* history, AutoCompletion, Internet Searching, Aliases and *
-* calculator functionality.                                *
+* history, AutoCompletion, Internet Searching, Aliases,    *
+* calculator functionality, backgrounds, transparency, and *
+* clock functionality.  Maybe this is starting to bloat..  *
 *                         *  *  *  *                       *
 * Coding:                                                  *
 *   LSXCommand - Visigoth (Shaheen Gandhi in real life)    *
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  June 8, 1999  2:00 AM                      *
+* Last Update:  June 15, 1999  12:30 AM                    *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
@@ -18,6 +19,7 @@
 #include <windows.h>
 #include <shlwapi.h>
 #include <stdio.h>
+#include <time.h>
 #include "resource.h"
 #include "exports.h"
 #include "lsxcommand.h"
@@ -29,8 +31,9 @@ int nHistoryEntries = 0, nSearchEngines = 0, nAliases = 0;
 HINSTANCE hInst = NULL;
 HWND hWnd = NULL, hText = NULL, hBG = NULL;
 HFONT hFont = NULL;
-HBRUSH hBGBrush = NULL;
+HBRUSH hBGBrush = NULL, hHollowBrush = NULL;
 HMENU hSearchEngineMenu = NULL, hAliasMenu = NULL, hHistoryMenu = NULL, hContextMenu = NULL;
+HBITMAP hBGBitmap = NULL;
 WNDPROC wpOld, wpBG;
 MENUITEMINFO item;
 struct CommandSettings *cs = NULL;
@@ -88,8 +91,18 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
   settings->UnixHistory = GetRCBool("CommandUnixHistory", TRUE);
   settings->ExplorePaths = GetRCBool("CommandExplorePaths", TRUE);
   settings->SelectAllOnMouseFocus = GetRCBool("CommandSelectAllOnMouseFocus", TRUE);
+  settings->AutoComplete = GetRCBool("CommandNoAutoComplete", FALSE);
+  settings->CommaDelimiter = GetRCBool("CommandCommaDelimiter", TRUE);
+  settings->RPNCalculator = GetRCBool("CommandRPNCalculator", TRUE);
+  settings->Transparent = GetRCBool("CommandTransparentEditBox", TRUE);
+  settings->ClockDisappears = GetRCBool("CommandClockDisappearsOnFocus", TRUE);
   GetRCString("CommandSearchEngineList", settings->SearchEngineList, "engines.list", sizeof(settings->SearchEngineList));
   GetRCString("CommandContextMenuOrder", settings->ContextMenuOrder, "012", sizeof(settings->ContextMenuOrder));
+  GetRCString("CommandBackground", settings->Background, "", sizeof(settings->Background));
+  GetRCString("CommandClock", settings->Clock, "", sizeof(settings->Clock));
+  GetRCString("CommandTextAlign", settings->TextAlign, "Left Top", sizeof(settings->TextAlign));
+  if(!(*(settings->Background)))
+    settings->Transparent = 0;
 	return settings;
 }
 
@@ -688,7 +701,7 @@ void ParseCalculatorCommand(char *command)
   char num[130];
 
   ++command;
-  sprintf(num, "=%f ", Evaluate(command, cs, &error));
+  sprintf(num, "=%f ", Evaluate(command, cs, &error, cs->RPNCalculator));
 
   if(!error) {
     SetWindowText(hText, num);
@@ -1088,16 +1101,14 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 			  HistoryUsePrev(hText);
 			SendMessage(hText,EM_SETSEL,0,-1);
 			return 0;
-		}
-		if(wParam==VK_UP) {
+    } else if(wParam==VK_UP) {
       if(cs->UnixHistory)
         HistoryUsePrev(hText);
       else
 			  HistoryUseNext(hText);
 			SendMessage(hText,EM_SETSEL,0,-1);
 			return 0;
-		}
-    if(wParam == VK_TAB) {
+    } else if(wParam == VK_TAB) {
       // Move cursor to start of next word and select rest of the line.
       if(!cs->NoTabMicroComplete) {
         DWORD nStart, nEnd;
@@ -1115,8 +1126,19 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
           SendMessage(hText, EM_SETSEL, (WPARAM)nStart, (LPARAM)nStart);
       }
       return 0;
+    } else if((wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_HOME || wParam == VK_END || VK_DELETE) && cs->Transparent) {
+        ShowWindow(hWnd, SW_HIDE);
+        ShowWindow(hWnd, SW_SHOW);
+        SetFocus(hText);
     }
 		break;
+  case WM_KEYUP:
+    if((wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_HOME || wParam == VK_END || VK_DELETE) && cs->Transparent) {
+        ShowWindow(hWnd, SW_HIDE);
+        ShowWindow(hWnd, SW_SHOW);
+        SetFocus(hText);
+    }
+    break;
 	case WM_CHAR:
 		if(wParam==VK_RETURN) {
       BOOL cleared = FALSE;
@@ -1140,34 +1162,59 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 			return 0;
     } else if(wParam == VK_TAB)
       return 0;
-    else {
+    /*else if(wParam == VK_BACK) {
+      if(cs->Transparent) {
+        LRESULT retval = CallWindowProc(wpOld,hText,msg,wParam,lParam);
+        ShowWindow(hWnd, SW_HIDE);
+        ShowWindow(hWnd, SW_SHOW);
+        SetFocus(hText);
+        return retval;
+      }
+    }*/ else {
       /*long retval;
       SIZE sz;
       RECT rct;*/
-      DWORD nStart, nEnd;
-      SendMessage(hText, EM_GETSEL, (WPARAM)&nStart, (LPARAM)&nEnd);
-      GetWindowText(hText, buf, sizeof(buf));
-      buf2 = (char *)malloc(strlen(buf) + 2);
-      buf3 = buf + nEnd*sizeof(char);
-      strcpy(buf2, "");
-      strncpy(buf2, buf, nStart);
-      buf2[nStart] = (char)wParam;
-      buf2[nStart + 1] = '\0';
-      strcat(buf2, buf3);
-      HistoryMoveNext(&current, 1);
-      nStart = AutoComplete(hText, buf2);
-      /*if((char)wParam == '?' && cs->ContextMenuAutoPopup) {
-        GetTextExtentPoint32(GetDC(hText), "?", 1, &sz);
-        GetWindowRect(hWnd, &rct);
-        rct.left += (cs->BorderSize + sz.cx);
-        retval = TrackPopupMenu(hSearchEngineMenu, TPM_RIGHTALIGN | (cs->ContextMenuAboveBox ? TPM_BOTTOMALIGN : TPM_TOPALIGN) | TPM_NONOTIFY | TPM_RIGHTBUTTON, rct.left, (cs->ContextMenuAboveBox ? rct.top : rct.bottom), 0, hWnd, NULL);
-      }*/ // AUTOPOPUP STUFF - UNDOCUMENTED, CAN'T PULL OFF WITH REGULAR MENUS
-      if(nStart) {
-        free(buf2);
-        return 0;
-      } else HistoryMoveToTail(&current);  // We got to something that is not in the history.
+      if(cs->CommaDelimiter && (wParam == 0x2E)) { // Period
+        GetWindowText(hText, buf, sizeof(buf));
+        if(buf[0] == '=')
+          wParam = 0x2C; // Comma
+      }
+      if(cs->AutoComplete) {
+        DWORD nStart, nEnd;
+        SendMessage(hText, EM_GETSEL, (WPARAM)&nStart, (LPARAM)&nEnd);
+        GetWindowText(hText, buf, sizeof(buf));
+        buf2 = (char *)malloc(strlen(buf) + 2);
+        buf3 = buf + nEnd*sizeof(char);
+        strcpy(buf2, "");
+        strncpy(buf2, buf, nStart);
+        buf2[nStart] = (char)wParam;
+        buf2[nStart + 1] = '\0';
+        strcat(buf2, buf3);
+        HistoryMoveNext(&current, 1);
+        nStart = AutoComplete(hText, buf2);
+        /*if((char)wParam == '?' && cs->ContextMenuAutoPopup) {
+          GetTextExtentPoint32(GetDC(hText), "?", 1, &sz);
+          GetWindowRect(hWnd, &rct);
+          rct.left += (cs->BorderSize + sz.cx);
+          retval = TrackPopupMenu(hSearchEngineMenu, TPM_RIGHTALIGN | (cs->ContextMenuAboveBox ? TPM_BOTTOMALIGN : TPM_TOPALIGN) | TPM_NONOTIFY | TPM_RIGHTBUTTON, rct.left, (cs->ContextMenuAboveBox ? rct.top : rct.bottom), 0, hWnd, NULL);
+        }*/ // AUTOPOPUP STUFF - UNDOCUMENTED, CAN'T PULL OFF WITH REGULAR MENUS
+        if(nStart) {
+          free(buf2);
+          return 0;
+        } else HistoryMoveToTail(&current);  // We got to something that is not in the history.
+      }
+      if(cs->Transparent) {
+        ShowWindow(hWnd, SW_HIDE);
+        ShowWindow(hWnd, SW_SHOW);
+        SetFocus(hText);
+      }
     }
 		break;
+  /*case WM_PAINT:
+    {
+
+    }
+    break;*/
 	case WM_DROPFILES:
 		{
 		  char szFileName[MAX_PATH];
@@ -1175,17 +1222,30 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 		  SetWindowText(hText, szFileName);
 		  SetFocus(hText);
 		  DragFinish((HDROP)wParam);
+      if(cs->Transparent) {
+        ShowWindow(hWnd, SW_HIDE);
+        ShowWindow(hWnd, SW_SHOW);
+        SetFocus(hText);
+      }
 		  return 0;
 		}
     break;
   case WM_LBUTTONDOWN:
-    {
-      if(cs->SelectAllOnMouseFocus && GetFocus() != hText) {
-        SetForegroundWindow(hWnd);
-        SetFocus(hText);
-        SendMessage(hText, EM_SETSEL, 0, -1);
-        return 0;
-      }
+    if(*(cs->Clock) && GetFocus() != hText && cs->ClockDisappears) {
+      SetWindowText(hText, "");
+      SetForegroundWindow(hWnd);
+      SetFocus(hText);
+    }
+    if(cs->SelectAllOnMouseFocus && GetFocus() != hText) {
+      SetForegroundWindow(hWnd);
+      SetFocus(hText);
+      SendMessage(hText, EM_SETSEL, 0, -1);
+      return 0;
+    }
+    if(cs->Transparent) {
+      ShowWindow(hWnd, SW_HIDE);
+      ShowWindow(hWnd, SW_SHOW);
+      SetFocus(hText);
     }
     break;
   case WM_CONTEXTMENU:
@@ -1221,19 +1281,21 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	switch(msg) {
 	case WM_CREATE:
 		{
-		hBG = CreateWindowEx(0,"STATIC","",WS_CHILD,cs->BorderSize,cs->BorderSize,cs->width-(cs->BorderSize*2),cs->height-(cs->BorderSize*2),hWnd,0,hInst,0);
-		wpBG = (WNDPROC)SetWindowLong(hText,GWL_WNDPROC,(long)BGProc);
+		//hBG = CreateWindowEx(WS_EX_TRANSPARENT,"STATIC","",WS_CHILD,cs->BorderSize,cs->BorderSize,cs->width-(cs->BorderSize*2),cs->height-(cs->BorderSize*2),hWnd,0,hInst,0);
+		//wpBG = (WNDPROC)SetWindowLong(hText,GWL_WNDPROC,(long)BGProc);
 		//DragAcceptFiles(hBG, TRUE);
 		hFont = CreateFont(cs->TextSize,0,0,0,0,0,0,0,0,0,0,0,0,cs->TextFontFace);
-		hText = CreateWindowEx(0,"EDIT","",WS_CHILD|ES_AUTOHSCROLL,cs->BorderSize,(cs->height/2)-(cs->TextSize/2),cs->width-(cs->BorderSize*2),cs->TextSize,hWnd,0,hInst,0);
+		hText = CreateWindowEx(0,"EDIT","",WS_CHILD|ES_AUTOHSCROLL,cs->BorderSize,cs->BorderSize/*(cs->height/2)-(cs->TextSize/2)*/,cs->width-(cs->BorderSize*2),cs->height-(cs->BorderSize*2)/*cs->TextSize*/,hWnd,0,hInst,0);
     hBGBrush = CreateSolidBrush(cs->BGColor);
+    hHollowBrush = (HBRUSH)GetStockObject(HOLLOW_BRUSH);
+    hBGBitmap = *(cs->Background) ? LoadLSImage(cs->Background, NULL) : NULL;
 		if(!hText) {
 			MessageBox(hWnd,"Error creating window",szApp,MB_OK);
 		}
 		wpOld = (WNDPROC)SetWindowLong(hText,GWL_WNDPROC,(long)EditProc);
 		//DragAcceptFiles(hBG, TRUE);
 		SendMessage(hText,WM_SETFONT,(WPARAM)hFont,FALSE);
-		ShowWindow(hBG,SW_SHOW);
+		//ShowWindow(hBG,SW_SHOW);
 		ShowWindow(hText,SW_SHOW);
 		return 0;
 		}
@@ -1246,14 +1308,60 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	////// THERES SOMETHING CAUSEING SOME KIND OF MEM LEAK HERE
 	////// IF YOU KNOW WHAT IT IS, LET ME KNOW
 	case WM_CTLCOLOREDIT:
-		SetTextColor((HDC)wParam, cs->TextColor);
+    {
+      /*DWORD align = 0;
+      char *p, Align[15];
+      strcpy(Align, cs->TextAlign);
+      p = strtok(Align, "\t ");
+      if(p) {
+        if(!stricmp(p, "CENTER"))
+          align |= TA_CENTER;
+        else if(!stricmp(p, "RIGHT"))
+          align |= TA_RIGHT;
+        else
+          align |= TA_LEFT;
+        p = strtok(NULL, "\t ");
+        if(p) {
+          if(!stricmp(p, "BOTTOM"))
+            align |= TA_BOTTOM;
+          else
+            align |= TA_TOP;
+          if(align) {
+            align |= TA_UPDATECP;
+            SetTextAlign((HDC)wParam, (UINT)align);
+          }
+        }
+      }*/
+      if(cs->Transparent) {
+        SetBkMode((HDC)wParam, TRANSPARENT);
+        SetTextColor((HDC)wParam, cs->TextColor);
+        return (int)hHollowBrush;
+      } else {
+        SetBkColor((HDC)wParam, cs->BGColor);
+        SetTextColor((HDC)wParam, cs->TextColor);
+        return (int)hBGBrush;
+      }
+    }
+    break;
+  case WM_PAINT:
+    if(hBGBitmap) {
+      PAINTSTRUCT ps;
+      HDC src = CreateCompatibleDC(NULL);
+      HDC hdc = BeginPaint(hWnd, &ps);
+      SelectObject(src, hBGBitmap);
+      if(!BitBlt(hdc, 0, 0, cs->width, cs->height, src, 0, 0, SRCCOPY))
+        break;
+      //TransparentBltLS((HDC)wParam, 0, 0, cs->width, cs->height, src, 0, 0, RGB(255,0,255));
+      EndPaint(hWnd, &ps);
+      DeleteDC(src);
+      return 0;
+    }
+    break;
+	/* case WM_CTLCOLORSTATIC:
+    SetBkMode((HDC)wParam, TRANSPARENT);
     SetBkColor((HDC)wParam, cs->BGColor);
-    return (int)hBGBrush;
-	//	return (int)CreateSolidBrush(cs.BGColor);
-	case WM_CTLCOLORSTATIC:
-    SetBkColor((HDC)wParam, cs->BGColor);
-    return (int)hBGBrush;
-	//	return (int)CreateSolidBrush(cs.BGColor);
+    return (int)hHollowBrush; //(int)hBGBrush;
+		return (int)CreateSolidBrush(cs.BGColor);*/
 	case WM_DROPFILES:
 		{
 		char szFileName[MAX_PATH];
@@ -1265,6 +1373,45 @@ BOOL CALLBACK WndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 	}
 	return DefWindowProc(hWnd,msg,wParam,lParam);
+}
+
+
+/***********************************************************
+* VOID CALLBACK UpdateClock()                              *
+*                         *  *  *  *                       *
+*    Arguments:                                            *
+*                                                          *
+*    - HWND hWnd                                           *
+*      The HWND of the window that owns this timer.        *
+*    - UINT uMsg                                           *
+*      The WM_TIMER message.                               *
+*    - UINT idEvent                                        *
+*      ID of the Timer event.                              *
+*    - DWORD dwTime                                        *
+*      Current system time.                                *
+*                         *  *  *  *                       *
+* If the user chooses to have a clock in LSXCommand, this  *
+* Callback processes the request to update the time & date *
+***********************************************************/
+
+VOID CALLBACK UpdateClock(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+{
+  if(idEvent == ID_CLOCKTIMER && GetFocus() != hText) {
+    /* 7 lines of code stolen from LSTime */
+    time_t tVal;
+    struct tm *stVal;
+    char tstring[512];
+
+    time(&tVal);
+    stVal = localtime(&tVal);
+    strftime(tstring, sizeof(tstring), cs->Clock, stVal);
+
+    SetWindowText(hText, tstring);
+    if(cs->Transparent) {
+      ShowWindow(hWnd, SW_HIDE);
+      ShowWindow(hWnd, SW_SHOWNOACTIVATE);
+    }
+  }
 }
 
 
@@ -1290,7 +1437,13 @@ void BangFocusCommand(HWND caller,char *args)
 	}
 	SetForegroundWindow(hText);
 	SetFocus(hText);
+  if(*(cs->Clock) && cs->ClockDisappears) SetWindowText(hText, "");
   if(cs->SelectAllOnFocus) SendMessage(hText, EM_SETSEL, 0, -1);
+  if(cs->Transparent && *(cs->Clock) && cs->ClockDisappears) {
+    ShowWindow(hWnd, SW_HIDE);
+    ShowWindow(hWnd, SW_SHOW);
+    SetFocus(hText);
+  }
 }
 
 
@@ -1320,7 +1473,13 @@ void BangToggleCommand(HWND caller, char *args)
 		ShowWindow(hWnd,SW_SHOWNORMAL);
 		SetForegroundWindow(hText);
 		SetFocus(hText);
+    if(*(cs->Clock) && cs->ClockDisappears) SetWindowText(hText, "");
     if(cs->SelectAllOnFocus) SendMessage(hText, EM_SETSEL, 0, -1);
+    if(cs->Transparent && *(cs->Clock) && cs->ClockDisappears) {
+      ShowWindow(hWnd, SW_HIDE);
+      ShowWindow(hWnd, SW_SHOW);
+      SetFocus(hText);
+    }
 		visible = TRUE;
 	}
 	return;
@@ -1441,7 +1600,7 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
 	wc.hbrBackground = hBr;
 	wc.hCursor = LoadCursor(NULL,IDC_ARROW);
 	RegisterClass(&wc);
-	hWnd = CreateWindowEx(((cs->NoAlwaysOnTop)?0:WS_EX_TOPMOST)|WS_EX_TOOLWINDOW,szApp,"",WS_POPUP|((cs->BevelBorder)?WS_SIZEBOX:0),cs->x,cs->y,cs->width,cs->height,GetDesktopWindow(),0,hInst,0);
+  hWnd = CreateWindowEx(((cs->NoAlwaysOnTop)?0:WS_EX_TOPMOST)|WS_EX_TOOLWINDOW|((cs->Transparent==2) ? WS_EX_TRANSPARENT:0),szApp,"",WS_POPUP|((cs->BevelBorder)?WS_SIZEBOX:0),cs->x,cs->y,cs->width,cs->height,GetDesktopWindow(),0,hInst,0);
 	
   //DragAcceptFiles(hWnd, TRUE);
 	SetWindowLong(hWnd,GWL_USERDATA,magicDWord);
@@ -1455,6 +1614,10 @@ int initModule(HWND parent, HINSTANCE dll, wharfDataType* wd)
 		ShowWindow(hWnd,SW_SHOWNORMAL);
 		visible = TRUE;
 	}
+
+  if(*(cs->Clock))
+    SetTimer(hWnd, ID_CLOCKTIMER, 1000, UpdateClock);
+
 	return 0;
 }
 

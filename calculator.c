@@ -6,7 +6,7 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  June 2, 1999  2:30 AM                      *
+* Last Update:  June 15, 1999  12:30 AM                    *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 * Ported from Visual Basic code by SoftCircuits, Inc.      *
@@ -324,19 +324,21 @@ double DoEvaluate(char *expr)
 * converting to postfix notation, then calculating it.     *
 ***********************************************************/
 
-double Evaluate(char *expr, struct CommandSettings *cs, BOOL *error)
+double Evaluate(char *expr, struct CommandSettings *cs, BOOL *error, BOOL alreadyRPN)
 {
   char buf[1024];
   int errPos;
 
   if(expr) {
-    errPos = InfixToPostfix(expr, buf);
-    if(errPos && !(cs->NoWarnOnError)) {
-      MessageBox(NULL, "There was an error while parsing the expression.  Please check it and try again.", "LSXCommand Expression Evaluator", MB_OK | MB_ICONERROR | MB_APPLMODAL);
-      *error = TRUE;
-      return 0;
-    }
-    return DoEvaluate(buf);
+    if(!alreadyRPN) {
+      errPos = InfixToPostfix(expr, buf);
+      if(errPos && !(cs->NoWarnOnError)) {
+        MessageBox(NULL, "There was an error while parsing the expression.  Please check it and try again.", "LSXCommand Expression Evaluator", MB_OK | MB_ICONERROR | MB_APPLMODAL);
+        *error = TRUE;
+        return 0;
+      }
+      return DoEvaluate(buf);
+    } else return DoEvaluate(expr);
   } else {
     errPos = -1;
     *error = TRUE;
