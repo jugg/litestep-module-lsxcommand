@@ -23,6 +23,7 @@
 #include <shlobj.h>
 #include <stdio.h>
 #include <time.h>
+#include <locale.h>
 #include "resource.h"
 #include "exports.h"
 #include "lsxcommand.h"
@@ -73,7 +74,7 @@ struct CommandSettings *ReadSettings(LPCSTR lsPath)
 {
   int offsetx, offsety;
   RECT screen;
-	struct CommandSettings *settings = (struct CommandSettings *)malloc(sizeof(struct CommandSettings));
+  struct CommandSettings *settings = (struct CommandSettings *)malloc(sizeof(struct CommandSettings));
   szModuleIniPath = (char *)malloc(strlen(lsPath) + strlen("\\MODULES.INI") + 1);
   strcpy(szModuleIniPath, lsPath);
   strcat(szModuleIniPath, "\\MODULES.INI");
@@ -1248,7 +1249,7 @@ void ExecCommand(char *szCommand, BOOL noaddtohist)
       si.lpFile = newcmd;
       si.lpParameters = args;
       si.nShow = SW_SHOWNORMAL;
-      si.fMask = SEE_MASK_DOENVSUBST;
+      si.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_FLAG_NO_UI;
       if(cs->ExplorePaths && PathIsDirectory(newcmd)) {
         val = ShellExecute(hWnd, "explore", newcmd, args, NULL, SW_SHOWNORMAL);
       } else {
@@ -2403,6 +2404,8 @@ int initModuleEx(HWND parent, HINSTANCE dll, LPCSTR szPath)
 {
 	WNDCLASS wc;
 	HBRUSH hBr;
+
+  setlocale(LC_ALL, "");
 
 	hInst = dll;
   cs = ReadSettings(szPath);

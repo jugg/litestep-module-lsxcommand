@@ -3,8 +3,8 @@
                     *            by Visigoth            *
                     *    gandhimail@worldnet.att.net    *
                     *          ===============          *
-                    *          Version: 1.7.9           *
-                    *         November 23, 1999         *
+                    *          Version: 1.8.0           *
+                    *          March 24, 2000           *
                     *          ===============          *
                     * http://floach.pimpin.net/visigoth *
                     *************************************
@@ -220,6 +220,13 @@ ii. Kudos
 
 iii. Change Log
 ===============
+
+   Version 1.8.0
+   -------------
+     Bug Fixes
+     `````````
+     - Fixed CommandNoWarnOnError
+     - Fixed locality stuff for international users
 
    Version 1.7.9
    -------------
