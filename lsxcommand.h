@@ -26,6 +26,7 @@ struct CommandSettings {
 	BOOL HiddenOnStart;
 	BOOL ClearOnHide;
   BOOL SelectAllOnFocus;
+  BOOL SelectAllOnMouseFocus;
   BOOL AssumeNetAddress;
   BOOL NoWarnOnError;
   BOOL ClearHistoryOnStartup;
@@ -35,6 +36,7 @@ struct CommandSettings {
   BOOL ContextMenuAboveBox;
   BOOL ContextMenuExecute;
   BOOL UnixHistory;
+  BOOL ExplorePaths;
 	COLORREF BGColor;
 	COLORREF TextColor;
 	COLORREF BorderColor;

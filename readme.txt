@@ -3,8 +3,8 @@
                     *         by Visigoth         *
                     * gandhimail@worldnet.att.net *
                     *       ==============        *
-                    *       Version: 1.5.2        *
-                    *        May 31, 1999         *
+                    *       Version: 1.5.3        *
+                    *        June 8, 1999         *
                     *******************************
 
 Table of Contents
@@ -17,6 +17,11 @@ II.   How to use LSXCommand
 
       II.1 Internet Searches
       II.2 Added RC Commands
+           New to 1.5.3:
+           -------------
+           - CommandExplorePaths
+           - CommandSelectAllOnMouseFocus
+
            New to 1.5.1:
            -------------
            - CommandUnixHistory
@@ -130,6 +135,26 @@ ii. Kudos
 iii. Change Log
 ===============
 
+   Version 1.5.3
+   -------------
+   Just a couple of bug fixes in the new command parser from 1.5.2
+   and another feature.
+
+     Bug Fixes
+     `````````
+     - Fixed the junk characters being launched as an Internet
+       Address when CommandAssumeNetAddress is turned on.
+     - Fixed history saving commands that were quoted paths alone
+       multiple times
+     - Fixed multiple explorer windows
+
+     New Features
+     ````````````
+     - Added following RC Commands (see section II.2 for details)
+
+       * CommandSelectAllOnMouseFocus
+       * CommandExplorePaths
+
    Version 1.5.2
    -------------
    More bug fixes - most related to string parsing and memory
@@ -185,9 +210,7 @@ iii. Change Log
 
        "c:\program files\something"
 
-     to launch files.  NOTE: If you left the quotes *off* of this,
-     the command would still work - like the explorer way of doing
-     things.
+     to launch files.
 
      LSXCommand now operates in the following fashion when given a
      command:
@@ -473,6 +496,26 @@ II. How to use LSXCommand
    ----------------------
      NOTE: Please see original LSCommand readme for previous
      RC Commands.
+
+     CommandSelectAllOnMouseFocus
+     ````````````````````````````
+     Description: Just like CommandSelectAllOnFocus, just that it
+     only works when clicking to focus LSXCommand.  The reason
+     these are two separate options is for people like me: I like to
+     be able to just click once to put the cursor where I want it -
+     not select the entire command.  But, some people like the
+     explorer way of doing things better, so I added it.
+
+     Example: CommandSelectAllOnMouseFocus  ; More explorer functions
+
+     CommandExplorePaths
+     ```````````````````
+     Description: If enabled, any directory path you enter into
+     LSXCommand will open a treed explorer window, instead of the
+     standard folder window.
+
+     Example: CommandExplorePaths	; Gimme a Tree!
+
 
      CommandUnixHistory
      ``````````````````

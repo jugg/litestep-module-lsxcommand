@@ -10,7 +10,7 @@
 *                e-mail: sgandhi@andrew.cmu.edu            *
 *   Original LSCommand - limpid                            *
 *                         *  *  *  *                       *
-* Last Update:  June 2, 1999  2:30 AM                      *
+* Last Update:  June 8, 1999  2:00 AM                      *
 *                         *  *  *  *                       *
 * Copyright (c) 1999 Shaheen Gandhi                        *
 ***********************************************************/
@@ -86,6 +86,8 @@ struct CommandSettings *ReadSettings(wharfDataType *wd)
   settings->ContextMenuAboveBox = GetRCBool("CommandContextMenuAboveBox", TRUE);
   settings->ContextMenuExecute = GetRCBool("CommandContextMenuExecute", TRUE);
   settings->UnixHistory = GetRCBool("CommandUnixHistory", TRUE);
+  settings->ExplorePaths = GetRCBool("CommandExplorePaths", TRUE);
+  settings->SelectAllOnMouseFocus = GetRCBool("CommandSelectAllOnMouseFocus", TRUE);
   GetRCString("CommandSearchEngineList", settings->SearchEngineList, "engines.list", sizeof(settings->SearchEngineList));
   GetRCString("CommandContextMenuOrder", settings->ContextMenuOrder, "012", sizeof(settings->ContextMenuOrder));
 	return settings;
@@ -204,15 +206,33 @@ void CreateHistoryPopupMenu()
 
 void HistoryInit()
 {
-  int i;
-  char path[_MAX_PATH], name[17];
+  BOOL sect_found=FALSE;
+  char line[_MAX_PATH], *p;
+  FILE *f;
 
-  for(i=0; i < cs->MaxHistoryEntries; ++i) {
-    _itoa(i, name, 10);
-    GetPrivateProfileString("LSXCOMMAND", name, "", path, sizeof(path), szModuleIniPath);
+  f = fopen(szModuleIniPath, "r");
+  if(f) {
+    while(fgets(line, _MAX_PATH - 1, f)) {
+      line[strlen(line) - 1] = '\0';
+      if(!stricmp(line, "[LSXCOMMAND]")) {
+        sect_found = TRUE;
+        break;
+      }
+    }
 
-    if(*path)
-      HistoryAdd(&current, path, &nHistoryEntries);
+    if(sect_found) {
+      while(fgets(line, _MAX_PATH - 1, f)) {
+        if(!(*line) || *line == '[')
+          break;
+
+        line[strlen(line) - 1] = '\0';
+        p = strtok(line, "=");
+        p = strtok(NULL, "\0");
+        HistoryAdd(&current, p, &nHistoryEntries);
+      }
+    }
+
+    fclose(f);
   }
 
   HistoryAdd(&current, "", &nHistoryEntries);
@@ -793,7 +813,7 @@ void ExecCommand(char *command)
 {
   int index;
 	char *newcmd, *args, *p;
-  HINSTANCE val;
+  HINSTANCE val=0;
 
 	if(strlen(command)<1)
 		return;
@@ -883,12 +903,16 @@ void ExecCommand(char *command)
         MessageBox(hWnd, "You have not specified any search engines, or specified\nan invalid search engine list.  You can not use the search feature at this time.", "LSXCommand", MB_OK | MB_ICONERROR | MB_APPLMODAL);
       }
     } else {
-		  val = ShellExecute(hWnd, "open", newcmd, args, NULL, SW_SHOWNORMAL);
+      if(cs->ExplorePaths && PathIsDirectory(newcmd))
+        val = ShellExecute(hWnd, "explore", newcmd, args, NULL, SW_SHOWNORMAL);
+      else
+        val = ShellExecute(hWnd, "open", newcmd, args, NULL, SW_SHOWNORMAL);
 
-      if(((long)val == ERROR_FILE_NOT_FOUND) || ((long)val == ERROR_PATH_NOT_FOUND)) {
+      if(((long)val == ERROR_PATH_NOT_FOUND || (long)val == ERROR_FILE_NOT_FOUND) && !PathIsDirectory(newcmd)) {
         if(!strstr(command, "\\")) {
           if(cs->AssumeNetAddress) {
-            newcmd[strlen(newcmd)] = ' ';
+            if(args)
+              newcmd[strlen(newcmd)] = ' ';
             newcmd = (char *)malloc(strlen(command) + 8);
             strcpy(newcmd, "http://");
             strcat(newcmd, command);
@@ -901,11 +925,22 @@ void ExecCommand(char *command)
             }
           }
         } else {
-          newcmd[strlen(newcmd)] = ' ';
-          val = ShellExecute(hWnd, "open", newcmd, "", NULL, SW_SHOWNORMAL);
-          if(((long)val == ERROR_FILE_NOT_FOUND || (long)val == ERROR_PATH_NOT_FOUND) && !cs->NoWarnOnError) {
-            MessageBeep(MB_ICONHAND);
-            MessageBox(NULL, "The file or path could not be found.", "LSXCommand", MB_OK | MB_ICONERROR | MB_APPLMODAL);
+          if(args) {
+            newcmd[strlen(newcmd)] = ' ';
+            if(cs->ExplorePaths && PathIsDirectory(newcmd))
+              val = ShellExecute(hWnd, "explore", newcmd, NULL, NULL, SW_SHOWNORMAL);
+            else
+              val = ShellExecute(hWnd, "open", newcmd, NULL, NULL, SW_SHOWNORMAL);
+ 
+            if(((long)val == ERROR_PATH_NOT_FOUND || (long)val == ERROR_FILE_NOT_FOUND) && !PathIsDirectory(newcmd) && !cs->NoWarnOnError) {
+              MessageBeep(MB_ICONHAND);
+              MessageBox(NULL, "The file or path could not be found.", "LSXCommand", MB_OK | MB_ICONERROR | MB_APPLMODAL);
+            }
+          } else {
+            if(!cs->NoWarnOnError) {
+              MessageBeep(MB_ICONHAND);
+              MessageBox(NULL, "The file or path could not be found.", "LSXCommand", MB_OK | MB_ICONERROR | MB_APPLMODAL);
+            }
           }
         }
       }
@@ -1142,6 +1177,17 @@ BOOL CALLBACK EditProc(HWND hText,UINT msg,WPARAM wParam,LPARAM lParam)
 		  DragFinish((HDROP)wParam);
 		  return 0;
 		}
+    break;
+  case WM_LBUTTONDOWN:
+    {
+      if(cs->SelectAllOnMouseFocus && GetFocus() != hText) {
+        SetForegroundWindow(hWnd);
+        SetFocus(hText);
+        SendMessage(hText, EM_SETSEL, 0, -1);
+        return 0;
+      }
+    }
+    break;
   case WM_CONTEXTMENU:
     {
       long retval = TrackPopupMenu(hContextMenu, TPM_LEFTALIGN | (cs->ContextMenuAboveBox ? TPM_BOTTOMALIGN : TPM_TOPALIGN) | TPM_NONOTIFY | TPM_RETURNCMD | TPM_RIGHTBUTTON, LOWORD(lParam), HIWORD(lParam), 0, hWnd, NULL);
